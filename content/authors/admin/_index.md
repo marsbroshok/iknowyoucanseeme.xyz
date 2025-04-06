@@ -2,8 +2,8 @@
 # Display name
 title: Alexander Usoltsev
 
-# Name pronunciation (optional)
-name_pronunciation: Alexander Usoltsev
+# # Name pronunciation (optional)
+# name_pronunciation: Alexander Usoltsev
 
 # Full name (for SEO)
 first_name: Alexander
