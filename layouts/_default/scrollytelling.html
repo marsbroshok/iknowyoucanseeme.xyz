@@ -1,0 +1,53 @@
+{{ define "main" }}
+{{ $styles := resources.Get "scss/main.scss" | toCSS }}
+<link rel="stylesheet" href="{{ $styles.Permalink }}">
+<style>
+  body {
+    overflow: hidden;
+  }
+</style>
+<div id="scrolly">
+  <div class="scrolly-container">
+    {{ range $i, $e := .Params.sections }}
+    <div class="scrolly-section" data-index="{{ $i }}">
+      <div class="scrolly-background" style="background-image: url('{{ .content.image | relURL }}');"></div>
+      <div class="scrolly-overlay">
+        <div class="scrolly-text">
+          <p>{{ .content.text }}</p>
+        </div>
+      </div>
+    </div>
+    {{ end }}
+  </div>
+</div>
+
+<script src="{{ "js/scrollama.min.js" | relURL }}"></script>
+<script>
+  const scroller = scrollama();
+  const sections = document.querySelectorAll('.scrolly-section');
+  const backgrounds = document.querySelectorAll('.scrolly-background');
+
+  function handleStepEnter(response) {
+    const { index, direction } = response;
+    backgrounds.forEach((background, i) => {
+      if (i <= index) {
+        background.style.transform = `translateY(0)`;
+      } else {
+        background.style.transform = `translateY(100%)`;
+      }
+    });
+  }
+
+  function init() {
+    scroller
+      .setup({
+        step: ".scrolly-section",
+        offset: 0.5,
+        progress: true,
+      })
+      .onStepEnter(handleStepEnter);
+  }
+
+  init();
+</script>
+{{ end }}
