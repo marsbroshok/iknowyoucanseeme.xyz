@@ -1,19 +1,14 @@
-{{ define "main" }}
+{{ $st := . }}
 {{ $styles := resources.Get "scss/main.scss" | toCSS }}
 <link rel="stylesheet" href="{{ $styles.Permalink }}">
-<style>
-  body {
-    overflow: hidden;
-  }
-</style>
 <div id="scrolly">
   <div class="scrolly-container">
-    {{ range $i, $e := .Params.sections }}
+    {{ range $i, $e := .content.sections }}
     <div class="scrolly-section" data-index="{{ $i }}">
-      <div class="scrolly-background" style="background-image: url('{{ .content.image | relURL }}');"></div>
+      <div class="scrolly-background" style="background-image: url('{{ .image | relURL }}');"></div>
       <div class="scrolly-overlay">
         <div class="scrolly-text">
-          <p>{{ .content.text }}</p>
+          <p>{{ .text }}</p>
         </div>
       </div>
     </div>
@@ -30,8 +25,10 @@
   function handleStepEnter(response) {
     const { index, direction } = response;
     backgrounds.forEach((background, i) => {
-      if (i <= index) {
+      if (i === index) {
         background.style.transform = `translateY(0)`;
+      } else if (i < index) {
+        background.style.transform = `translateY(-100%)`;
       } else {
         background.style.transform = `translateY(100%)`;
       }
@@ -50,4 +47,3 @@
 
   init();
 </script>
-{{ end }}
