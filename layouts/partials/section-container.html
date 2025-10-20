@@ -1,0 +1,12 @@
+{{ $page := . }}
+{{ $sections := $page.Params.sections }}
+
+{{ range $index, $section := $sections }}
+  {{ $block_name := $section.block }}
+  {{ $block_path := printf "blocks/%s.html" $block_name }}
+  {{ if partialCached $block_path $block_path }}
+    {{ partial $block_path $section }}
+  {{ else }}
+    {{ errorf "Partial %s not found." $block_path }}
+  {{ end }}
+{{ end }}
