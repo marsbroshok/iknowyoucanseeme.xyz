@@ -4,73 +4,54 @@ Track: `intake_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 
 Every task follows Red → Green → Refactor, commits per task (Conventional Commits), and keeps 100% coverage on new code. Work happens in `./.worktrees/intake_20261111` on branch `track/intake_20261111`.
 
+## Review fixes
+- [x] Fix `src/intake/CatalogueReader.ts:52,55` TS18046/TS2339 (narrow via `if (error instanceof Error...)`): `3825d99`
+- [x] Fix `src/intake/IgExportParser.ts:25,44` TS2339/TS2551 (cast `root as import('node-html-parser').HTMLElement` and use `.text`): `f248bbb`
+- [x] Fix `tests/catalogueReader.test.ts:64,67,76,88` TS18046/TS2345 (narrow `e instanceof Error` and type `fakeExec`): `6d07767`
+- [x] Fix `tests/cli.test.ts:53,82,94-95,110,136` TS2345/TS2741 (type `p: fs.PathLike` and add `pdf_index: 0`): `4a180ff`
+- [x] Worktree environment: `npm run lint` crashes with `Cannot find module 'eslint-scope/dist/eslint-scope.cjs'`. Fix: run `npm ci`
+- [x] Fix 4 & 10: Placeholder titles in schema and generator.
+- [x] Fix 1: Broken catalogue image link in `ReviewSheetRenderer.ts`.
+- [x] Fix 2: Remove error swallowing in `ContentGenerator.ts` and fix tests.
+- [x] Fix 3: Fix metadata for sketches and Venice portraits in `ContentGenerator.ts`.
+- [x] Fix 5: Filter out 2019 posts from matching & assets.
+- [x] Fix 6: Test evasion in `forbidden.test.ts`.
+- [x] Fix 7 & 12: Never upscale pipeline & test, plus fast-check property test.
+- [x] Fix 14: Exclude matched images from t2/leak proposals.
+- [x] Fix 11 & 13: Remove `v8 ignore` in CLI, fix any warnings, add TSDocs.
+- [x] Fix 8 & 9: Manual re-matching of La Découverte and Venice portraits (during propose/generate).
+
 ## Phase 1: Toolchain & schemas
 
-- [ ] Task: Bootstrap npm/TypeScript toolchain
-    - [ ] Add `package.json` (type: module, scripts: test, test:coverage, lint, typecheck, check, intake), strict `tsconfig.json`, `vitest.config.ts` (v8 coverage, 100% thresholds on `src/**` + `tools/**`), ESLint flat config + Prettier
-    - [ ] Write a smoke test proving the coverage gate fails below 100% (config assertion test)
-    - [ ] Verify the legacy Hugo files are untouched (`git diff --stat` shows only new files plus `.gitignore` additions)
-- [ ] Task: Zod content schemas (`src/content/schema/`)
-    - [ ] Red: tests for `Territory`, `Zone`, `Work`, `Exhibition` (valid fixtures pass; missing FR title, bad slug, unknown zone, Leak zone outside Dreamland, people without consent rejected)
-    - [ ] Red: invariant test that no schema has a `price`-like key (`price`, `prix`, `cost`, `eur`)
-    - [ ] Green: implement one schema per file plus `index.ts` barrel; export inferred types
-    - [ ] Property test (fast-check): every generated valid `Work` round-trips through YAML stringify/parse unchanged
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Bootstrap npm/TypeScript toolchain
+- [x] Task: Zod content schemas (`src/content/schema/`)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Readers (export & catalogue)
 
-- [ ] Task: `IgExportParser`
-    - [ ] Red: synthetic HTML fixtures mirroring the export structure (caption `h2`, media links, date div; carousel; reel; entity-encoded caption; missing caption)
-    - [ ] Red: path-whitelist test: the parser refuses paths outside `your_instagram_activity/media/` and `media/{posts,reels}/`
-    - [ ] Red: dates parsed to ISO (`Nov 10, 2026 1:29 am` → `2026-11-10T01:29`)
-    - [ ] Green: implement with `node-html-parser`; clear error on missing files
-- [ ] Task: `CatalogueReader` + `intake-config/catalogue.yaml`
-    - [ ] Author `catalogue.yaml`: the 15 works (FR title, size w×h cm, PDF image index, proposed zone); **no prices**
-    - [ ] Red: schema validation of the config; 15 unique slugs; slugify keeps French meaning (`les-echos-du-passe`, `la-frontiere-s-estompe`, `un-etranger`)
-    - [ ] Green: reader + `PdfThumbnailExtractor` adapter (spawns `pdfimages -j`); adapter integration-tested against a tiny generated PDF fixture or skipped with an explicit prerequisite check that fails loudly (never silently)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: `IgExportParser`
+- [x] Task: `CatalogueReader` + `intake-config/catalogue.yaml`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Image analysis
 
-- [ ] Task: `PerceptualHasher` (dHash 64-bit)
-    - [ ] Red: properties: distance(a,a)=0; symmetry; 0 ≤ d ≤ 64; a resized/re-encoded copy stays within threshold; unrelated synthetic images exceed it
-    - [ ] Green: pure function over a grayscale 9×8 pixel buffer + `sharp` adapter producing the buffer
-- [ ] Task: `PaletteExtractor`
-    - [ ] Red: properties: returns exactly k (≤5) valid `#rrggbb` hex values; deterministic (seeded); a single-colour image returns that colour first
-    - [ ] Green: deterministic k-means on a downsampled RGB buffer
-- [ ] Task: `ImageProcessor`
-    - [ ] Red: long edge ≤ 2400 px, never upscales, aspect ratio preserved (property test over dimensions); output has no EXIF/GPS (fixture with GPS EXIF); sRGB output
-    - [ ] Green: `sharp` pipeline writing JPEG q≈88, deterministic output
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: `PerceptualHasher` (dHash 64-bit)
+- [x] Task: `PaletteExtractor`
+- [x] Task: `ImageProcessor`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Proposals & review loop
 
-- [ ] Task: `ProposalEngine` + `intake-config/rules.yaml`
-    - [ ] Author `rules.yaml`: territory-2 posts (2026-11-10 ICM, 2026-08-29 eclipse); Leak candidates (2025-05-02 Venice portraits, 2026-10-19 Calaca clay); 2019 origin posts (2019-12-03…13)
-    - [ ] Red: best match plus ≤2 alternatives per catalogue work ranked by distance; rules select by post date/ID only (no hardcoded IDs in code); deterministic ordering
-    - [ ] Green: implement
-- [ ] Task: `SelectionStore` (selection.yaml)
-    - [ ] Red: property test: merging new proposals into an edited selection never overwrites artist-edited fields and never drops entries; new entries are appended
-    - [ ] Green: implement with `yaml` (comments preserved where possible)
-- [ ] Task: `ReviewSheetRenderer`
-    - [ ] Red: HTML snapshot contains each catalogue thumbnail beside its match and alternatives, scores, post dates and caption excerpts; all text HTML-escaped (XSS test with `<script>` caption)
-    - [ ] Green: static HTML + inline CSS written to `intake/review/index.html` (relative image paths)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: `ProposalEngine` + `intake-config/rules.yaml`
+- [x] Task: `SelectionStore` (selection.yaml)
+- [x] Task: `ReviewSheetRenderer`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5: Generation & CLI
 
-- [ ] Task: `ContentGenerator`
-    - [ ] Red: kept entries → schema-valid `src/content/{works,territories,zones,exhibitions}/*.yaml`; dropped entries absent; source notes carry the original caption and date; exhibitions MPAA 2019 + Atelier 51 2025; `sources/origin-2019.yaml` written
-    - [ ] Red: originals swap: `intake/originals/<slug>.*` or `<slug>-<n>.*` replaces the Instagram source and sets `source: original`
-    - [ ] Red: idempotency: two runs → byte-identical output
-    - [ ] Green: implement
-- [ ] Task: CLI (`tools/intake/cli.ts`: `catalogue`, `propose`, `generate`)
-    - [ ] Red: argument parsing and help text test (interface parity); non-zero exit with a readable message on missing export
-    - [ ] Green: implement with `node:util.parseArgs`
-- [ ] Task: Guard test against forbidden committed content
-    - [ ] Red/Green: test scanning `src/content/**` and `src/assets/**`: no `€`, no price keys, no files > 2400 px, no EXIF GPS, nothing under `intake/`
-- [ ] Task: Real-data run (no new code)
-    - [ ] Run `catalogue` → `propose` on the real export; pre-fill `selection.yaml` (catalogue matches keep=true; territory-2 all keep=true; Leak portraits keep=true with consent confirmed; clay creatures keep=true)
-    - [ ] Run `generate`; commit generated content and web masters; record match confidence and doubtful matches in the track report for the artist's morning review
-- [ ] Task: Docs: README "Content intake" section (prerequisites, folders, propose → edit → generate loop, originals swap)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: `ContentGenerator`
+- [x] Task: CLI (`tools/intake/cli.ts`: `catalogue`, `propose`, `generate`)
+- [x] Task: Guard test against forbidden committed content
+- [x] Task: Real-data run (no new code)
+- [x] Task: Docs: README "Content intake" section (prerequisites, folders, propose → edit → generate loop, originals swap)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
