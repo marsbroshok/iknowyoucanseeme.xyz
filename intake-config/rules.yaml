@@ -1,0 +1,12 @@
+territory2:
+  dates:
+    - "2026-11-10" # ICM
+    - "2026-08-29" # Eclipse
+leak:
+  dates:
+    - "2025-05-02" # Venice portraits
+    - "2026-10-19" # Calaca clay
+origin2019:
+  date_range:
+    start: "2019-12-03"
+    end: "2019-12-13"
