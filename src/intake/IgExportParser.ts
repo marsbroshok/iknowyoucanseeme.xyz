@@ -20,7 +20,7 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
     }
 
     const content = fs.readFileSync(filePath, 'utf-8');
-    const root = parse(content);
+    const root = parse(content) as import('node-html-parser').HTMLElement;
 
     const blocks = root.querySelectorAll('.pam.uiBoxWhite');
 
@@ -41,7 +41,7 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
       if (!dateEl) {
         return;
       }
-      const rawDate = (dateEl.textContent || dateEl.text || '').trim();
+      const rawDate = (dateEl.text || '').trim();
       const date = parseDate(rawDate);
 
       // Get caption
