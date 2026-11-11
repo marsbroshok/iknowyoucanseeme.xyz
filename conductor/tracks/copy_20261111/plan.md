@@ -29,3 +29,11 @@ From the `intake_20261111` review (non-blocking, fix as the first task of this t
 
 - [x] Task: `tests/catalogueReader.test.ts` (91ab906) (~L58–70): a try/catch test passes even if no error is thrown (`expect(true).toBe(true)`). Rewrite it with `await expect(...).rejects.toThrow(...)` so it fails when nothing throws.
 - [x] Task: `src/intake/CatalogueReader.ts` (91ab906) `PdfThumbnailExtractor` builds a shell string with interpolated paths (`pdfimages -j "${pdfPath}" ...`). Switch to `execFile('pdfimages', ['-j', pdfPath, prefix])` (no shell), and add a test with a path containing quotes/spaces.
+
+## Review fixes
+6de8bcf docs: regenerate REVIEW.md
+1c7b6b2 test: fix test suites for concurrent execution
+8b29f46 content: fix facts in about and zone statements
+e1ba32d content: add unique fragments to all 40 works
+2f6b9c6 test: add integrity tests for works fragments and facts
+7005e76 test: fix copyReview.test.ts temp file leak preventing vitest exit
