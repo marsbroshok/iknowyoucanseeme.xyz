@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: An abstract piece of the journey.
+  fr: Une partie abstraite du voyage.
+  sources:
+    - la-decouverte
+    - caption

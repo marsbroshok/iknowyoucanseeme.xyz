@@ -1,0 +1,38 @@
+slug: ui
+blocks:
+  threshold:
+    status: draft
+    en: Threshold
+    fr: Le Seuil
+    sources:
+      - spec
+  gaze:
+    status: draft
+    en: I know you can see me
+    fr: Je sais que tu me vois
+    sources:
+      - spec
+  enter:
+    status: draft
+    en: Enter
+    fr: Entrer
+    sources:
+      - spec
+  wakeup:
+    status: draft
+    en: Wake up
+    fr: Se réveiller
+    sources:
+      - spec
+  drift:
+    status: draft
+    en: Drift
+    fr: Dériver
+    sources:
+      - spec
+  contact:
+    status: draft
+    en: Contact for availability
+    fr: Disponibilité sur demande
+    sources:
+      - spec

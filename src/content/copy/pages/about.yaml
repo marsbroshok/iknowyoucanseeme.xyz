@@ -1,0 +1,32 @@
+slug: about
+title:
+  en: About
+  fr: À propos
+blocks:
+  bio:
+    status: draft
+    en: I am an artist, photographer and ceramic maker living in France. Having left
+      my home country, my work often explores the search for home and how it
+      evolves.
+    fr: Je suis artiste, photographe et céramiste vivant en France. Ayant quitté mon
+      pays natal, mon travail explore souvent la recherche d'un chez-soi et son
+      évolution.
+    sources:
+      - product_guidelines
+      - exhibition_statement
+  origin:
+    status: draft
+    en: This project began in December 2019 at the exhibition 'L'Emprunt, la
+      Citation' (MPAA) with AI colourisation experiments.
+    fr: Ce projet a commencé en décembre 2019 lors de l'exposition 'L'Emprunt, la
+      Citation' (MPAA) avec des expériences de colorisation par IA.
+    sources:
+      - origin-2019.yaml
+  exhibitions:
+    status: draft
+    en: Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland
+      (2026).
+    fr: Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et
+      Dreamland (2026).
+    sources:
+      - product_guidelines
