@@ -49,10 +49,10 @@ export class PdfThumbnailExtractor {
     try {
       await this.execFn(`pdfimages -j "${pdfPath}" "${outputDir}/img"`);
     } catch (error: unknown) {
-      if (error.message && error.message.includes('command not found')) {
+      if (error instanceof Error && error.message.includes('command not found')) {
         throw new Error('Prerequisite pdfimages is not installed. Please install poppler.');
       }
-      throw new Error(`Failed to extract images from PDF: ${error?.message}`);
+      throw new Error(`Failed to extract images from PDF: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
