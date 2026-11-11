@@ -4,24 +4,24 @@ Track: `copy_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 
 ## Phase 1: Schema & guards
 
-- [ ] Task: `TextBlock` schema and extensions to `Work`, `Territory`, `Zone`, plus the `pages` collection
-    - [ ] Red: schema tests (status enum, both languages required, sources non-empty)
-    - [ ] Green: implement; regenerate nothing yet
-- [ ] Task: Vocabulary & typography guards
-    - [ ] Red: guard tests over fixture texts (a literary word fails; a long sentence fails; missing NBSP before `?` in FR fails; straight quotes in FR fail)
-    - [ ] Green: `CopyGuard` module (deny-list in `content-config/vocabulary-deny.yaml`, not in code)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: `TextBlock` schema (97ce9ce) and extensions to `Work`, `Territory`, `Zone`, plus the `pages` collection
+    - [x] Red: schema tests (status enum, both languages required, sources non-empty)
+    - [x] Green: implement; regenerate nothing yet
+- [x] Task: Vocabulary - [ ] Task: Vocabulary & typography guards typography guards (fa33f8c)
+    - [x] Red: guard tests over fixture texts (a literary word fails; a long sentence fails; missing NBSP before `?` in FR fails; straight quotes in FR fail)
+    - [x] Green: `CopyGuard` module (deny-list in `content-config/vocabulary-deny.yaml`, not in code)
+- [x] Task: Phase Verification - [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Drafting
 
-- [ ] Task: Territory and zone statements (EN + FR) with sources
-- [ ] Task: Work fragments for every kept work (EN + FR) with sources
-- [ ] Task: Pages: about (incl. 2019 origin), gaze, threshold, contact, legal (© all rights reserved, privacy: cookieless analytics)
-- [ ] Task: Microcopy file `src/content/pages/ui.yaml`
-- [ ] Task: Instagram bio proposal `docs/copy/instagram-bio.md`
-- [ ] Task: Run guards on all content; fix drafts until green
-- [ ] Task: Generate `docs/copy/REVIEW.md` (script `npm run copy:review`, tested) listing every text block side by side EN | FR with status
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Territory and zone statements (16f7303) (EN + FR) with sources
+- [x] Task: Work fragments for every kept work (16f7303) (EN + FR) with sources
+- [x] Task: Pages: about (16f7303) (incl. 2019 origin), gaze, threshold, contact, legal (© all rights reserved, privacy: cookieless analytics)
+- [x] Task: Microcopy file `src/content/pages/ui.yaml` (16f7303)
+- [x] Task: Instagram bio proposal `docs/copy/instagram-bio.md` (16f7303)
+- [x] Task: Run guards on all content; fix drafts until green (16f7303)
+- [x] Task: Generate `docs/copy/REVIEW.md` (script `npm run copy:review`, tested) (16f7303) listing every text block side by side EN | FR with status
+- [x] Task: Phase Verification - [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
 

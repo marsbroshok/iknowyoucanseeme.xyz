@@ -35,7 +35,7 @@ export function readCatalogue(yamlPath: string): CatalogueWork[] {
  * PdfThumbnailExtractor
  */
 export class PdfThumbnailExtractor {
-  constructor(private execFn: (file: string, args: string[]) => Promise<{ stdout: string | Buffer; stderr: string | Buffer }> = execFileAsync as any) {}
+  constructor(private execFn: (file: string, args: string[]) => Promise<{ stdout: string | Buffer; stderr: string | Buffer }> = execFileAsync) {}
 
   async extract(pdfPath: string, outputDir: string): Promise<void> {
     if (!fs.existsSync(pdfPath)) {
