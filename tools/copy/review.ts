@@ -62,8 +62,8 @@ export function generateReviewSheet(outputFile: string) {
 }
 
 
-export function runMain(argv: string[], currentUrl: string) {
-  if (argv && argv === fileURLToPath(currentUrl)) {
+export function runMain(argv1: string, currentUrl: string) {
+  if (argv1 && argv1 === fileURLToPath(currentUrl)) {
     const out = path.resolve(__dirname, '../../docs/copy/REVIEW.md');
     generateReviewSheet(out);
     console.log(`Generated ${out}`);
