@@ -1,5 +1,5 @@
 
 # Raw intake material (Instagram export, print masters, recordings). Never commit.
-/intake/
+/intake
 /.worktrees/
 .DS_Store
