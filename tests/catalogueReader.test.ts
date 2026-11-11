@@ -119,7 +119,7 @@ describe('PdfThumbnailExtractor', () => {
       return { stdout: '', stderr: '' };
     };
     
-    const extractor = new PdfThumbnailExtractor(fakeExecFn as any);
+    const extractor = new PdfThumbnailExtractor(fakeExecFn as (cmd: string, args: string[]) => Promise<{ stdout: string | Buffer; stderr: string | Buffer }>);
     const fakePdf = path.resolve(__dirname, 'fake pdf with spaces and "quotes".pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
