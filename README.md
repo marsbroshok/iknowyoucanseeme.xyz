@@ -1,38 +1,42 @@
-# [Creator's Blog: Hugo Theme](https://github.com/HugoBlox/theme-blog)
+# iknowyoucanseeme.xyz
 
-[![Screenshot](./.github/preview.png)](https://hugoblox.com/templates/)
+Dreamland scrollytelling web experience.
 
-The **Creator's Blog** Hugo Theme empowers you to easily create your own _personal blog_ or _build a business around your content_.
+## Intake Pipeline
 
-️**Trusted by 250,000+ researchers, educators, and students.** Highly customizable via the integrated **no-code, block-based website builder**, making every site truly personalized ⭐⭐⭐⭐⭐
+The intake pipeline processes raw content from the artist's Instagram export and the Dreamland catalogue PDF to generate structured `src/content/works` collections and `src/assets/works` WebP images.
 
-[![Get Started](https://img.shields.io/badge/-Get%20started-ff4655?style=for-the-badge)](https://hugoblox.com/templates/)
-[![Discord](https://img.shields.io/discord/722225264733716590?style=for-the-badge)](https://discord.com/channels/722225264733716590/742892432458252370/742895548159492138)  
-[![Twitter Follow](https://img.shields.io/twitter/follow/GetResearchDev?label=Follow%20on%20Twitter)](https://twitter.com/GetResearchDev)
+### Prerequisites
 
-Easily write technical content with plain text Markdown, LaTeX math, diagrams, RMarkdown, or Jupyter, and import publications from BibTeX.
+- Node.js v25
+- `npm`
+- `ffmpeg` (for videos, via Homebrew)
+- `poppler` (for `pdfimages`, via Homebrew)
 
-[Check out the latest demo](https://hugo-blog-theme.netlify.app/) of what you'll get in less than 10 minutes, or [view the showcase](https://hugoblox.com/creators/).
+### Usage
 
-The integrated [**Hugo Blox**](https://hugoblox.com) website builder and CMS makes it easy to create a beautiful website for free. Edit your site in the CMS (or your favorite editor), generate it with [Hugo](https://github.com/gohugoio/hugo), and deploy with GitHub or Netlify. Customize anything on your site with widgets, light/dark themes, and language packs.
+1. **Place raw data:**
+   - Put your Instagram HTML export in `intake/instagram/your_instagram_activity`.
+   - Put the catalogue PDF at `intake/catalogue/Dreamland_artifacts_and_texts.pdf`.
 
-- 👉 [**Get Started**](https://hugoblox.com/templates/)
-- 📚 [View the **documentation**](https://docs.hugoblox.com/)
-- 💬 [Chat with the **Hugo Blox Builder community**](https://discord.gg/z8wNYzb) or [**Hugo community**](https://discourse.gohugo.io)
-- ⬇️ **Automatically import citations from BibTeX** with the [Hugo Academic CLI](https://github.com/GetRD/academic-file-converter)
-- 🐦 Share your new site with the community: [@GetResearchDev](https://twitter.com/GetResearchDev) [@GeorgeCushen](https://twitter.com/GeorgeCushen) [#MadeWithHugoBlox](https://twitter.com/search?q=%23MadeWithHugoBlox&src=typed_query)
-- 🗳 [Take the survey and help us improve #OpenSource](https://forms.gle/NioD9VhUg7PNmdCAA)
-- 🚀 [Contribute improvements](https://github.com/HugoBlox/hugo-blox-builder/blob/main/CONTRIBUTING.md) or [suggest improvements](https://github.com/HugoBlox/hugo-blox-builder/issues)
-- ⬆️ **Updating?** View the [Update Guide](https://docs.hugoblox.com/) and [Release Notes](https://github.com/HugoBlox/hugo-blox-builder/releases)
+2. **Run catalogue extraction:**
+   ```bash
+   npm run intake catalogue
+   ```
 
-## We ask you, humbly, to support this open source movement
+3. **Run proposals engine:**
+   ```bash
+   npm run intake propose -- --export intake/instagram/your_instagram_activity
+   ```
+   This will perceptual-hash the media, run date-based rules, and propose matches. It outputs an HTML sheet at `intake/review/index.html` and a proposed config at `intake-config/selection.yaml`.
 
-Today we ask you to defend the open source independence of the Hugo Blox Builder and themes 🐧
+4. **Review and generate:**
+   - Review the HTML sheet. Edit `intake-config/selection.yaml` to confirm or drop (`keep: false`) matches.
+   - Generate web-ready masters and Astro content schemas:
+   ```bash
+   npm run intake generate -- --export intake/instagram/your_instagram_activity
+   ```
 
-We're an open source movement that depends on your support to stay online and thriving, but 99.9% of our creators don't give; they simply look the other way.
-
-### [❤️ Click here to become a GitHub Sponsor, unlocking awesome perks such as _exclusive academic templates and widgets_](https://hugoblox.com/sponsors/)
-
-## Demo credits
-
-- [Unsplash](https://unsplash.com/) images
+### Privacy & Secrets
+- Never commit the raw `intake/instagram` export directory, which contains private messages and PI.
+- Do not check in `.env` files or prices. `src/content` is checked by automated tests to forbid the `€` symbol and `price:` keys.
