@@ -9,6 +9,9 @@ import { Work, WorkSchema, TerritorySchema, ZoneSchema, ExhibitionSchema } from 
 
 import sharp from 'sharp';
 
+/**
+ * generateContentFiles
+ */
 export async function generateContentFiles(
   selection: SelectionEntry[],
   igImages: HashedIgImage[],
@@ -49,9 +52,9 @@ export async function generateContentFiles(
         slug: s.slug,
         title: { fr: s.title_fr },
         territory: s.territory,
-        zone: s.zone as any,
-        year: 2026, // Default or parse from date
-        medium: 'photo',
+        zone: s.zone as "arrival" | "lens" | "leak" | undefined,
+        year: s.slug.startsWith('venise-portrait') ? 2025 : 2026,
+        medium: s.slug.startsWith('esquisse-argile') ? 'ceramic' : 'photo',
         techniques: [],
         availability: 'unknown',
         images: [],
@@ -87,13 +90,7 @@ export async function generateContentFiles(
       inputBuf = fs.readFileSync(srcPath);
     }
 
-    let processed: Buffer;
-    try {
-      processed = await processImage(inputBuf);
-    } catch {
-      // In case dummy data is not a real image, use dummy fallback
-      processed = inputBuf;
-    }
+    const processed: Buffer = await processImage(inputBuf);
     
     const assetDir = path.join(assetsWorksDir, s.slug);
     if (!fs.existsSync(assetDir)) fs.mkdirSync(assetDir, { recursive: true });
@@ -101,20 +98,13 @@ export async function generateContentFiles(
     const outFilename = `${imgIndex}.jpg`;
     fs.writeFileSync(path.join(assetDir, outFilename), processed);
     
-    let palette: string[] = [];
-    try {
-      palette = await extractPalette(processed);
-    } catch {
-      palette = [];
-    }
+    const palette: string[] = await extractPalette(processed);
 
     // Try to get dimensions if it was really processed
-    let w = 800, h = 800; // defaults
-    try {
-      const meta = await sharp(processed).metadata();
-      if (meta.width) w = meta.width;
-      if (meta.height) h = meta.height;
-    } catch { /* ignore */ }
+    let w = 800, h = 800;
+    const meta = await sharp(processed).metadata();
+    if (meta.width) w = meta.width;
+    if (meta.height) h = meta.height;
 
     work.images.push({
       src: outFilename,

@@ -24,6 +24,7 @@ export interface CatalogueProposal {
   slug: string;
   title_fr: string;
   zone: string;
+  pdf_index: number;
   matches: Array<{ src: string; distance: number; postDate: string; postCaption: string; hash: bigint }>;
 }
 
@@ -34,12 +35,15 @@ export interface AllProposals {
   origin2019: HashedIgImage[];
 }
 
+/**
+ * parseRules
+ */
 export function parseRules(yamlPath: string): Rules {
   if (!fs.existsSync(yamlPath)) {
     throw new Error(`Rules config not found at ${yamlPath}`);
   }
   const content = fs.readFileSync(yamlPath, 'utf-8');
-  const parsed = yaml.parse(content);
+  const parsed = yaml.parse(content) || {};
   return {
     territory2: parsed.territory2?.dates || [],
     leak: parsed.leak?.dates || [],
@@ -50,6 +54,9 @@ export function parseRules(yamlPath: string): Rules {
   };
 }
 
+/**
+ * generateProposals
+ */
 export function generateProposals(
   catalogue: HashedCatalogueWork[],
   igImages: HashedIgImage[],
@@ -57,7 +64,14 @@ export function generateProposals(
 ): AllProposals {
   // Catalogue matches
   const catalogueProposals: CatalogueProposal[] = catalogue.map(work => {
-    const scored = igImages.map(img => ({
+    const validIgImages = igImages.filter(img => {
+      const ds = img.postDate.substring(0, 10);
+      if (rules.origin2019.start && rules.origin2019.end) {
+        if (ds >= rules.origin2019.start && ds <= rules.origin2019.end) return false;
+      }
+      return true;
+    });
+    const scored = validIgImages.map(img => ({
       ...img,
       distance: hammingDistance(work.hash, img.hash)
     }));
@@ -72,6 +86,7 @@ export function generateProposals(
       slug: work.slug,
       title_fr: work.title_fr,
       zone: work.zone,
+      pdf_index: work.pdf_index,
       matches: scored.slice(0, 3)
     };
   });
@@ -80,14 +95,18 @@ export function generateProposals(
   const leak: HashedIgImage[] = [];
   const origin: HashedIgImage[] = [];
 
+  const catalogueMatchedSrcs = new Set(catalogueProposals.map(c => c.matches[0]?.src).filter(Boolean));
+
   for (const img of igImages) {
     // dates in rules are YYYY-MM-DD. img.postDate is ISO like YYYY-MM-DDTHH:mm:ss
     const dateStr = img.postDate.substring(0, 10);
-    if (rules.territory2.includes(dateStr)) {
-      t2.push(img);
-    }
-    if (rules.leak.includes(dateStr)) {
-      leak.push(img);
+    if (!catalogueMatchedSrcs.has(img.src)) {
+      if (rules.territory2.includes(dateStr)) {
+        t2.push(img);
+      }
+      if (rules.leak.includes(dateStr)) {
+        leak.push(img);
+      }
     }
     if (rules.origin2019.start && rules.origin2019.end) {
       if (dateStr >= rules.origin2019.start && dateStr <= rules.origin2019.end) {

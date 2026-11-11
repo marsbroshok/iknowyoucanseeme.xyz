@@ -8,6 +8,9 @@ export interface IgPost {
   media: string[];
 }
 
+/**
+ * parseIgPosts
+ */
 export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }): IgPost[] {
   const posts: IgPost[] = [];
 
@@ -17,13 +20,13 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
     }
 
     const content = fs.readFileSync(filePath, 'utf-8');
-    const root = parse(content) as any;
+    const root = parse(content);
 
-    const blocks: any[] = root.querySelectorAll('.pam.uiBoxWhite');
+    const blocks = root.querySelectorAll('.pam.uiBoxWhite');
 
-    blocks.forEach((block: any, index: number) => {
-      const imgs: string[] = block.querySelectorAll('img').map((el: any) => el.attributes?.src || '');
-      const vids: string[] = block.querySelectorAll('video').map((el: any) => el.attributes?.src || '');
+    blocks.forEach((block: import('node-html-parser').HTMLElement, index: number) => {
+      const imgs: string[] = block.querySelectorAll('img').map((el: import('node-html-parser').HTMLElement) => el.attributes?.src || '');
+      const vids: string[] = block.querySelectorAll('video').map((el: import('node-html-parser').HTMLElement) => el.attributes?.src || '');
       const allMedia = [...imgs, ...vids].filter(Boolean);
 
       // Whitelist check
@@ -77,7 +80,7 @@ function parseDate(raw: string): string {
     if (ampm.toLowerCase() === 'pm' && hour < 12) hour += 12;
     if (ampm.toLowerCase() === 'am' && hour === 12) hour = 0;
     
-    const d = new Date(Date.UTC(parseInt(year, 10), (months as any)[mon.toLowerCase()], parseInt(day, 10), hour, parseInt(min, 10)));
+    const d = new Date(Date.UTC(parseInt(year, 10), (months as Record<string, number>)[mon.toLowerCase()], parseInt(day, 10), hour, parseInt(min, 10)));
     return d.toISOString().replace('Z', '');
   }
   return '';

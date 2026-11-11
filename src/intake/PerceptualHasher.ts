@@ -1,5 +1,8 @@
 import sharp from 'sharp';
 
+/**
+ * dHash
+ */
 export function dHash(pixels: Uint8Array): bigint {
   if (pixels.length !== 72) {
     throw new Error('dHash requires exactly 9x8 pixels (72 bytes)');
@@ -23,6 +26,9 @@ export function dHash(pixels: Uint8Array): bigint {
   return hash;
 }
 
+/**
+ * hammingDistance
+ */
 export function hammingDistance(h1: bigint, h2: bigint): number {
   let xor = h1 ^ h2;
   let count = 0;
@@ -33,6 +39,9 @@ export function hammingDistance(h1: bigint, h2: bigint): number {
   return count;
 }
 
+/**
+ * hashImageBuffer
+ */
 export async function hashImageBuffer(buffer: Buffer): Promise<bigint> {
   const pixels = await sharp(buffer)
     .greyscale()

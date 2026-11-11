@@ -48,6 +48,8 @@ describe('ContentGenerator', () => {
     ];
     
     // Test the generator
+    await expect(generateContentFiles(selection, igImages, srcDir, intakeDir, intakeDir)).rejects.toThrow();
+    fs.writeFileSync(invalidIgPath, validJpeg);
     await generateContentFiles(selection, igImages, srcDir, intakeDir, intakeDir);
     
     // Check works
@@ -81,7 +83,7 @@ describe('ContentGenerator', () => {
     
     // Originals dir missing branch
     fs.rmSync(path.join(intakeDir, 'originals'), { recursive: true, force: true });
-    await generateContentFiles([{ src: 'temp_ig.jpg', keep: true, slug: 'work-6', title_fr: 'w6', territory: 't6' }], igImages, srcDir, intakeDir, intakeDir);
+    await generateContentFiles([{ src: 'temp_ig.jpg', keep: true, slug: 'work-6', title_fr: 'w6', territory: 't6' }, { src: 'temp_ig.jpg', keep: true, slug: 'venise-portrait-1', title_fr: 'vp1', territory: 't' }, { src: 'temp_ig.jpg', keep: true, slug: 'esquisse-argile-1', title_fr: 'ea1', territory: 't' }], igImages, srcDir, intakeDir, intakeDir);
     const jpg = Buffer.from('ffd8ffe000104a46494600010101004800480000ffdb004300080606070605080707070909080a0c140d0c0b0b0c1912130f141d1a1f1e1d1a1c1c20242e2720222c231c1c2837292c30313434341f27393d38323c2e333432ffdb0043010909090c0b0c180d0d1832211c213232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232ffc00011080001000103012200021101031101ffc4001500010100000000000000000000000000000008ffc40014100100000000000000000000000000000000ffc4001501010100000000000000000000000000000000ffc40014110100000000000000000000000000000000ffda000c03010002110311003f00508fffd9', 'hex');
     fs.writeFileSync(path.join(intakeDir, 'temp_ig_inner.jpg'), jpg);
     await generateContentFiles([{ src: 'temp_ig_inner.jpg', keep: true, slug: 'work-7', title_fr: 'w7', territory: 't7' }], igImages, srcDir, intakeDir, intakeDir);

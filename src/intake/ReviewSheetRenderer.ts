@@ -11,6 +11,9 @@ function escapeHtml(unsafe: string) {
     .replace(/'/g, "&#039;");
 }
 
+/**
+ * renderReviewSheet
+ */
 export function renderReviewSheet(proposals: AllProposals, outputPath: string) {
   let html = `<!DOCTYPE html>
 <html>
@@ -39,7 +42,7 @@ export function renderReviewSheet(proposals: AllProposals, outputPath: string) {
         <strong>${escapeHtml(p.title_fr)}</strong><br>
         <small>${escapeHtml(p.zone)}</small><br>
         <!-- Catalogue thumbnail -> intake/catalogue/img-000.jpg etc -->
-        <img src="../catalogue/img-00${p.slug}.jpg" alt="cat" />
+        <img src="../catalogue/img-0${p.pdf_index < 10 ? '0' + p.pdf_index : p.pdf_index}.jpg" alt="cat" />
       </div>`;
       
     for (let i = 0; i < p.matches.length; i++) {

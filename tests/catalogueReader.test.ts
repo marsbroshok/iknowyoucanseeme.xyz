@@ -60,7 +60,7 @@ describe('PdfThumbnailExtractor', () => {
 
     try {
       await extractor.extract(fakePdf, 'out_dir4');
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (e.message.includes('Prerequisite pdfimages is not installed')) {
         expect(true).toBe(true);
       } else {
@@ -73,7 +73,7 @@ describe('PdfThumbnailExtractor', () => {
   
   it('handles command not found by throwing specific error', async () => {
     const fakeExec = async () => { throw new Error('command not found: pdfimages'); };
-    const extractor = new PdfThumbnailExtractor(fakeExec as any);
+    const extractor = new PdfThumbnailExtractor(fakeExec as unknown as typeof import('child_process').exec);
     const fakePdf = path.resolve(__dirname, 'fake5.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
@@ -85,7 +85,7 @@ describe('PdfThumbnailExtractor', () => {
   
   it('handles execution success with existing and non-existing outputDir', async () => {
     const fakeExec = async () => ({ stdout: '', stderr: '' });
-    const extractor = new PdfThumbnailExtractor(fakeExec as any);
+    const extractor = new PdfThumbnailExtractor(fakeExec as unknown as typeof import('child_process').exec);
     const fakePdf = path.resolve(__dirname, 'fake6.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 

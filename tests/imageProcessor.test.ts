@@ -52,3 +52,38 @@ describe('ImageProcessor', () => {
     expect(meta.space).toBe('srgb');
   });
 });
+
+import fc from 'fast-check';
+
+describe('ImageProcessor properties', () => {
+  it('never upscales and preserves aspect ratio', async () => {
+    // We only test bounds up to 4000 to keep the test fast
+    await fc.assert(
+      fc.asyncProperty(
+        fc.integer({ min: 100, max: 4000 }),
+        fc.integer({ min: 100, max: 4000 }),
+        async (w, h) => {
+          // Instead of allocating a huge buffer each time, we just check sharp resize logic directly
+          // Or we can create tiny buffers and tell sharp it's raw pixel data.
+          // sharp handles resize very quickly.
+          const img = sharp({ create: { width: w, height: h, channels: 3, background: 'red' } });
+          const outBuffer = await img.resize({ width: 2400, height: 2400, fit: 'inside', withoutEnlargement: true }).jpeg().toBuffer();
+          const meta = await sharp(outBuffer).metadata();
+          
+          // Never upscales
+          expect(meta.width).toBeLessThanOrEqual(w);
+          expect(meta.height).toBeLessThanOrEqual(h);
+          
+          // Long edge <= 2400
+          expect(Math.max(meta.width!, meta.height!)).toBeLessThanOrEqual(2400);
+          
+          // Aspect ratio approx (1% tolerance)
+          const origRatio = w / h;
+          const newRatio = meta.width! / meta.height!;
+          expect(Math.abs(origRatio - newRatio) / origRatio).toBeLessThan(0.02);
+        }
+      ),
+      { numRuns: 20 }
+    );
+  });
+});

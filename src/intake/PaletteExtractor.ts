@@ -9,6 +9,9 @@ function lcg(seed: number) {
   };
 }
 
+/**
+ * extractPalette
+ */
 export async function extractPalette(buffer: Buffer, k: number = 5): Promise<string[]> {
   // downsample for speed
   const pixels = await sharp(buffer)

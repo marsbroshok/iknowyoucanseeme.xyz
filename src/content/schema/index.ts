@@ -18,7 +18,7 @@ export const ExhibitionSchema = z.object({
 export const WorkSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   title: z.object({
-    fr: z.string(),
+    fr: z.string().trim().min(1),
     en: z.string().optional()
   }),
   territory: z.string(),

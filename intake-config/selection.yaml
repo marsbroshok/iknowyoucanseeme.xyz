@@ -29,12 +29,14 @@ selection:
     title_fr: Immersion II
     territory: dreamland
     zone: arrival
-  - src: media/posts/201912/17842686004870197.jpg
+  # doubtful match
+  - src: media/posts/17874504948258750.jpg
     keep: true
     slug: la-decouverte
     title_fr: La Découverte
     territory: dreamland
     zone: lens
+    doubtful: true
   - src: media/posts/18002117252433282.jpg
     keep: true
     slug: les-echos-du-passe
@@ -89,223 +91,241 @@ selection:
     title_fr: Un Étranger
     territory: dreamland
     zone: lens
-  - src: media/posts/18121995212079827.jpg
-    keep: true
-    slug: t2-0
-    title_fr: ""
-    territory: the-border-is-thin
   - src: media/posts/18286919470292952.jpg
     keep: true
-    slug: t2-1
-    title_fr: ""
+    slug: cygne-icm-1
+    title_fr: Cygne (ICM) 1
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18169828183471595.jpg
     keep: true
-    slug: t2-2
-    title_fr: ""
+    slug: cygne-icm-2
+    title_fr: Cygne (ICM) 2
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/17893567083458512.jpg
     keep: true
-    slug: t2-3
-    title_fr: ""
+    slug: cygne-icm-3
+    title_fr: Cygne (ICM) 3
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18431222254151910.jpg
     keep: true
-    slug: t2-4
-    title_fr: ""
+    slug: cygne-icm-4
+    title_fr: Cygne (ICM) 4
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18137814343672270.jpg
     keep: true
-    slug: t2-5
-    title_fr: ""
+    slug: cygne-icm-5
+    title_fr: Cygne (ICM) 5
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18212037166370067.jpg
     keep: true
-    slug: t2-6
-    title_fr: ""
+    slug: cygne-icm-6
+    title_fr: Cygne (ICM) 6
     territory: the-border-is-thin
-  - src: media/posts/18122048333069684.jpg
-    keep: true
-    slug: t2-7
-    title_fr: ""
-    territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/17995861589849219.jpg
     keep: true
-    slug: t2-8
-    title_fr: ""
+    slug: cygne-icm-7
+    title_fr: Cygne (ICM) 7
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18035864882907359.jpg
     keep: true
-    slug: t2-9
-    title_fr: ""
+    slug: cygne-icm-8
+    title_fr: Cygne (ICM) 8
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18030209147670079.jpg
     keep: true
-    slug: t2-10
-    title_fr: ""
+    slug: eclipse-miroir-9
+    title_fr: Éclipse au miroir 9
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18039705743829839.jpg
     keep: true
-    slug: t2-11
-    title_fr: ""
+    slug: eclipse-miroir-10
+    title_fr: Éclipse au miroir 10
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18039454592824268.jpg
     keep: true
-    slug: t2-12
-    title_fr: ""
+    slug: eclipse-miroir-11
+    title_fr: Éclipse au miroir 11
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18596807890068349.jpg
     keep: true
-    slug: t2-13
-    title_fr: ""
+    slug: eclipse-miroir-12
+    title_fr: Éclipse au miroir 12
     territory: the-border-is-thin
+    titlePlaceholder: true
   - src: media/posts/18071267930595356.jpg
     keep: true
-    slug: leak-0
-    title_fr: ""
+    slug: esquisse-argile-1
+    title_fr: Esquisse en argile 1
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
   - src: media/posts/18089983202256568.jpg
     keep: true
-    slug: leak-1
-    title_fr: ""
+    slug: esquisse-argile-2
+    title_fr: Esquisse en argile 2
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
   - src: media/posts/18116722688009520.jpg
     keep: true
-    slug: leak-2
-    title_fr: ""
+    slug: esquisse-argile-3
+    title_fr: Esquisse en argile 3
     territory: dreamland
     zone: leak
-  - src: media/posts/18120727447746994.jpg
-    keep: true
-    slug: leak-3
-    title_fr: ""
-    territory: dreamland
-    zone: leak
+    titlePlaceholder: true
   - src: media/posts/18222826111354199.jpg
     keep: true
-    slug: leak-4
-    title_fr: ""
+    slug: esquisse-argile-4
+    title_fr: Esquisse en argile 4
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+  # has people
   - src: media/posts/18053581673258095.jpg
     keep: true
-    slug: leak-5
-    title_fr: ""
+    slug: venise-portrait-5
+    title_fr: Portrait, Venise 5
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # no people
   - src: media/posts/18077339425770949.jpg
-    keep: true
-    slug: leak-6
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-6
+    title_fr: Portrait, Venise 6
     territory: dreamland
     zone: leak
-  - src: media/posts/18058048922177402.jpg
-    keep: true
-    slug: leak-7
-    title_fr: ""
-    territory: dreamland
-    zone: leak
+    titlePlaceholder: true
+  # has people
   - src: media/posts/18504256519017142.jpg
     keep: true
-    slug: leak-8
-    title_fr: ""
+    slug: venise-portrait-7
+    title_fr: Portrait, Venise 7
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # has people
   - src: media/posts/18037905335293188.jpg
     keep: true
-    slug: leak-9
-    title_fr: ""
+    slug: venise-portrait-8
+    title_fr: Portrait, Venise 8
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # has people
   - src: media/posts/18083552179658520.jpg
     keep: true
-    slug: leak-10
-    title_fr: ""
+    slug: venise-portrait-9
+    title_fr: Portrait, Venise 9
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # no people
   - src: media/posts/18053841794244028.jpg
-    keep: true
-    slug: leak-11
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-10
+    title_fr: Portrait, Venise 10
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+  # has people
   - src: media/posts/18379193953137944.jpg
     keep: true
-    slug: leak-12
-    title_fr: ""
+    slug: venise-portrait-11
+    title_fr: Portrait, Venise 11
     territory: dreamland
     zone: leak
-  - src: media/posts/18059509969899977.jpg
-    keep: true
-    slug: leak-13
-    title_fr: ""
-    territory: dreamland
-    zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # has people
   - src: media/posts/18104286106513217.jpg
     keep: true
-    slug: leak-14
-    title_fr: ""
+    slug: venise-portrait-12
+    title_fr: Portrait, Venise 12
     territory: dreamland
     zone: leak
-  - src: media/posts/18508131397057682.jpg
-    keep: true
-    slug: leak-15
-    title_fr: ""
-    territory: dreamland
-    zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # has people
   - src: media/posts/18503608360038158.jpg
     keep: true
-    slug: leak-16
-    title_fr: ""
+    slug: venise-portrait-13
+    title_fr: Portrait, Venise 13
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # no people
   - src: media/posts/17876088033220901.jpg
-    keep: true
-    slug: leak-17
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-14
+    title_fr: Portrait, Venise 14
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+  # has people
   - src: media/posts/18066727721503160.jpg
     keep: true
-    slug: leak-18
-    title_fr: ""
+    slug: venise-portrait-15
+    title_fr: Portrait, Venise 15
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # no people
   - src: media/posts/17953041041951601.jpg
-    keep: true
-    slug: leak-19
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-16
+    title_fr: Portrait, Venise 16
     territory: dreamland
     zone: leak
-  - src: media/posts/18373057408193453.jpg
-    keep: true
-    slug: leak-20
-    title_fr: ""
-    territory: dreamland
-    zone: leak
-  - src: media/posts/18501216103006307.jpg
-    keep: true
-    slug: leak-21
-    title_fr: ""
-    territory: dreamland
-    zone: leak
+    titlePlaceholder: true
+  # no people
   - src: media/posts/18073253947856256.jpg
-    keep: true
-    slug: leak-22
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-17
+    title_fr: Portrait, Venise 17
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+  # has people
   - src: media/posts/17905559154149324.jpg
     keep: true
-    slug: leak-23
-    title_fr: ""
+    slug: venise-portrait-18
+    title_fr: Portrait, Venise 18
     territory: dreamland
     zone: leak
+    titlePlaceholder: true
+    people:
+      consent: confirmed
+  # no people
   - src: media/posts/17973525503845528.jpg
-    keep: true
-    slug: leak-24
-    title_fr: ""
+    keep: false
+    slug: venise-portrait-19
+    title_fr: Portrait, Venise 19
     territory: dreamland
     zone: leak
+    titlePlaceholder: true

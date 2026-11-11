@@ -9,8 +9,12 @@ export interface SelectionEntry {
   territory: string;
   zone?: string;
   people?: { consent: 'confirmed' };
+  titlePlaceholder?: boolean;
 }
 
+/**
+ * mergeSelection
+ */
 export function mergeSelection(original: SelectionEntry[], proposed: SelectionEntry[]): SelectionEntry[] {
   const merged = [...original];
   const origSrcs = new Set(original.map(o => o.src));
@@ -24,6 +28,9 @@ export function mergeSelection(original: SelectionEntry[], proposed: SelectionEn
   return merged;
 }
 
+/**
+ * readSelection
+ */
 export function readSelection(yamlPath: string): SelectionEntry[] {
   if (!fs.existsSync(yamlPath)) return [];
   const content = fs.readFileSync(yamlPath, 'utf-8');
@@ -31,6 +38,9 @@ export function readSelection(yamlPath: string): SelectionEntry[] {
   return parsed?.selection || [];
 }
 
+/**
+ * writeSelection
+ */
 export function writeSelection(yamlPath: string, selection: SelectionEntry[]): void {
   const doc = new yaml.Document();
   doc.contents = doc.createNode({ selection });

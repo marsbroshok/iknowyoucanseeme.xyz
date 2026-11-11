@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import * as yaml from 'yaml';
 import { WorkSchema, TerritorySchema, ZoneSchema, ExhibitionSchema } from '../src/content/schema/index.js';
+import { AnyZodObject, ZodEffects } from 'zod';
 
 describe('Zod Content Schemas', () => {
   it('validates a correct Work fixture', () => {
@@ -71,9 +72,9 @@ describe('Zod Content Schemas', () => {
   });
 
   it('ensures no schema has a price-like key', () => {
-    const checkNoPrice = (schema: any) => {
+    const checkNoPrice = (schema: AnyZodObject | ZodEffects<AnyZodObject>) => {
       // Use innerType for ZodEffects
-      const actualSchema = schema._def?.typeName === 'ZodEffects' ? schema.innerType() : schema;
+      const actualSchema = 'innerType' in schema ? schema.innerType() : schema;
       const keys = Object.keys(actualSchema.shape || {});
       keys.forEach(k => {
         expect(k.toLowerCase()).not.toMatch(/price|prix|cost|eur/);
@@ -90,7 +91,7 @@ describe('Zod Content Schemas', () => {
       fc.property(
         fc.record({
           slug: fc.stringMatching(/^[a-z0-9-]+$/),
-          title: fc.record({ fr: fc.string(), en: fc.string() }),
+          title: fc.record({ fr: fc.string({ minLength: 1 }).filter(s => s.trim().length > 0), en: fc.string() }),
           territory: fc.string(),
           year: fc.integer({ min: 1900, max: 2100 }),
           medium: fc.constantFrom('photo', 'ceramic'),

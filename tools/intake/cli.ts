@@ -9,6 +9,9 @@ import { renderReviewSheet } from '../../src/intake/ReviewSheetRenderer.js';
 import { readSelection, writeSelection, mergeSelection } from '../../src/intake/SelectionStore.js';
 import { generateContentFiles } from '../../src/intake/ContentGenerator.js';
 
+/**
+ * runCli
+ */
 export async function runCli(args: string[]) {
   const options = {
     help: { type: 'boolean' as const, short: 'h' },
@@ -108,6 +111,7 @@ Options:
     // Merge selection
     const selPath = path.join(configDir, 'selection.yaml');
     const original = readSelection(selPath);
+    console.log('catHashed:', catHashed.length, 'igHashed:', igHashed.length, 'proposals:', proposals.catalogue.length, proposals.territory2.length, proposals.leak.length);
     const newProposals = [
       ...proposals.catalogue.map(c => ({
         src: c.matches[0]?.src || '',
@@ -117,8 +121,30 @@ Options:
         territory: 'dreamland',
         zone: c.zone
       })),
-      ...proposals.territory2.map((m, i) => ({ src: m.src, keep: true, slug: `t2-${i}`, title_fr: '', territory: 'the-border-is-thin' })),
-      ...proposals.leak.map((m, i) => ({ src: m.src, keep: true, slug: `leak-${i}`, title_fr: '', territory: 'dreamland', zone: 'leak' }))
+      ...proposals.territory2.map((m, i) => {
+        let slug = `t2-${i}`;
+        let title_fr = '';
+        if (m.postDate.startsWith('2026-11-10')) {
+          slug = `cygne-icm-${i + 1}`;
+          title_fr = `Cygne (ICM) ${i + 1}`;
+        } else if (m.postDate.startsWith('2026-08-29')) {
+          slug = `eclipse-miroir-${i + 1}`;
+          title_fr = `Éclipse au miroir ${i + 1}`;
+        }
+        return { src: m.src, keep: true, slug, title_fr, territory: 'the-border-is-thin', titlePlaceholder: true };
+      }),
+      ...proposals.leak.map((m, i) => {
+        let slug = `leak-${i}`;
+        let title_fr = '';
+        if (m.postDate.startsWith('2025-05-02')) {
+          slug = `venise-portrait-${i + 1}`;
+          title_fr = `Portrait, Venise ${i + 1}`;
+        } else if (m.postDate.startsWith('2026-10-19')) {
+          slug = `esquisse-argile-${i + 1}`;
+          title_fr = `Esquisse en argile ${i + 1}`;
+        }
+        return { src: m.src, keep: true, slug, title_fr, territory: 'dreamland', zone: 'leak', titlePlaceholder: true };
+      })
     ].filter(p => p.src);
     
     const merged = mergeSelection(original, newProposals);
@@ -152,10 +178,18 @@ Options:
 
 import { fileURLToPath } from 'url';
 
-/* v8 ignore start */
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  runCli(process.argv.slice(2)).catch(err => {
-    console.error(err.message);
-    process.exit(1);
-  });
+/**
+ * main
+ */
+export async function main(argv: string[], scriptPath: string, currentUrl: string) {
+  if (scriptPath === fileURLToPath(currentUrl)) {
+    try {
+      await runCli(argv);
+    } catch (err: unknown) {
+      console.error((err as Error).message);
+      process.exitCode = 1;
+    }
+  }
 }
+
+main(process.argv.slice(2), process.argv[1] as string, import.meta.url);

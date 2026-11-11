@@ -11,10 +11,18 @@ describe('ReviewSheetRenderer', () => {
           slug: 'work1',
           title_fr: 'w1',
           zone: 'arrival',
+          pdf_index: 5,
           matches: [
             { src: 'img1.jpg', distance: 0, postDate: '2026-01-01T00:00:00', postCaption: '<script>alert(1)</script>', hash: 0n },
             { src: 'img2.jpg', distance: 1, postDate: '2026-01-01T00:00:00', postCaption: 'safe', hash: 1n }
-          ]
+          ],
+        },
+        {
+          slug: 'work2',
+          title_fr: 'w2',
+          zone: 'arrival',
+          pdf_index: 10,
+          matches: []
         }
       ],
       territory2: [],

@@ -17,6 +17,9 @@ export const CatalogueConfigSchema = z.object({
 
 export type CatalogueWork = z.infer<typeof CatalogueConfigSchema>['works'][number];
 
+/**
+ * readCatalogue
+ */
 export function readCatalogue(yamlPath: string): CatalogueWork[] {
   if (!fs.existsSync(yamlPath)) {
     throw new Error(`Catalogue config not found at ${yamlPath}`);
@@ -28,6 +31,9 @@ export function readCatalogue(yamlPath: string): CatalogueWork[] {
   return result.works;
 }
 
+/**
+ * PdfThumbnailExtractor
+ */
 export class PdfThumbnailExtractor {
   constructor(private execFn: (cmd: string) => Promise<{ stdout: string; stderr: string }> = execAsync) {}
 
@@ -42,7 +48,7 @@ export class PdfThumbnailExtractor {
 
     try {
       await this.execFn(`pdfimages -j "${pdfPath}" "${outputDir}/img"`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message && error.message.includes('command not found')) {
         throw new Error('Prerequisite pdfimages is not installed. Please install poppler.');
       }
