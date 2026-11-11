@@ -50,8 +50,9 @@ describe('CLI', () => {
   });
 
   it('runs propose with everything missing', async () => {
-    vi.mocked(fs.existsSync).mockImplementation((p: string) => {
-      if (p.endsWith('your_instagram_activity')) return true; // export dir exists
+    vi.mocked(fs.existsSync).mockImplementation((p: fs.PathLike) => {
+      const pStr = p.toString();
+      if (pStr.endsWith('your_instagram_activity')) return true; // export dir exists
       return false; // all files inside missing
     });
     vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from(''));
@@ -79,20 +80,21 @@ describe('CLI', () => {
       { id: '2', date: '2026-01-01', caption: '', media: ['missing.jpg'] }
     ]);
     
-    vi.mocked(fs.existsSync).mockImplementation((p: string) => {
-      if (p.includes('missing')) return false;
-      if (p.includes('img-015')) return false; // force missing hash for catalogue
-      if (p.includes('img-0010')) return false; // force fallback path in catalogue
-      if (p.includes('your_instagram_activity/media/posts_1.html')) return true;
-      if (p.includes('reels.html')) return false; // missing reels
+    vi.mocked(fs.existsSync).mockImplementation((p: fs.PathLike) => {
+      const pStr = p.toString();
+      if (pStr.includes('missing')) return false;
+      if (pStr.includes('img-015')) return false; // force missing hash for catalogue
+      if (pStr.includes('img-0010')) return false; // force fallback path in catalogue
+      if (pStr.includes('your_instagram_activity/media/posts_1.html')) return true;
+      if (pStr.includes('reels.html')) return false; // missing reels
       return true; // pretend all other files exist
     });
 
     vi.mocked(ProposalEngine.parseRules).mockReturnValue({ territory2: [], leak: [], origin2019: { start: '', end: '' } });
     vi.mocked(ProposalEngine.generateProposals).mockReturnValue({
       catalogue: [
-        { slug: 'work-1', title_fr: 'w1', zone: 'arrival', matches: [{ src: 'img1.jpg', distance: 0, postDate: '', postCaption: '', hash: 0n }] },
-        { slug: 'work-no-match', title_fr: 'no match', zone: 'arrival', matches: [] }
+        { slug: 'work-1', title_fr: 'w1', zone: 'arrival', pdf_index: 0, matches: [{ src: 'img1.jpg', distance: 0, postDate: '', postCaption: '', hash: 0n }] },
+        { slug: 'work-no-match', title_fr: 'no match', zone: 'arrival', pdf_index: 0, matches: [] }
       ],
       territory2: [{ src: 't2.jpg', hash: 0n, postDate: '2026-11-10T12', postCaption: '' }, { src: 't3.jpg', hash: 0n, postDate: '2026-08-29T12', postCaption: '' }],
       leak: [{ src: 'l1.jpg', hash: 0n, postDate: '2025-05-02T12', postCaption: '' }, { src: 'l2.jpg', hash: 0n, postDate: '2026-10-19T12', postCaption: '' }],
@@ -107,11 +109,12 @@ describe('CLI', () => {
   });
   
   it('runs propose and falls back to exportDir/../m for ig paths', async () => {
-    vi.mocked(fs.existsSync).mockImplementation((p: string) => {
+    vi.mocked(fs.existsSync).mockImplementation((p: fs.PathLike) => {
+      const pStr = p.toString();
       // Mock that `exportDir/m` does not exist, but `exportDir/../m` does
-      if (p.includes('missing')) return false;
-      if (p.includes('your_instagram_activity/media')) return true;
-      if (p === 'export/media/posts/202611/img1.jpg') return false; // force fallback
+      if (pStr.includes('missing')) return false;
+      if (pStr.includes('your_instagram_activity/media')) return true;
+      if (pStr === 'export/media/posts/202611/img1.jpg') return false; // force fallback
       return true;
     });
     vi.mocked(CatalogueReader.readCatalogue).mockReturnValue([]);
@@ -133,9 +136,10 @@ describe('CLI', () => {
     vi.mocked(IgExportParser.parseIgPosts).mockReturnValue([
       { id: '1', date: '2026-01-01', caption: '', media: ['media/posts/202611/img1.jpg', 'video.mp4'] }
     ]);
-    vi.mocked(fs.existsSync).mockImplementation((p: string) => {
-      if (p.includes('posts_1.html')) return true;
-      if (p.includes('reels.html')) return true;
+    vi.mocked(fs.existsSync).mockImplementation((p: fs.PathLike) => {
+      const pStr = p.toString();
+      if (pStr.includes('posts_1.html')) return true;
+      if (pStr.includes('reels.html')) return true;
       return true;
     });
 
