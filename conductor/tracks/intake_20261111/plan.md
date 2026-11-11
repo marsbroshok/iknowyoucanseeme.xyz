@@ -5,6 +5,11 @@ Track: `intake_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 Every task follows Red → Green → Refactor, commits per task (Conventional Commits), and keeps 100% coverage on new code. Work happens in `./.worktrees/intake_20261111` on branch `track/intake_20261111`.
 
 ## Review fixes
+- [x] Fix `src/intake/CatalogueReader.ts:52,55` TS18046/TS2339 (narrow via `if (error instanceof Error...)`): `3825d99`
+- [x] Fix `src/intake/IgExportParser.ts:25,44` TS2339/TS2551 (cast `root as import('node-html-parser').HTMLElement` and use `.text`): `f248bbb`
+- [x] Fix `tests/catalogueReader.test.ts:64,67,76,88` TS18046/TS2345 (narrow `e instanceof Error` and type `fakeExec`): `6d07767`
+- [x] Fix `tests/cli.test.ts:53,82,94-95,110,136` TS2345/TS2741 (type `p: fs.PathLike` and add `pdf_index: 0`): `4a180ff`
+- [x] Worktree environment: `npm run lint` crashes with `Cannot find module 'eslint-scope/dist/eslint-scope.cjs'`. Fix: run `npm ci`
 - [x] Fix 4 & 10: Placeholder titles in schema and generator.
 - [x] Fix 1: Broken catalogue image link in `ReviewSheetRenderer.ts`.
 - [x] Fix 2: Remove error swallowing in `ContentGenerator.ts` and fix tests.
