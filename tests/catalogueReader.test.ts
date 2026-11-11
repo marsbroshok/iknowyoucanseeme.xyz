@@ -61,10 +61,10 @@ describe('PdfThumbnailExtractor', () => {
     try {
       await extractor.extract(fakePdf, 'out_dir4');
     } catch (e: unknown) {
-      if (e.message.includes('Prerequisite pdfimages is not installed')) {
+      if (e instanceof Error && e.message.includes('Prerequisite pdfimages is not installed')) {
         expect(true).toBe(true);
       } else {
-        expect(e.message).toMatch(/Failed to extract images/);
+        expect(e instanceof Error ? e.message : String(e)).toMatch(/Failed to extract images/);
       }
     }
     
@@ -73,7 +73,7 @@ describe('PdfThumbnailExtractor', () => {
   
   it('handles command not found by throwing specific error', async () => {
     const fakeExec = async () => { throw new Error('command not found: pdfimages'); };
-    const extractor = new PdfThumbnailExtractor(fakeExec as unknown as typeof import('child_process').exec);
+    const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
     const fakePdf = path.resolve(__dirname, 'fake5.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
@@ -85,7 +85,7 @@ describe('PdfThumbnailExtractor', () => {
   
   it('handles execution success with existing and non-existing outputDir', async () => {
     const fakeExec = async () => ({ stdout: '', stderr: '' });
-    const extractor = new PdfThumbnailExtractor(fakeExec as unknown as typeof import('child_process').exec);
+    const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
     const fakePdf = path.resolve(__dirname, 'fake6.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
@@ -99,5 +99,17 @@ describe('PdfThumbnailExtractor', () => {
     fs.unlinkSync(fakePdf);
     fs.rmSync(newDir, { recursive: true, force: true });
     fs.rmSync(existingDir, { recursive: true, force: true });
+  });
+
+  it('handles non-Error objects thrown by exec', async () => {
+    const fakeExec = async () => { throw 'String error'; };
+    const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
+    const fakePdf = path.resolve(__dirname, 'fake7.pdf');
+    fs.writeFileSync(fakePdf, 'dummy');
+
+    await expect(extractor.extract(fakePdf, 'out_dir7'))
+      .rejects.toThrow(/Failed to extract images from PDF: String error/);
+    
+    fs.unlinkSync(fakePdf);
   });
 });
