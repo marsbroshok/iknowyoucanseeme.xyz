@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: A solar flash caught in rock.
+  fr: Un éclat solaire pris dans la roche.
+  sources:
+    - eclipse-miroir-12
+    - caption_eclipse

@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Light torn apart by mirrors.
+  fr: La lumière déchirée par les miroirs.
+  sources:
+    - eclipse-miroir-10
+    - caption_eclipse

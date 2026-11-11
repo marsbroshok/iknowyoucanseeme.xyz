@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Steps echo on wet stone.
+  fr: Les pas résonnent sur la pierre.
+  sources:
+    - venise-portrait-13
+    - caption_venice

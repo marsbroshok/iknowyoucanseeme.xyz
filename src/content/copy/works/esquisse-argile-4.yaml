@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Small animals before they have a name.
+  fr: De petites bêtes, avant d'avoir un nom.
+  sources:
+    - esquisse-argile-4
+    - caption_clay

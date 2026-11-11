@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Venice on a rainy morning.
+  fr: Venise un matin de pluie.
+  sources:
+    - venise-portrait-5
+    - caption_venice

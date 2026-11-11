@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Birds in the cold wind.
+  fr: Les oiseaux dans le vent froid.
+  sources:
+    - cygne-icm-7
+    - caption_7

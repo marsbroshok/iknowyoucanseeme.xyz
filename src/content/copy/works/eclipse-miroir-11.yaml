@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Cold stone swallows fire.
+  fr: La pierre froide avale le feu.
+  sources:
+    - eclipse-miroir-11
+    - caption_eclipse

@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Autumn colors in splashes.
+  fr: Couleurs d'automne en éclaboussures.
+  sources:
+    - cygne-icm-6
+    - caption_6

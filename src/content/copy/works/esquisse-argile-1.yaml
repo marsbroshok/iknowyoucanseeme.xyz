@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Hands in clay shape the new.
+  fr: Les mains dans l'argile façonnent le nouveau.
+  sources:
+    - esquisse-argile-1
+    - caption_clay

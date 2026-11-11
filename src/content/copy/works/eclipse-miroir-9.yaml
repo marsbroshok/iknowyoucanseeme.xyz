@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: The Moon eats the Sun.
+  fr: La Lune mange le Soleil.
+  sources:
+    - eclipse-miroir-9
+    - caption_eclipse

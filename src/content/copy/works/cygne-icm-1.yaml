@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: A border between worlds.
+  fr: Une frontière entre les mondes.
+  sources:
+    - cygne-icm-1
+    - caption_1

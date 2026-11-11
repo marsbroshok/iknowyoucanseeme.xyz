@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Someone lives here too.
+  fr: Quelqu'un vit ici aussi.
+  sources:
+    - venise-portrait-11
+    - caption_venice

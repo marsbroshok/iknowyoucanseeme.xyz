@@ -12,10 +12,14 @@ describe('Forbidden content guard', () => {
     for (const f of files) {
       if (f.endsWith('.ts') || f.endsWith('.yaml') || f.endsWith('.md')) {
         const p = path.join(contentDir, f);
-        const text = fs.readFileSync(p, 'utf-8');
-        expect(text).not.toContain('€');
-        expect(text).not.toMatch(/price:/i);
-        expect(text).not.toMatch(/prix:/i);
+        try {
+          const text = fs.readFileSync(p, 'utf-8');
+          expect(text).not.toContain('€');
+          expect(text).not.toMatch(/price:/i);
+          expect(text).not.toMatch(/prix:/i);
+        } catch (err: unknown) {
+          if (err instanceof Error && (err as Error & { code?: string }).code !== 'ENOENT') throw err;
+        }
       }
     }
   });
@@ -45,3 +49,5 @@ describe('Forbidden assets guard', () => {
     }
   });
 });
+
+

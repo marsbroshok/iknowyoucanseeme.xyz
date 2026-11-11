@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Press a little, and the border opens.
+  fr: On appuie un peu, et la frontière s'ouvre.
+  sources:
+    - cygne-icm-2
+    - caption_2

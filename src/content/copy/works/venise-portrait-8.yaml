@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Suspended between dreams.
+  fr: Suspendu entre les rêves.
+  sources:
+    - venise-portrait-8
+    - caption_venice

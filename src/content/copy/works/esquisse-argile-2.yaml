@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: First sketches of creatures.
+  fr: Premières esquisses de créatures.
+  sources:
+    - esquisse-argile-2
+    - caption_clay

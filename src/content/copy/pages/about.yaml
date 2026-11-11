@@ -1,0 +1,24 @@
+slug: about
+title:
+  en: About
+  fr: À propos
+blocks:
+  bio:
+    status: draft
+    en: I am a photographer and ceramic artist. I live in France. I left my country. Since then I ask myself what home is.
+    fr: Je suis photographe et céramiste. Je vis en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi.
+    sources:
+      - product_guidelines
+      - exhibition_statement
+  origin:
+    status: draft
+    en: This project began in 2019. I gave black and white portraits to an AI. It hallucinated colours and showed its biases. The name iknowyoucanseeme comes from there.
+    fr: Ce projet a commencé en 2019. J'ai donné des portraits en noir et blanc à une IA. Elle a halluciné des couleurs et montré ses biais. Le nom iknowyoucanseeme vient de là.
+    sources:
+      - origin-2019.yaml
+  exhibitions:
+    status: draft
+    en: Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland (Atelier 51, 16–30 Oct 2025).
+    fr: Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et Dreamland (Atelier 51, 16–30 oct. 2025).
+    sources:
+      - product_guidelines

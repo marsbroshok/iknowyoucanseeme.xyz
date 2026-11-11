@@ -1,0 +1,14 @@
+slug: legal
+blocks:
+  copyright:
+    status: draft
+    en: © all rights reserved.
+    fr: © tous droits réservés.
+    sources:
+      - spec
+  privacy:
+    status: draft
+    en: Cookieless analytics are used to respect your privacy.
+    fr: Des analyses sans cookies sont utilisées pour respecter votre vie privée.
+    sources:
+      - spec

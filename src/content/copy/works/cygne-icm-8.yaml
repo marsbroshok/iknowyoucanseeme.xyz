@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Flight against the current.
+  fr: Vol à contre-courant.
+  sources:
+    - cygne-icm-8
+    - caption_8

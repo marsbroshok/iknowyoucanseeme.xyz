@@ -1,11 +1,22 @@
 import { z } from 'zod';
 
+
+export const TextBlockSchema = z.object({
+  status: z.enum(['draft', 'artist-edited', 'proofed']),
+  fr: z.string().min(1),
+  en: z.string().min(1),
+  sources: z.array(z.string()).min(1)
+});
+export type TextBlock = z.infer<typeof TextBlockSchema>;
+
 export const TerritorySchema = z.object({
+  statement: TextBlockSchema.optional(),
   slug: z.string().regex(/^[a-z0-9-]+$/),
   title: z.record(z.string(), z.string()).optional()
 });
 
 export const ZoneSchema = z.object({
+  statement: TextBlockSchema.optional(),
   slug: z.string().regex(/^[a-z0-9-]+$/),
   title: z.record(z.string(), z.string()).optional()
 });
@@ -42,7 +53,8 @@ export const WorkSchema = z.object({
     height: z.number(),
     palette: z.array(z.string().regex(/^#[0-9a-fA-F]{6}$/))
   })),
-  sourceNotes: z.string().optional()
+  sourceNotes: z.string().optional(),
+  fragment: TextBlockSchema.optional()
 }).refine(data => {
   if (data.zone === 'leak' && data.territory !== 'dreamland') {
     return false;
@@ -56,3 +68,10 @@ export type Work = z.infer<typeof WorkSchema>;
 export type Territory = z.infer<typeof TerritorySchema>;
 export type Zone = z.infer<typeof ZoneSchema>;
 export type Exhibition = z.infer<typeof ExhibitionSchema>;
+
+export const PageSchema = z.object({
+  slug: z.enum(['about', 'gaze', 'threshold', 'contact', 'legal', 'ui']),
+  blocks: z.record(z.string(), TextBlockSchema).optional(),
+  title: z.record(z.string(), z.string()).optional()
+});
+export type Page = z.infer<typeof PageSchema>;

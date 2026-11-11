@@ -1,0 +1,8 @@
+slug: contact
+blocks:
+  title:
+    status: draft
+    en: Contact
+    fr: Contact
+    sources:
+      - spec

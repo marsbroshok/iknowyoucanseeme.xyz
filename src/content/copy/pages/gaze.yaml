@@ -1,0 +1,8 @@
+slug: gaze
+blocks:
+  title:
+    status: draft
+    en: The Gaze
+    fr: Le Regard
+    sources:
+      - spec
