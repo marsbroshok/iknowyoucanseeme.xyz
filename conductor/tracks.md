@@ -9,7 +9,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 2: Copy drafts EN/FR in the artist's plain voice**
+- [x] **Track 2: Copy drafts EN/FR in the artist's plain voice**
   *Link: [./tracks/copy_20261111/index.md](./tracks/copy_20261111/index.md)*
 
 ---
