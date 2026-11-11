@@ -1,9 +1,9 @@
 import fs from 'fs';
 import yaml from 'yaml';
 import { z } from 'zod';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export const CatalogueConfigSchema = z.object({
   works: z.array(z.object({
@@ -35,7 +35,7 @@ export function readCatalogue(yamlPath: string): CatalogueWork[] {
  * PdfThumbnailExtractor
  */
 export class PdfThumbnailExtractor {
-  constructor(private execFn: (cmd: string) => Promise<{ stdout: string; stderr: string }> = execAsync) {}
+  constructor(private execFn: (file: string, args: string[]) => Promise<{ stdout: string | Buffer; stderr: string | Buffer }> = execFileAsync as any) {}
 
   async extract(pdfPath: string, outputDir: string): Promise<void> {
     if (!fs.existsSync(pdfPath)) {
@@ -47,7 +47,7 @@ export class PdfThumbnailExtractor {
     }
 
     try {
-      await this.execFn(`pdfimages -j "${pdfPath}" "${outputDir}/img"`);
+      await this.execFn('pdfimages', ['-j', pdfPath, `${outputDir}/img`]);
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('command not found')) {
         throw new Error('Prerequisite pdfimages is not installed. Please install poppler.');
