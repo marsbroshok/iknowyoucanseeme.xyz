@@ -6,16 +6,16 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
 
 ## Phase 1: Toolchain & schemas
 
-- [ ] Task: Bootstrap npm/TypeScript toolchain
+- [x] Task: Bootstrap npm/TypeScript toolchain
     - [ ] Add `package.json` (type: module, scripts: test, test:coverage, lint, typecheck, check, intake), strict `tsconfig.json`, `vitest.config.ts` (v8 coverage, 100% thresholds on `src/**` + `tools/**`), ESLint flat config + Prettier
     - [ ] Write a smoke test proving the coverage gate fails below 100% (config assertion test)
     - [ ] Verify the legacy Hugo files are untouched (`git diff --stat` shows only new files plus `.gitignore` additions)
-- [ ] Task: Zod content schemas (`src/content/schema/`)
+- [x] Task: Zod content schemas (`src/content/schema/`)
     - [ ] Red: tests for `Territory`, `Zone`, `Work`, `Exhibition` (valid fixtures pass; missing FR title, bad slug, unknown zone, Leak zone outside Dreamland, people without consent rejected)
     - [ ] Red: invariant test that no schema has a `price`-like key (`price`, `prix`, `cost`, `eur`)
     - [ ] Green: implement one schema per file plus `index.ts` barrel; export inferred types
     - [ ] Property test (fast-check): every generated valid `Work` round-trips through YAML stringify/parse unchanged
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Readers (export & catalogue)
 
@@ -28,7 +28,7 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
     - [ ] Author `catalogue.yaml`: the 15 works (FR title, size w×h cm, PDF image index, proposed zone); **no prices**
     - [ ] Red: schema validation of the config; 15 unique slugs; slugify keeps French meaning (`les-echos-du-passe`, `la-frontiere-s-estompe`, `un-etranger`)
     - [ ] Green: reader + `PdfThumbnailExtractor` adapter (spawns `pdfimages -j`); adapter integration-tested against a tiny generated PDF fixture or skipped with an explicit prerequisite check that fails loudly (never silently)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Image analysis
 
@@ -41,7 +41,7 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
 - [ ] Task: `ImageProcessor`
     - [ ] Red: long edge ≤ 2400 px, never upscales, aspect ratio preserved (property test over dimensions); output has no EXIF/GPS (fixture with GPS EXIF); sRGB output
     - [ ] Green: `sharp` pipeline writing JPEG q≈88, deterministic output
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Proposals & review loop
 
@@ -55,7 +55,7 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
 - [ ] Task: `ReviewSheetRenderer`
     - [ ] Red: HTML snapshot contains each catalogue thumbnail beside its match and alternatives, scores, post dates and caption excerpts; all text HTML-escaped (XSS test with `<script>` caption)
     - [ ] Green: static HTML + inline CSS written to `intake/review/index.html` (relative image paths)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
 
 ## Phase 5: Generation & CLI
 
@@ -73,4 +73,4 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
     - [ ] Run `catalogue` → `propose` on the real export; pre-fill `selection.yaml` (catalogue matches keep=true; territory-2 all keep=true; Leak portraits keep=true with consent confirmed; clay creatures keep=true)
     - [ ] Run `generate`; commit generated content and web masters; record match confidence and doubtful matches in the track report for the artist's morning review
 - [ ] Task: Docs: README "Content intake" section (prerequisites, folders, propose → edit → generate loop, originals swap)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md) Checkpoint (Refer to workflow.md)
