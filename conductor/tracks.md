@@ -4,7 +4,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 1: Content intake pipeline (Instagram export + catalogue → reviewed content & web images)**
+- [x] **Track 1: Content intake pipeline (Instagram export + catalogue → reviewed content & web images)**
   *Link: [./tracks/intake_20261111/index.md](./tracks/intake_20261111/index.md)*
 
 ---
