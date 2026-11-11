@@ -2,7 +2,7 @@
 
 | File | Path | Status | EN | FR | Sources |
 |---|---|---|---|---|---|
-| pages/about.yaml | blocks.bio | draft | I am an artist, photographer and ceramic artist living in France. I left my country. Since then I ask myself what home is. | Je suis artiste, photographe et artiste céramiste vivant en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi. | product_guidelines, exhibition_statement |
+| pages/about.yaml | blocks.bio | draft | I am a photographer and ceramic artist. I live in France. I left my country. Since then I ask myself what home is. | Je suis photographe et céramiste. Je vis en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi. | product_guidelines, exhibition_statement |
 | pages/about.yaml | blocks.origin | draft | This project began in 2019. I gave black and white portraits to an AI. It hallucinated colours and showed its biases. The name iknowyoucanseeme comes from there. | Ce projet a commencé en 2019. J'ai donné des portraits en noir et blanc à une IA. Elle a halluciné des couleurs et montré ses biais. Le nom iknowyoucanseeme vient de là. | origin-2019.yaml |
 | pages/about.yaml | blocks.exhibitions | draft | Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland (Atelier 51, 16–30 Oct 2025). | Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et Dreamland (Atelier 51, 16–30 oct. 2025). | product_guidelines |
 | pages/contact.yaml | blocks.title | draft | Contact | Contact | spec |
@@ -20,7 +20,7 @@
 | territories/the-border-is-thin.yaml | statement | draft | There is a border between these worlds. If you point the camera in the right direction and apply some pressure, it becomes thin and reveals what is out there. | Il y a une frontière entre ces mondes. Mais si vous dirigez l'appareil photo dans la bonne direction, elle s'affine et révèle ce qui se cache de l'autre côté. | cygne-icm-1, eclipse-miroir-9 |
 | works/arrivee.yaml | fragment | draft | The moment of return. | Le moment du retour. | arrivee, exhibition_statement_2025_p1 |
 | works/cygne-icm-1.yaml | fragment | draft | A border between worlds. | Une frontière entre les mondes. | cygne-icm-1, caption_1 |
-| works/cygne-icm-2.yaml | fragment | draft | Pressure thins out the air. | La pression amincit l'air. | cygne-icm-2, caption_2 |
+| works/cygne-icm-2.yaml | fragment | draft | Press a little, and the border opens. | On appuie un peu, et la frontière s'ouvre. | cygne-icm-2, caption_2 |
 | works/cygne-icm-3.yaml | fragment | draft | Revealing what lies beyond. | Révéler ce qui se cache au-delà. | cygne-icm-3, caption_3 |
 | works/cygne-icm-4.yaml | fragment | draft | Heavy rain in November. | Forte pluie en novembre. | cygne-icm-4, caption_4 |
 | works/cygne-icm-5.yaml | fragment | draft | Grey days start to shift. | Les jours gris commencent à changer. | cygne-icm-5, caption_5 |
@@ -35,12 +35,12 @@
 | works/esquisse-argile-1.yaml | fragment | draft | Hands in clay shape the new. | Les mains dans l'argile façonnent le nouveau. | esquisse-argile-1, caption_clay |
 | works/esquisse-argile-2.yaml | fragment | draft | First sketches of creatures. | Premières esquisses de créatures. | esquisse-argile-2, caption_clay |
 | works/esquisse-argile-3.yaml | fragment | draft | Dreamland forms taking hold. | Les formes de Dreamland s'installent. | esquisse-argile-3, caption_clay |
-| works/esquisse-argile-4.yaml | fragment | draft | A warm and tactile tone. | Un ton chaud et tactile. | esquisse-argile-4, caption_clay |
+| works/esquisse-argile-4.yaml | fragment | draft | Small animals before they have a name. | De petites bêtes, avant d'avoir un nom. | esquisse-argile-4, caption_clay |
 | works/immersion-i.yaml | fragment | draft | Stepping into the deep end. | Entrer dans le grand bain. | immersion-i, exhibition_statement_2025_p4 |
 | works/immersion-ii.yaml | fragment | draft | Surrounded by the new air. | Entouré par le nouvel air. | immersion-ii, exhibition_statement_2025_p4 |
 | works/la-decouverte.yaml | fragment | draft | Finding evidence of life. | Trouver des preuves de vie. | la-decouverte, exhibition_statement_2025_p3 |
 | works/la-frontiere-s-estompe.yaml | fragment | draft | The border is almost gone. | La frontière a presque disparu. | la-frontiere-s-estompe, exhibition_statement_2025_p3 |
-| works/les-echos-du-passe.yaml | fragment | draft | Old walls whisper stories. | Les vieux murs murmurent des histoires. | les-echos-du-passe, exhibition_statement_2025_p1 |
+| works/les-echos-du-passe.yaml | fragment | draft | The sea remembers another shore. | La mer se souvient d'un autre rivage. | les-echos-du-passe, exhibition_statement_2025_p1 |
 | works/les-reflets-i.yaml | fragment | draft | Water shows another side. | L'eau montre un autre côté. | les-reflets-i, exhibition_statement_2025_p2 |
 | works/les-reflets-ii.yaml | fragment | draft | Lines bend in the mirror. | Les lignes se plient dans le miroir. | les-reflets-ii, exhibition_statement_2025_p2 |
 | works/les-reflets-iii.yaml | fragment | draft | A clear view in the ripple. | Une vue claire dans l'ondulation. | les-reflets-iii, exhibition_statement_2025_p2 |
@@ -49,7 +49,7 @@
 | works/rever-en-rose.yaml | fragment | draft | A color that changes the view. | Une couleur qui change la vue. | rever-en-rose, exhibition_statement_2025_p1 |
 | works/solitude.yaml | fragment | draft | A quiet place I found. | Un endroit calme que j'ai trouvé. | solitude, exhibition_statement_2025_p1 |
 | works/un-etranger.yaml | fragment | draft | The strange becoming familiar. | L'étrange devient familier. | un-etranger, exhibition_statement_2025_p2 |
-| works/venise-portrait-11.yaml | fragment | draft | Inhabitants of the Leak zone. | Habitants de la zone de Fuite. | venise-portrait-11, caption_venice |
+| works/venise-portrait-11.yaml | fragment | draft | Someone lives here too. | Quelqu'un vit ici aussi. | venise-portrait-11, caption_venice |
 | works/venise-portrait-12.yaml | fragment | draft | Faces seen in the mist. | Des visages vus dans la brume. | venise-portrait-12, caption_venice |
 | works/venise-portrait-13.yaml | fragment | draft | Steps echo on wet stone. | Les pas résonnent sur la pierre. | venise-portrait-13, caption_venice |
 | works/venise-portrait-15.yaml | fragment | draft | A masked glance backwards. | Un regard masqué en arrière. | venise-portrait-15, caption_venice |

@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: Inhabitants of the Leak zone.
-  fr: Habitants de la zone de Fuite.
+  en: Someone lives here too.
+  fr: Quelqu'un vit ici aussi.
   sources:
     - venise-portrait-11
     - caption_venice

@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: Pressure thins out the air.
-  fr: La pression amincit l'air.
+  en: Press a little, and the border opens.
+  fr: On appuie un peu, et la frontière s'ouvre.
   sources:
     - cygne-icm-2
     - caption_2

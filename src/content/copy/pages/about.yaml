@@ -5,8 +5,8 @@ title:
 blocks:
   bio:
     status: draft
-    en: I am an artist, photographer and ceramic artist living in France. I left my country. Since then I ask myself what home is.
-    fr: Je suis artiste, photographe et artiste céramiste vivant en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi.
+    en: I am a photographer and ceramic artist. I live in France. I left my country. Since then I ask myself what home is.
+    fr: Je suis photographe et céramiste. Je vis en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi.
     sources:
       - product_guidelines
       - exhibition_statement
