@@ -17,15 +17,13 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
     }
 
     const content = fs.readFileSync(filePath, 'utf-8');
-    const root = parse(content);
+    const root = parse(content) as any;
 
-    // Finding post blocks. Instagram export uses specific classes.
-    const blocks = root.querySelectorAll('.pam._3-95._2pi0._2lej.uiBoxWhite.noborder');
+    const blocks: any[] = root.querySelectorAll('.pam._3-95._2pi0._2lej.uiBoxWhite.noborder');
 
-    blocks.forEach((block, index) => {
-      // Get media
-      const imgs = block.querySelectorAll('img').map(el => el.getAttribute ? el.getAttribute('src') : el.attributes?.src || '');
-      const vids = block.querySelectorAll('video').map(el => el.getAttribute ? el.getAttribute('src') : el.attributes?.src || '');
+    blocks.forEach((block: any, index: number) => {
+      const imgs: string[] = block.querySelectorAll('img').map((el: any) => el.attributes?.src || '');
+      const vids: string[] = block.querySelectorAll('video').map((el: any) => el.attributes?.src || '');
       const allMedia = [...imgs, ...vids].filter(Boolean);
 
       // Whitelist check
@@ -37,7 +35,9 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
 
       // Get date
       const dateEl = block.querySelector('._3-94._2lem');
-      if (!dateEl) return;
+      if (!dateEl) {
+        return;
+      }
       const rawDate = (dateEl.textContent || dateEl.text || '').trim();
       const date = parseDate(rawDate);
 
