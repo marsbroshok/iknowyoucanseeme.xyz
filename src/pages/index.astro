@@ -1,0 +1,24 @@
+---
+import { getPreferredLocale } from '../i18n/ChooseLocale.js';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>iknowyoucanseeme</title>
+  <script is:inline>
+    // Minimal inline script to redirect based on navigator.language
+    const lang = (navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
+    window.location.replace('/' + lang + '/');
+  </script>
+</head>
+<body>
+  <noscript>
+    <div style="display: flex; gap: 1rem; padding: 2rem; font-family: monospace;">
+      <a href="/en/">English</a>
+      <a href="/fr/">Français</a>
+    </div>
+  </noscript>
+</body>
+</html>
