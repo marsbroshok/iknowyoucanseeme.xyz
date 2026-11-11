@@ -59,16 +59,13 @@ describe('PdfThumbnailExtractor', () => {
     fs.writeFileSync(fakePdf, 'not a real pdf');
 
     try {
-      await extractor.extract(fakePdf, 'out_dir4');
-    } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes('Prerequisite pdfimages is not installed')) {
-        expect(true).toBe(true);
-      } else {
-        expect(e instanceof Error ? e.message : String(e)).toMatch(/Failed to extract images/);
+      await expect(extractor.extract(fakePdf, 'out_dir4'))
+        .rejects.toThrow(/Prerequisite pdfimages is not installed|Failed to extract images/);
+    } finally {
+      if (fs.existsSync(fakePdf)) {
+        fs.unlinkSync(fakePdf);
       }
     }
-    
-    fs.unlinkSync(fakePdf);
   });
   
   it('handles command not found by throwing specific error', async () => {
@@ -111,5 +108,35 @@ describe('PdfThumbnailExtractor', () => {
       .rejects.toThrow(/Failed to extract images from PDF: String error/);
     
     fs.unlinkSync(fakePdf);
+  });
+
+  it('passes paths with spaces and quotes correctly to execFn', async () => {
+    let capturedCmd: string | undefined;
+    let capturedArgs: readonly string[] | undefined;
+    const fakeExecFn = async (cmd: string, args: string[]) => {
+      capturedCmd = cmd;
+      capturedArgs = args;
+      return { stdout: '', stderr: '' };
+    };
+    
+    const extractor = new PdfThumbnailExtractor(fakeExecFn as any);
+    const fakePdf = path.resolve(__dirname, 'fake pdf with spaces and "quotes".pdf');
+    fs.writeFileSync(fakePdf, 'dummy');
+
+    try {
+      await extractor.extract(fakePdf, 'out dir with spaces');
+      expect(capturedCmd).toBe('pdfimages');
+      expect(capturedArgs).toBeDefined();
+      expect(capturedArgs).toContain('-j');
+      expect(capturedArgs).toContain(fakePdf);
+      expect(capturedArgs).toContain('out dir with spaces/img');
+    } finally {
+      if (fs.existsSync(fakePdf)) {
+        fs.unlinkSync(fakePdf);
+      }
+      if (fs.existsSync('out dir with spaces')) {
+        fs.rmSync('out dir with spaces', { recursive: true, force: true });
+      }
+    }
   });
 });
