@@ -27,5 +27,5 @@ Track: `copy_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 
 From the `intake_20261111` review (non-blocking, fix as the first task of this track):
 
-- [ ] Task: `tests/catalogueReader.test.ts` (~L58–70): a try/catch test passes even if no error is thrown (`expect(true).toBe(true)`). Rewrite it with `await expect(...).rejects.toThrow(...)` so it fails when nothing throws.
-- [ ] Task: `src/intake/CatalogueReader.ts` `PdfThumbnailExtractor` builds a shell string with interpolated paths (`pdfimages -j "${pdfPath}" ...`). Switch to `execFile('pdfimages', ['-j', pdfPath, prefix])` (no shell), and add a test with a path containing quotes/spaces.
+- [x] Task: `tests/catalogueReader.test.ts` (91ab906) (~L58–70): a try/catch test passes even if no error is thrown (`expect(true).toBe(true)`). Rewrite it with `await expect(...).rejects.toThrow(...)` so it fails when nothing throws.
+- [x] Task: `src/intake/CatalogueReader.ts` (91ab906) `PdfThumbnailExtractor` builds a shell string with interpolated paths (`pdfimages -j "${pdfPath}" ...`). Switch to `execFile('pdfimages', ['-j', pdfPath, prefix])` (no shell), and add a test with a path containing quotes/spaces.
