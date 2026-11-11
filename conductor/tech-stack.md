@@ -27,7 +27,7 @@
 
 | Concern | Tool |
 |---|---|
-| Package manager / runtime | Node.js LTS + **pnpm** |
+| Package manager / runtime | Node.js (v25 present) + **npm** (see Decision Notes, 2026-11-11) |
 | Unit & component tests | **Vitest** (+ `@vitest/coverage-v8`) |
 | Property-based tests | **fast-check** (content schema, routing, palette, drift math invariants) |
 | End-to-end & visual | **Playwright** (awake layer flows, device routing, i18n, screenshots of the world) |
@@ -58,3 +58,5 @@
 ## Secrets
 
 - Web3Forms access key and any tokens provided via environment variables / GitHub Actions secrets; never committed.
+
+- **npm instead of pnpm (2026-11-11).** pnpm is not installed and Node v25 no longer bundles Corepack. Installing a global tool overnight without the artist's OK was rejected; npm is already present, is one less tool for the artist to learn, and is sufficient for a single-package static site.

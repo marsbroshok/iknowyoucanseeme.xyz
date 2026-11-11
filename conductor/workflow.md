@@ -47,7 +47,7 @@ All tasks follow a strict lifecycle:
     -   Rerun tests to ensure they still pass after refactoring.
 
 6.  **Verify Coverage:** Run coverage reports using the project's chosen tools.
-    For this project: `pnpm test:coverage` (Vitest + v8). Target: 100% statements
+    For this project: `npm run test:coverage` (Vitest + v8). Target: 100% statements
     and branches for new code. WebGL shaders and Three.js render loops are verified
     with Playwright visual/e2e tests instead; their pure math/state modules are unit-tested. The
     specific tools and commands will vary by language and framework.
@@ -242,22 +242,22 @@ language, framework, and build tools.**
 ### Setup
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### Daily Development
 
 ```bash
-pnpm dev            # Astro dev server
-pnpm test           # Vitest (unit + property tests)
-pnpm test:e2e       # Playwright (awake layer, routing, i18n, visual)
-pnpm lint           # ESLint + Prettier check
+npm run dev          # Astro dev server
+npm test           # Vitest (unit + property tests)
+npm run test:e2e     # Playwright (awake layer, routing, i18n, visual)
+npm run lint        # ESLint + Prettier check
 ```
 
 ### Before Committing
 
 ```bash
-pnpm check          # astro check + lint + test:coverage + build
+npm run check       # astro check + lint + test:coverage + build
 ```
 
 ## Testing Requirements
