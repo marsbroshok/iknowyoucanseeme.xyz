@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TextBlockSchema, WorkSchema } from '../src/content/schema/index.js';
+import { TextBlockSchema } from '../src/content/schema/index.js';
 
 describe('TextBlockSchema', () => {
   it('requires valid status enum', () => {

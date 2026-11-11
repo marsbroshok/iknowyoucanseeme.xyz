@@ -1,18 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
 import { checkVocabularyAndTypography } from '../src/tools/CopyGuard.js';
 
-function findTextBlocks(obj: any): any[] {
-  let blocks: any[] = [];
+function findTextBlocks(obj: unknown): Record<string, unknown>[] {
+  let blocks: Record<string, unknown>[] = [];
   if (typeof obj !== 'object' || obj === null) return blocks;
   
-  if (obj.status && ['draft', 'artist-edited', 'proofed'].includes(obj.status) && obj.fr && obj.en) {
-    blocks.push(obj);
+  const record = obj as Record<string, unknown>;
+  
+  if (typeof record.status === 'string' && ['draft', 'artist-edited', 'proofed'].includes(record.status) && typeof record.fr === 'string' && typeof record.en === 'string') {
+    blocks.push(record);
   } else {
-    for (const key of Object.keys(obj)) {
-      blocks = blocks.concat(findTextBlocks(obj[key]));
+    for (const key of Object.keys(record)) {
+      blocks = blocks.concat(findTextBlocks(record[key]));
     }
   }
   return blocks;
@@ -34,9 +36,9 @@ describe('Draft contents', () => {
           const blocks = findTextBlocks(content);
           for (const block of blocks) {
             try {
-              checkVocabularyAndTypography(block);
-            } catch (err: any) {
-              err.message = `${err.message} (in ${fullPath})`;
+              checkVocabularyAndTypography(block as unknown as Parameters<typeof checkVocabularyAndTypography>[0]);
+            } catch (err: unknown) {
+              if (err instanceof Error) { err.message = `${err.message} (in ${fullPath})`; }
               throw err;
             }
           }

@@ -10,20 +10,21 @@ export function generateReviewSheet(outputFile: string) {
   const copyDir = path.resolve(__dirname, '../../src/content/copy');
   const items: { file: string, pathKeys: string[], status: string, en: string, fr: string, sources: string[] }[] = [];
 
-  function walk(obj: any, file: string, pathKeys: string[]) {
+  function walk(obj: unknown, file: string, pathKeys: string[]) {
     if (typeof obj !== 'object' || obj === null) return;
-    if (obj.status && ['draft', 'artist-edited', 'proofed'].includes(obj.status) && obj.fr && obj.en) {
+    const record = obj as Record<string, unknown>;
+    if (typeof record.status === 'string' && ['draft', 'artist-edited', 'proofed'].includes(record.status) && typeof record.fr === 'string' && typeof record.en === 'string') {
       items.push({
         file,
         pathKeys,
-        status: obj.status,
-        en: obj.en,
-        fr: obj.fr,
-        sources: obj.sources || []
+        status: record.status,
+        en: record.en,
+        fr: record.fr,
+        sources: Array.isArray(record.sources) ? (record.sources as string[]) : []
       });
     } else {
-      for (const k of Object.keys(obj)) {
-        walk(obj[k], file, [...pathKeys, k]);
+      for (const k of Object.keys(record)) {
+        walk(record[k], file, [...pathKeys, k]);
       }
     }
   }
@@ -60,9 +61,12 @@ export function generateReviewSheet(outputFile: string) {
   fs.writeFileSync(outputFile, md);
 }
 
-const isMain = process.argv[1] && import.meta.url === `file://${fs.realpathSync(process.argv[1])}`;
-if (isMain) {
-  const out = path.resolve(__dirname, '../../docs/copy/REVIEW.md');
-  generateReviewSheet(out);
-  console.log(`Generated ${out}`);
+
+export function runMain(argv: string[], currentUrl: string) {
+  if (argv && argv === fileURLToPath(currentUrl)) {
+    const out = path.resolve(__dirname, '../../docs/copy/REVIEW.md');
+    generateReviewSheet(out);
+    console.log(`Generated ${out}`);
+  }
 }
+runMain(process.argv[1] as string, import.meta.url);

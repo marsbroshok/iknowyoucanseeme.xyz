@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { checkVocabularyAndTypography } from '../src/tools/CopyGuard.js';
+import { checkVocabularyAndTypography, clearDenyListCache } from '../src/tools/CopyGuard.js';
+import fs from 'fs';
+import path from 'path';
 
 describe('CopyGuard', () => {
   it('fails on literary words', () => {
@@ -16,6 +18,22 @@ describe('CopyGuard', () => {
       en: 'Normal english.',
       sources: ['x']
     })).toThrow(/literary word in fr: s'amincir/i);
+  });
+
+  it('works when deny-list file is missing', () => {
+    const p = path.resolve(__dirname, '../content-config/vocabulary-deny.yaml');
+    fs.renameSync(p, p + '.bak');
+    clearDenyListCache();
+    try {
+      expect(() => checkVocabularyAndTypography({
+        status: 'draft',
+        fr: 'Normal',
+        en: 'Normal',
+        sources: []
+      })).not.toThrow();
+    } finally {
+      fs.renameSync(p + '.bak', p);
+    }
   });
 
   it('fails on long sentences', () => {

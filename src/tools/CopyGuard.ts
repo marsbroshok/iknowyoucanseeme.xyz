@@ -27,6 +27,8 @@ function loadDenyList() {
   return denyList;
 }
 
+export function clearDenyListCache() { denyList = null; }
+
 export function checkVocabularyAndTypography(block: TextBlock) {
   const lists = loadDenyList();
 
