@@ -7,6 +7,7 @@
 - **Never:** "quirky", "coffee-fueled", emoji, marketing superlatives, sales language ("buy now", "limited offer"), exclamation marks.
 - **Recurring motifs:** border, threshold, leak, drift, lens, echo, reflection, arrival, strangeness made familiar.
 - **Work fragments:** each work gets a 1–2 line poetic fragment, not a description.
+- **Authentic, simple vocabulary (artist's directive):** neither FR nor EN is the artist's native language. Use only plain words he would actually say in real life. Do NOT use rare, literary or "writerly" words (e.g. *s'amincir*, *gossamer*, *liminal*); a simple phrase beats an elegant one. The artist's own captions are the reference register.
 
 ## Language
 

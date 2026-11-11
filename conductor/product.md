@@ -20,6 +20,24 @@ The current site (Hugo Blox academic/blog starter) reads like a hobby tech blog:
 
 **One world.** Dreamland is the territory. Photographs = its landscapes. Ceramics = physical evidence (flora, fauna, artifacts) that leaked out of it. The site is the first territory of a wider *iknowyoucanseeme* universe; future series become new territories at the edge of the fog.
 
+## Territories
+
+| # | Territory (EN / FR) | Content | Source |
+|---|---|---|---|
+| 1 | **Dreamland** / **Dreamland** | The 15 catalogue works of the *Dreamland* exhibition (Atelier 51, 16–30 Oct 2025) across the Arrival and Lens zones. The Leak zone holds the Venice colour-leak portraits (consent confirmed) as Dreamland's "inhabitants" and unfired clay creatures as first "sketches" of its fauna, until finished ceramics exist | Catalogue PDF + Instagram 2025 |
+| 2 | **The border is thin** / **La frontière s'efface** | 2026 work: ICM birds and swans in autumn (with Jiří Hřebíček) and the solar eclipse torn apart by mirrors and filters | Instagram 2026 |
+
+The territory 2 title comes from the artist's own caption: *"There is a border between these worlds, but if you point the camera in the right direction and apply some pressure, it will thin out and reveal what's out there."*
+
+## Origin of the Name (2019)
+
+The hashtag *#iknowyoucanseeme* began with the 2019 group show *L'Emprunt, la Citation* (MPAA, 100 rue Didot, Paris, vernissage 12 Dec 2019): black-and-white portraits colourised by an AI that "hallucinated" their colours and exposed its biases. The gaze was originally the machine's. This story is told in About and informs the gaze moments. There is no full archive of older series.
+
+## Exhibitions (known)
+
+- *L'Emprunt, la Citation*, MPAA, Paris, Dec 2019 (group).
+- *Dreamland*, Atelier 51, 16–30 Oct 2025 (solo).
+
 ## Identity
 
 - **Artist name:** Alexander Usoltsev (leads).
