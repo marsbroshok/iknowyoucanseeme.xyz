@@ -1,0 +1,35 @@
+{
+  "name": "intake_20261111",
+  "version": "1.0.0",
+  "description": "[![Screenshot](./.github/preview.png)](https://hugoblox.com/templates/)",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run test:coverage",
+    "intake": "npx tsx tools/intake/cli.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^24.0.9",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.29.0",
+    "fast-check": "^4.1.1",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "node-html-parser": "^1.1.16",
+    "sharp": "^0.34.2",
+    "yaml": "^2.8.0",
+    "zod": "^3.25.67"
+  }
+}
