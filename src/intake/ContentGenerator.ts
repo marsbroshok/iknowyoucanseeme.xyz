@@ -13,7 +13,8 @@ export async function generateContentFiles(
   selection: SelectionEntry[],
   igImages: HashedIgImage[],
   srcDir: string,
-  intakeDir: string
+  intakeDir: string,
+  exportDir: string
 ) {
   const worksDir = path.join(srcDir, 'content/works');
   const territoriesDir = path.join(srcDir, 'content/territories');
@@ -79,10 +80,10 @@ export async function generateContentFiles(
       inputBuf = fs.readFileSync(originalPath);
       source = 'original';
     } else {
-      inputBuf = fs.readFileSync(path.join(path.dirname(intakeDir), s.src)); // relative to repo root (which is parent of intakeDir if intake is symlink)
-      // Actually s.src is something like "media/posts/...", wait in tests it is 'temp_ig.jpg' which is absolute or relative to tests. 
-      // I should handle resolving appropriately.
-      const srcPath = path.resolve(path.dirname(intakeDir), s.src);
+      let srcPath = path.resolve(exportDir, s.src);
+      if (!fs.existsSync(srcPath)) {
+        srcPath = path.resolve(exportDir, '..', s.src);
+      }
       inputBuf = fs.readFileSync(srcPath);
     }
 

@@ -143,15 +143,17 @@ Options:
       }
     }
     
-    await generateContentFiles(selection, igHashed, srcDir, intakeDir);
+    await generateContentFiles(selection, igHashed, srcDir, intakeDir, exportDir);
     console.log('Generate complete.');
   }
 }
 
 // execute if run directly
 
+import { fileURLToPath } from 'url';
+
 /* v8 ignore start */
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   runCli(process.argv.slice(2)).catch(err => {
     console.error(err.message);
     process.exit(1);

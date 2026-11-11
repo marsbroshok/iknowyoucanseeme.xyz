@@ -19,7 +19,7 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
     const content = fs.readFileSync(filePath, 'utf-8');
     const root = parse(content) as any;
 
-    const blocks: any[] = root.querySelectorAll('.pam._3-95._2pi0._2lej.uiBoxWhite.noborder');
+    const blocks: any[] = root.querySelectorAll('.pam.uiBoxWhite');
 
     blocks.forEach((block: any, index: number) => {
       const imgs: string[] = block.querySelectorAll('img').map((el: any) => el.attributes?.src || '');
@@ -34,7 +34,7 @@ export function parseIgPosts(options: { postsHtml?: string; reelsHtml?: string }
       });
 
       // Get date
-      const dateEl = block.querySelector('._3-94._2lem');
+      const dateEl = block.querySelector('._3-94');
       if (!dateEl) {
         return;
       }
