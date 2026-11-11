@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Light from a different sky.
+  fr: La lumière d'un ciel différent.
   sources:
     - nouveau-soleil
-    - caption
+    - exhibition_statement_2025_p3

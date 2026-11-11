@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: A quiet place I found.
+  fr: Un endroit calme que j'ai trouvé.
   sources:
     - solitude
-    - caption
+    - exhibition_statement_2025_p1

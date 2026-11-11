@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Living soul across forms.
+  fr: Âme vivante à travers les formes.
   sources:
     - venise-portrait-7
-    - caption
+    - caption_venice

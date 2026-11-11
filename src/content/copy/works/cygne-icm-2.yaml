@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Pressure thins out the air.
+  fr: La pression amincit l'air.
   sources:
     - cygne-icm-2
-    - caption
+    - caption_2

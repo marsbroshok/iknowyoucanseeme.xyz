@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: First sketches of creatures.
+  fr: Premières esquisses de créatures.
   sources:
     - esquisse-argile-2
-    - caption
+    - caption_clay

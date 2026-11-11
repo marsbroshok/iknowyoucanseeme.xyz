@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: The border is almost gone.
+  fr: La frontière a presque disparu.
   sources:
     - la-frontiere-s-estompe
-    - caption
+    - exhibition_statement_2025_p3

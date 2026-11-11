@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Heavy rain in November.
+  fr: Forte pluie en novembre.
   sources:
     - cygne-icm-4
-    - caption
+    - caption_4

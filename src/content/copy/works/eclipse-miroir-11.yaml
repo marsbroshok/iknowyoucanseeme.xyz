@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Cold stone swallows fire.
+  fr: La pierre froide avale le feu.
   sources:
     - eclipse-miroir-11
-    - caption
+    - caption_eclipse

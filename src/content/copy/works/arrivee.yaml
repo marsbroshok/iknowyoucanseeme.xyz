@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: The moment of return.
+  fr: Le moment du retour.
   sources:
     - arrivee
-    - caption
+    - exhibition_statement_2025_p1

@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Dreamland forms taking hold.
+  fr: Les formes de Dreamland s'installent.
   sources:
     - esquisse-argile-3
-    - caption
+    - caption_clay

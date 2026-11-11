@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Looking up to find home.
+  fr: Regarder en haut pour trouver sa maison.
   sources:
     - perdu-dans-les-etoiles
-    - caption
+    - exhibition_statement_2025_p2

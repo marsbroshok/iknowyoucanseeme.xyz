@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Venice on a rainy morning.
+  fr: Venise un matin de pluie.
   sources:
     - venise-portrait-5
-    - caption
+    - caption_venice

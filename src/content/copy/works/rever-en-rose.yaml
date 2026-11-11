@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: A color that changes the view.
+  fr: Une couleur qui change la vue.
   sources:
     - rever-en-rose
-    - caption
+    - exhibition_statement_2025_p1

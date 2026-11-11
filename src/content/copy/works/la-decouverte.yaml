@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Finding evidence of life.
+  fr: Trouver des preuves de vie.
   sources:
     - la-decouverte
-    - caption
+    - exhibition_statement_2025_p3

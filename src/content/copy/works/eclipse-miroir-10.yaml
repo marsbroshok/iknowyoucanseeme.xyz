@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Light torn apart by mirrors.
+  fr: La lumière déchirée par les miroirs.
   sources:
     - eclipse-miroir-10
-    - caption
+    - caption_eclipse

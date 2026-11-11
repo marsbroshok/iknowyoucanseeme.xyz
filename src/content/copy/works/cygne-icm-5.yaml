@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Grey days start to shift.
+  fr: Les jours gris commencent à changer.
   sources:
     - cygne-icm-5
-    - caption
+    - caption_5

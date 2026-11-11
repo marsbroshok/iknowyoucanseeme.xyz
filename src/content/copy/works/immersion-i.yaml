@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Stepping into the deep end.
+  fr: Entrer dans le grand bain.
   sources:
     - immersion-i
-    - caption
+    - exhibition_statement_2025_p4

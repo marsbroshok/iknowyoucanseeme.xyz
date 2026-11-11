@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: A solar flash caught in rock.
+  fr: Un éclat solaire pris dans la roche.
   sources:
     - eclipse-miroir-12
-    - caption
+    - caption_eclipse

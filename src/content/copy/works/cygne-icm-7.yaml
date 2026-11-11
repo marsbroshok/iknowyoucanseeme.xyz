@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Birds in the cold wind.
+  fr: Les oiseaux dans le vent froid.
   sources:
     - cygne-icm-7
-    - caption
+    - caption_7

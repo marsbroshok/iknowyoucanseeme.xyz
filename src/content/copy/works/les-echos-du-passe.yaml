@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Old walls whisper stories.
+  fr: Les vieux murs murmurent des histoires.
   sources:
     - les-echos-du-passe
-    - caption
+    - exhibition_statement_2025_p1

@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: Faces seen in the mist.
+  fr: Des visages vus dans la brume.
   sources:
     - venise-portrait-12
-    - caption
+    - caption_venice

@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: An abstract piece of the journey.
-  fr: Une partie abstraite du voyage.
+  en: A warm and tactile tone.
+  fr: Un ton chaud et tactile.
   sources:
     - esquisse-argile-4
-    - caption
+    - caption_clay
