@@ -55,6 +55,15 @@ describe('CopyGuard', () => {
   });
 
   it('fails on missing non-breaking spaces before French punctuation', () => {
+    // Failing ASCII space
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Quoi ?',
+      en: 'What?',
+      sources: ['x']
+    })).toThrow(/missing non-breaking space before \?/i);
+
+    // Failing no-space case (letter directly before)
     expect(() => checkVocabularyAndTypography({
       status: 'draft',
       fr: 'Quoi?',
@@ -62,12 +71,54 @@ describe('CopyGuard', () => {
       sources: ['x']
     })).toThrow(/missing non-breaking space before \?/i);
     
+    // Failing no-space case (digit directly before)
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: '10!',
+      en: '10!',
+      sources: ['x']
+    })).toThrow(/missing non-breaking space before !/i);
+
+    // Failing no-space case (closing quote directly before)
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: '« mot »!',
+      en: '"word"!',
+      sources: ['x']
+    })).toThrow(/missing non-breaking space before !/i);
+
     expect(() => checkVocabularyAndTypography({
       status: 'draft',
       fr: 'Non!',
       en: 'No!',
       sources: ['x']
     })).toThrow(/missing non-breaking space before !/i);
+  });
+
+  it('passes on valid exceptions for French punctuation', () => {
+    // Passes URL
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Visitez https://example.com ou http://test.com',
+      en: 'Visit https://example.com',
+      sources: ['x']
+    })).not.toThrow();
+
+    // Passes time
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Il est 10:30.',
+      en: 'It is 10:30.',
+      sources: ['x']
+    })).not.toThrow();
+
+    // Passes NNBSP
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Quoi\u202F?',
+      en: 'What?',
+      sources: ['x']
+    })).not.toThrow();
   });
 
   it('fails on straight quotes in French', () => {

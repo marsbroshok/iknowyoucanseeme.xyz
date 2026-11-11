@@ -65,10 +65,29 @@ export function checkVocabularyAndTypography(block: TextBlock) {
   // Typography guard for FR
   // missing non-breaking space before : ; ? !
   // Straight quotes
-  const match = /([a-zA-Z0-9])([:;?!])/.exec(block.fr);
-  if (match) {
-    throw new Error(`Missing non-breaking space before ${match[2]} in FR`);
+  const invalidPunctuationRegex = /(?<![\u00A0\u202F])([:;?!])/g;
+  let matchPunct;
+  while ((matchPunct = invalidPunctuationRegex.exec(block.fr)) !== null) {
+    const punct = matchPunct[1];
+    const index = matchPunct.index;
+    
+    // Allow http:// or https://
+    if (punct === ':' && (block.fr.slice(Math.max(0, index - 5), index) === 'https' || block.fr.slice(Math.max(0, index - 4), index) === 'http')) {
+      continue;
+    }
+    
+    // Allow time formats like 10:30
+    if (punct === ':' && index > 0 && index < block.fr.length - 1) {
+      const prevChar = block.fr[index - 1];
+      const nextChar = block.fr[index + 1];
+      if (/\d/.test(prevChar) && /\d/.test(nextChar)) {
+        continue;
+      }
+    }
+
+    throw new Error(`Missing non-breaking space before ${punct} in FR`);
   }
+
   if (/"/.test(block.fr)) {
     throw new Error(`Use « » for quotes in FR instead of straight quotes`);
   }
