@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { generateReviewSheet, runMain } from '../tools/copy/review.js';
 import { fileURLToPath } from 'url';
 
@@ -15,18 +15,54 @@ describe('copyReview script', () => {
     expect(content).toContain('| File | Path | Status | EN | FR | Sources |');
     expect(content).toContain('cygne-icm-1.yaml');
     
-    const fakeYaml = path.resolve(__dirname, '../src/content/copy/fake.yaml');
-    fs.writeFileSync(fakeYaml, 'status: draft\nen: en\nfr: fr\nsources: "not an array"\n');
-    generateReviewSheet(outPath);
-    if (fs.existsSync(fakeYaml)) fs.unlinkSync(fakeYaml);
-    if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
-
-    // cover !existsSync branch
-    const realDir = path.resolve(__dirname, '../src/content/copy');
-    fs.renameSync(realDir, realDir + '.bak');
-    generateReviewSheet(outPath);
-    fs.renameSync(realDir + '.bak', realDir);
-    if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
+    // We cannot safely write to src/content/copy or rename it because tests run concurrently.
+    // We mock fs.existsSync and fs.readdirSync to test those edge cases safely.
+    const originalExists = fs.existsSync;
+    const originalReaddir = fs.readdirSync;
+    
+    try {
+      // Test missing directory
+      fs.existsSync = vi.fn().mockReturnValue(false);
+      generateReviewSheet(outPath);
+      
+      // Test fake yaml
+      fs.existsSync = originalExists;
+      // @ts-expect-error mock
+      fs.readdirSync = (dir: fs.PathLike) => {
+        if (dir.toString().endsWith('copy')) {
+          return ['fake.yaml'];
+        }
+        return originalReaddir(dir);
+      };
+      
+      // We also need to mock readFileSync and statSync for fake.yaml
+      const originalStat = fs.statSync;
+      const originalRead = fs.readFileSync;
+      
+      // @ts-expect-error mock
+      fs.statSync = (p: fs.PathLike) => {
+        if (p.toString().endsWith('fake.yaml')) return { isDirectory: () => false };
+        return originalStat(p);
+      };
+      
+      // @ts-expect-error mock
+      fs.readFileSync = (p: fs.PathLike, enc: unknown) => {
+        if (p.toString().endsWith('fake.yaml')) return 'status: draft\nen: en\nfr: fr\nsources: "not an array"\n';
+        // @ts-expect-error mock
+        return originalRead(p, enc);
+      };
+      
+      generateReviewSheet(outPath);
+      
+      // @ts-expect-error mock
+      fs.statSync = originalStat;
+      fs.readFileSync = originalRead;
+      
+    } finally {
+      fs.existsSync = originalExists;
+      fs.readdirSync = originalReaddir;
+      if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
+    }
   });
 
   it('can be run directly from CLI', () => {
@@ -41,4 +77,7 @@ describe('copyReview script', () => {
     }
   });
 });
+
+
+
 
