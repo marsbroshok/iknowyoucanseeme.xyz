@@ -36,3 +36,105 @@ blocks:
     fr: Disponibilité sur demande
     sources:
       - spec
+  form_name:
+    status: draft
+    en: Name
+    fr: Nom
+    sources:
+      - spec
+  form_email:
+    status: draft
+    en: Email
+    fr: Email
+    sources:
+      - spec
+  form_message:
+    status: draft
+    en: Message
+    fr: Message
+    sources:
+      - spec
+  form_send:
+    status: draft
+    en: Send
+    fr: Envoyer
+    sources:
+      - spec
+  form_success:
+    status: draft
+    en: Message sent successfully.
+    fr: Message envoyé avec succès.
+    sources:
+      - spec
+  form_error:
+    status: draft
+    en: An error occurred. Please try again.
+    fr: Une erreur est survenue. Veuillez réessayer.
+    sources:
+      - spec
+  form_required_hint:
+    status: draft
+    en: Required field
+    fr: Champ obligatoire
+    sources:
+      - spec
+  form_honeypot:
+    status: draft
+    en: Leave this field empty
+    fr: Laissez ce champ vide
+    sources:
+      - spec
+  lang_switch:
+    status: draft
+    en: Switch language
+    fr: Changer de langue
+    sources:
+      - spec
+  sound_mute:
+    status: draft
+    en: Mute sound
+    fr: Couper le son
+    sources:
+      - spec
+  sound_unmute:
+    status: draft
+    en: Unmute sound
+    fr: Activer le son
+    sources:
+      - spec
+  dialog_close:
+    status: draft
+    en: Close dialog
+    fr: Fermer la boîte de dialogue
+    sources:
+      - spec
+  work_prev:
+    status: draft
+    en: Previous work
+    fr: Œuvre précédente
+    sources:
+      - spec
+  work_next:
+    status: draft
+    en: Next work
+    fr: Œuvre suivante
+    sources:
+      - spec
+  skip_content:
+    status: draft
+    en: Skip to content
+    fr: Passer au contenu
+    sources:
+      - spec
+  toggle_wakeup:
+    status: draft
+    en: Toggle wake up mode
+    fr: Activer le mode réveil
+    sources:
+      - spec
+  toggle_drift:
+    status: draft
+    en: Toggle drift mode
+    fr: Activer le mode dérive
+    sources:
+      - spec

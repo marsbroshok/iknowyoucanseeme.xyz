@@ -16,7 +16,24 @@
 | pages/ui.yaml | blocks.wakeup | draft | Wake up | Se réveiller | spec |
 | pages/ui.yaml | blocks.drift | draft | Drift | Dériver | spec |
 | pages/ui.yaml | blocks.contact | draft | Contact for availability | Disponibilité sur demande | spec |
-| territories/dreamland.yaml | statement | draft | A journey is traditionally defined as a cycle whose final step is the return home. But as someone who has changed countries, I found myself adrift from the classic story of voyage and return. This work is born from that experience. It proposes that our most constant home is not a physical place, but the internal landscape of the dream. This inner world is a resonant space with a permeable boundary. As memory and present experience merge, the concept of 'home' evolves. The journey explored here is not of departure and return, but of this quiet, continuous transformation. | Un voyage est souvent vu comme un cycle dont l'étape finale est le retour chez soi. Mais ayant changé de pays, je me suis éloigné de cette histoire classique. Ce travail est né de cette expérience : notre véritable maison n'est pas un lieu physique, mais le paysage intérieur du rêve. Ce monde intérieur a une frontière perméable. Au fur et à mesure que la mémoire et le présent se mélangent, l'idée de maison évolue. Le voyage exploré ici n'est pas un départ ou un retour, mais une transformation silencieuse et continue. | exhibition_statement_2026 |
+| pages/ui.yaml | blocks.form_name | draft | Name | Nom | spec |
+| pages/ui.yaml | blocks.form_email | draft | Email | Email | spec |
+| pages/ui.yaml | blocks.form_message | draft | Message | Message | spec |
+| pages/ui.yaml | blocks.form_send | draft | Send | Envoyer | spec |
+| pages/ui.yaml | blocks.form_success | draft | Message sent successfully. | Message envoyé avec succès. | spec |
+| pages/ui.yaml | blocks.form_error | draft | An error occurred. Please try again. | Une erreur est survenue. Veuillez réessayer. | spec |
+| pages/ui.yaml | blocks.form_required_hint | draft | Required field | Champ obligatoire | spec |
+| pages/ui.yaml | blocks.form_honeypot | draft | Leave this field empty | Laissez ce champ vide | spec |
+| pages/ui.yaml | blocks.lang_switch | draft | Switch language | Changer de langue | spec |
+| pages/ui.yaml | blocks.sound_mute | draft | Mute sound | Couper le son | spec |
+| pages/ui.yaml | blocks.sound_unmute | draft | Unmute sound | Activer le son | spec |
+| pages/ui.yaml | blocks.dialog_close | draft | Close dialog | Fermer la boîte de dialogue | spec |
+| pages/ui.yaml | blocks.work_prev | draft | Previous work | Œuvre précédente | spec |
+| pages/ui.yaml | blocks.work_next | draft | Next work | Œuvre suivante | spec |
+| pages/ui.yaml | blocks.skip_content | draft | Skip to content | Passer au contenu | spec |
+| pages/ui.yaml | blocks.toggle_wakeup | draft | Toggle wake up mode | Activer le mode réveil | spec |
+| pages/ui.yaml | blocks.toggle_drift | draft | Toggle drift mode | Activer le mode dérive | spec |
+| territories/dreamland.yaml | statement | draft | A journey is traditionally defined as a cycle whose final step is the return home. But as someone who has changed countries, I found myself adrift from the classic story of voyage and return. This work is born from that experience. It proposes that our most constant home is not a physical place, but the internal landscape of the dream. This inner world is a resonant space with a permeable boundary. As memory and present experience merge, the concept of 'home' evolves. The journey explored here is not of departure and return, but of this quiet, continuous transformation. | Un voyage est souvent vu comme un cycle dont l'étape finale est le retour chez soi. Mais ayant changé de pays, je me suis éloigné de cette histoire classique. Ce travail est né de cette expérience : notre véritable maison n'est pas un lieu physique, mais le paysage intérieur du rêve. Ce monde intérieur a une frontière perméable. Au fur et à mesure que la mémoire et le présent se mélangent, l'idée de maison évolue. Le voyage exploré ici n'est pas un départ ou un retour, mais une transformation silencieuse et continue. | exhibition_statement_2026 |
 | territories/the-border-is-thin.yaml | statement | draft | There is a border between these worlds. If you point the camera in the right direction and apply some pressure, it becomes thin and reveals what is out there. | Il y a une frontière entre ces mondes. Mais si vous dirigez l'appareil photo dans la bonne direction, elle s'affine et révèle ce qui se cache de l'autre côté. | cygne-icm-1, eclipse-miroir-9 |
 | works/arrivee.yaml | fragment | draft | The moment of return. | Le moment du retour. | arrivee, exhibition_statement_2025_p1 |
 | works/cygne-icm-1.yaml | fragment | draft | A border between worlds. | Une frontière entre les mondes. | cygne-icm-1, caption_1 |
