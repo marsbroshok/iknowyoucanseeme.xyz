@@ -5,28 +5,20 @@ title:
 blocks:
   bio:
     status: draft
-    en: I am an artist, photographer and ceramic maker living in France. Having left
-      my home country, my work often explores the search for home and how it
-      evolves.
-    fr: Je suis artiste, photographe et céramiste vivant en France. Ayant quitté mon
-      pays natal, mon travail explore souvent la recherche d'un chez-soi et son
-      évolution.
+    en: I am an artist, photographer and ceramic artist living in France. I left my country. Since then I ask myself what home is.
+    fr: Je suis artiste, photographe et artiste céramiste vivant en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi.
     sources:
       - product_guidelines
       - exhibition_statement
   origin:
     status: draft
-    en: This project began in December 2019 at the exhibition 'L'Emprunt, la
-      Citation' (MPAA) with AI colourisation experiments.
-    fr: Ce projet a commencé en décembre 2019 lors de l'exposition 'L'Emprunt, la
-      Citation' (MPAA) avec des expériences de colorisation par IA.
+    en: This project began in 2019. I gave black and white portraits to an AI. It hallucinated colours and showed its biases. The name iknowyoucanseeme comes from there.
+    fr: Ce projet a commencé en 2019. J'ai donné des portraits en noir et blanc à une IA. Elle a halluciné des couleurs et montré ses biais. Le nom iknowyoucanseeme vient de là.
     sources:
       - origin-2019.yaml
   exhibitions:
     status: draft
-    en: Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland
-      (2026).
-    fr: Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et
-      Dreamland (2026).
+    en: Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland (Atelier 51, 16–30 Oct 2025).
+    fr: Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et Dreamland (Atelier 51, 16–30 oct. 2025).
     sources:
       - product_guidelines
