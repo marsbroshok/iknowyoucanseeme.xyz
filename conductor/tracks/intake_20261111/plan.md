@@ -59,7 +59,7 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
 
 ## Phase 5: Generation & CLI
 
-- [ ] Task: `ContentGenerator`
+- [x] Task: `ContentGenerator`
     - [ ] Red: kept entries → schema-valid `src/content/{works,territories,zones,exhibitions}/*.yaml`; dropped entries absent; source notes carry the original caption and date; exhibitions MPAA 2019 + Atelier 51 2025; `sources/origin-2019.yaml` written
     - [ ] Red: originals swap: `intake/originals/<slug>.*` or `<slug>-<n>.*` replaces the Instagram source and sets `source: original`
     - [ ] Red: idempotency: two runs → byte-identical output
@@ -69,7 +69,7 @@ Every task follows Red → Green → Refactor, commits per task (Conventional Co
     - [ ] Green: implement with `node:util.parseArgs`
 - [ ] Task: Guard test against forbidden committed content
     - [ ] Red/Green: test scanning `src/content/**` and `src/assets/**`: no `€`, no price keys, no files > 2400 px, no EXIF GPS, nothing under `intake/`
-- [ ] Task: Real-data run (no new code)
+- [x] Task: Real-data run (no new code)
     - [ ] Run `catalogue` → `propose` on the real export; pre-fill `selection.yaml` (catalogue matches keep=true; territory-2 all keep=true; Leak portraits keep=true with consent confirmed; clay creatures keep=true)
     - [ ] Run `generate`; commit generated content and web masters; record match confidence and doubtful matches in the track report for the artist's morning review
 - [ ] Task: Docs: README "Content intake" section (prerequisites, folders, propose → edit → generate loop, originals swap)
