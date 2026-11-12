@@ -27,3 +27,11 @@ Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 - [ ] Task: Bundle-size test (≤ 250 KB gz) + Playwright SwiftShader smoke + reduced-motion e2e + axe with world mounted
 - [ ] Task: Performance trace script and `docs/perf.md` with measured numbers
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Inherited Findings
+
+From `launch_20261111` review (non-blocking; do them as the first small task):
+
+- [ ] Task: `tests/catalogueReader.test.ts` leaves empty `out_dir4/5/7` folders in the working directory; write them under `os.tmpdir()` and clean up.
+- [ ] Task: `src/content/copy/pages/legal.yaml` states cookieless analytics are used even when `PUBLIC_GOATCOUNTER_CODE` is unset; make the wording conditional (render the analytics sentence only when analytics is enabled), EN + FR, CopyGuard/LanguageGuard green.
+- Note (no action now): `qrcode` pinned to 1.4.1 because the local npm proxy lacks 1.5.x; upgrade when available.
