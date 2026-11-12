@@ -520,6 +520,21 @@ describe('bootDrift — exhibition mode (?kiosk=1, FR5)', () => {
     expect(world.mounts).toHaveLength(2);
   });
 
+  it('ignores ?w= on open and when resetting from "Wake up" back to the start of the path', async () => {
+    vi.useFakeTimers();
+    history.replaceState(null, '', '/en/?kiosk=1&w=arrivee');
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(world.mounts[0].startSlug).toBeNull();
+    history.replaceState(null, '', '/en/?kiosk=1&w=cygne-icm-1');
+    $('[data-drift-wake]').dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    $('[data-drift-wake]').click();
+    await vi.advanceTimersByTimeAsync(KIOSK.idleResetMs);
+    expect(world.mounts).toHaveLength(2);
+    expect(world.mounts[1].startSlug).toBeNull();
+  });
+
   it('ignores the timers while the world is still loading', async () => {
     vi.useFakeTimers();
     let release: (m: WorldModule) => void = () => undefined;

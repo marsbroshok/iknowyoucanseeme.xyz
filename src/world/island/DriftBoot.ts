@@ -73,11 +73,12 @@ export interface DriftBootHandle {
  * through `loadSound` only then, and is fed by the world each frame. While
  * sound is on (not muted) the short threshold also waits for a click.
  *
- * With `?kiosk=1` (exhibition mode, FR5) the world opens without the
- * threshold and without a gesture, whatever was stored; a {@link KioskMode}
- * takes the links out of the page, hands the first tap to the sound as its
- * gesture, drifts on by itself and resets after 90 s without input (back
- * into the world from the awake page too); "Wake up" is not remembered.
+ * With `?kiosk=1` (exhibition mode, FR5) the world opens at the start of
+ * the path (`?w=` is ignored), without the threshold and without a gesture,
+ * whatever was stored; a {@link KioskMode} takes the links out of the page,
+ * hands the first tap to the sound as its gesture, drifts on by itself and
+ * resets after 90 s without input (back into the world from the awake page
+ * too); "Wake up" is not remembered.
  *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
@@ -142,7 +143,7 @@ export function bootDrift(
       sound?.entered(detail);
       root.dispatchEvent(new CustomEvent<EnteredDetail>('entered', { bubbles: true, detail }));
     };
-    const deepLink = (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
+    const deepLink = !kiosk && (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
     const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: sound !== null && !sound.muted }, entered), win);
     threshold = overlay;
     layer.show();
@@ -154,7 +155,7 @@ export function bootDrift(
     load()
       .then((module) => {
         const manifest = readManifest(doc);
-        const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
+        const startSlug = kiosk ? null : DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
         return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk });
       })
       .then(

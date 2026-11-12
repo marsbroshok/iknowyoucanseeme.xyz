@@ -239,7 +239,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     metrics.frame(f.nearest, f.nearestDistance, dt);
     leakRecorder.frame(dt, threshold.holding, f.nearest ? { color: work(f.nearest).color, distance: f.nearestDistance } : null);
     if (f.plan) streamer.update(f.plan);
-    if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
+    if (f.settled && !kiosk) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
     if (f.compass) {
       compass.update(f.compass);
       if (f.nearest) list.setEntry(f.nearest);

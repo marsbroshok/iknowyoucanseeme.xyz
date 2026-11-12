@@ -16,6 +16,7 @@ interface Debug {
   frames: number;
   pose: { x: number; z: number; yaw: number };
   facing: string | null;
+  fragment: { id: string; opacity: number } | null;
   threshold: { holding: boolean; visible: boolean };
   sound: { state: string } | null;
 }
@@ -29,6 +30,18 @@ async function worldReady(page: Page): Promise<void> {
 async function frames(page: Page, n: number): Promise<void> {
   const start = (await debug(page))?.frames ?? 0;
   await page.waitForFunction((target) => ((window as unknown as { __driftDebug: { frames: number } }).__driftDebug.frames ?? 0) >= target, start + n, { timeout: 15_000 });
+}
+
+/**
+ * Jumps the fake clock without racing Playwright's live real-time tick loop
+ * (an in-flight `_runTo` resuming after `fastForward` otherwise rewinds ticks).
+ */
+async function jumpClock(page: Page, ms: number): Promise<void> {
+  const lead = 250;
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + lead);
+  await new Promise((r) => setTimeout(r, 25));
+  await page.clock.fastForward(ms - lead);
+  await page.clock.resume();
 }
 
 /** Opens the work in front through the keyboard work list (real buttons). */
@@ -78,17 +91,17 @@ test.describe('Exhibition mode (?kiosk=1)', () => {
     await openFirstWork(page);
     await page.mouse.move(400, 300);
     await expect(page.locator('html')).not.toHaveClass(/kiosk-idle/);
-    await page.clock.fastForward(KIOSK.cursorHideMs + 1_000);
+    await jumpClock(page, KIOSK.cursorHideMs + 1_000);
     await expect(page.locator('html')).toHaveClass(/kiosk-idle/);
     await expect(page.locator('[data-drift-focus]')).toBeVisible();
-    await page.clock.fastForward(KIOSK.idleResetMs);
+    await jumpClock(page, KIOSK.idleResetMs);
     await expect(page.locator('[data-drift-focus]')).toBeHidden();
     await frames(page, 2);
     const pose = (await debug(page))?.pose;
     expect(pose?.x).toBeCloseTo(start?.x as number, 1);
     expect(pose?.z).toBeCloseTo(start?.z as number, 1);
     await page.mouse.move(420, 320);
-    await page.clock.fastForward(KIOSK_TICK);
+    await jumpClock(page, KIOSK_TICK);
     await expect(page.locator('html')).not.toHaveClass(/kiosk-idle/);
   });
 
@@ -97,7 +110,7 @@ test.describe('Exhibition mode (?kiosk=1)', () => {
     await page.goto(`${KEYED}/en/?kiosk=1`);
     await worldReady(page);
     const start = (await debug(page))?.pose;
-    await page.clock.fastForward(KIOSK.autoDriftAfterMs + 1_000);
+    await jumpClock(page, KIOSK.autoDriftAfterMs + 1_000);
     // The glide runs frame by frame: wait for frames, not for time.
     await expect.poll(async () => {
       await frames(page, 5);
@@ -112,9 +125,46 @@ test.describe('Exhibition mode (?kiosk=1)', () => {
     await worldReady(page);
     await page.locator('[data-drift-wake]').click();
     await expect(page.locator('[data-drift]')).toBeHidden();
-    await page.clock.fastForward(KIOSK.idleResetMs + 1_000);
+    await jumpClock(page, KIOSK.idleResetMs + 1_000);
     await expect(page.locator('[data-drift]')).toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem('iknowyoucanseeme:mode'))).toBeNull();
+  });
+
+  test('ignores ?w= in the address and starts at the beginning of the path', async ({ page }) => {
+    await page.goto(`${KEYED}/en/?kiosk=1`);
+    await worldReady(page);
+    const start = (await debug(page))?.pose;
+
+    await page.goto(`${KEYED}/en/?kiosk=1&w=venise-portrait-5`);
+    await worldReady(page);
+    const state = await debug(page);
+    expect(state?.facing).toBeNull();
+    expect(state?.pose.x).toBeCloseTo(start?.x as number, 1);
+    expect(state?.pose.z).toBeCloseTo(start?.z as number, 1);
+  });
+
+  test('never writes ?w= when settling, and "Wake up" after settling resets to the start after 90 s (fake clock)', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.clock.install();
+    await page.goto(`${KEYED}/en/?kiosk=1`);
+    await worldReady(page);
+    const start = (await debug(page))?.pose;
+
+    await jumpClock(page, KIOSK.autoDriftAfterMs + 500);
+    await expect.poll(async () => (await debug(page))?.fragment?.id ?? null, { timeout: 30_000 }).not.toBeNull();
+    const settled = (await debug(page))?.pose;
+    expect(Math.hypot((settled?.x ?? 0) - (start?.x ?? 0), (settled?.z ?? 0) - (start?.z ?? 0))).toBeGreaterThan(5);
+    expect(new URL(page.url()).searchParams.get('w')).toBeNull();
+
+    await page.locator('[data-drift-wake]').click();
+    await expect(page.locator('[data-drift]')).toBeHidden();
+    await page.evaluate(() => delete (window as { __driftDebug?: unknown }).__driftDebug);
+    await jumpClock(page, KIOSK.idleResetMs + 1_000);
+    await expect(page.locator('[data-drift]')).toBeVisible();
+    await worldReady(page);
+    const resetPose = (await debug(page))?.pose;
+    expect(resetPose?.x).toBeCloseTo(start?.x as number, 1);
+    expect(resetPose?.z).toBeCloseTo(start?.z as number, 1);
   });
 });
 
