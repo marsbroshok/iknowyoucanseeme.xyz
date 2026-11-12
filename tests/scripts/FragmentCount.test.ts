@@ -52,6 +52,18 @@ describe('showFragmentCount', () => {
     expect($('[data-fragments-found]').hidden).toBe(true);
   });
 
+  it('fails closed (shows nothing, with a warning) when the build-time ids are not a list of strings', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    for (const bad of ['{nope', '"work:a"', '{"0":"work:a"}', '[1, 2]', '["work:a", null]', 'null']) {
+      document.body.innerHTML = `<p data-fragments-found data-ids='${bad}' data-template="{n} / {total}" hidden></p>`;
+      expect(showFragmentCount(document, { localStorage: new MemoryStorage() }), bad).toBe(false);
+      expect($('[data-fragments-found]').hidden).toBe(true);
+      expect($('[data-fragments-found]').textContent).toBe('');
+    }
+    expect(warn).toHaveBeenCalledTimes(6);
+    warn.mockRestore();
+  });
+
   it('reports a counter without its ids or text', () => {
     document.body.innerHTML = '<p data-fragments-found data-ids="[]" hidden></p>';
     expect(() => showFragmentCount(document, { localStorage: new MemoryStorage() })).toThrow('[fragments] [data-fragments-found] needs data-ids and data-template');

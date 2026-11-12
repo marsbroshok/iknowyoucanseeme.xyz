@@ -7,7 +7,10 @@ import zlib from 'node:zlib';
  * Bundle budget of the drift world (spec NFR, ADR 0007): the home pages load
  * one small boot module; Three.js arrives only through its dynamic import,
  * and that world chunk (with its static imports) stays within 250 KB gzipped.
- * The test-only debug hook must not exist in the production build.
+ * Tone.js (sound track, ADR 0011) is in neither: it arrives only through
+ * the boot's second dynamic import, the sound chunk, loaded after the
+ * visitor's gesture. The test-only debug hook must not exist in the
+ * production build.
  */
 const DIST = path.resolve('dist');
 const KEYED = path.resolve('dist-e2e-keyed');
@@ -15,6 +18,9 @@ const ASTRO = (root: string) => path.join(root, '_astro');
 
 /** Gzipped size budget of the world chunk and its static imports. */
 const WORLD_BUDGET_GZ = 250 * 1024;
+/** Tone.js's console banner, present in its bundled code. */
+const TONE = /Tone\.js v/;
+
 /** Gzipped size budget of the boot module (and its static imports). */
 const BOOT_BUDGET_GZ = 8 * 1024;
 
@@ -53,21 +59,31 @@ const sum = (root: string, files: Iterable<string>) => [...files].reduce((total,
 
 test.describe('Drift world bundle (dist/)', () => {
   for (const home of ['en/index.html', 'fr/index.html']) {
-    test(`${home}: a small boot module without Three.js; the world chunk ≤ 250 KB gzipped, loaded only by dynamic import`, () => {
+    test(`${home}: a small boot module without Three.js or Tone.js; the world chunk ≤ 250 KB gzipped without Tone.js; Tone.js only in the sound chunk; both loaded only by dynamic import`, () => {
       const scripts = moduleScripts(fs.readFileSync(path.join(DIST, home), 'utf8'));
       expect(scripts).toHaveLength(1);
       const boot = closure(DIST, scripts[0]);
       const bootSize = sum(DIST, boot);
       expect(bootSize).toBeLessThanOrEqual(BOOT_BUDGET_GZ);
-      for (const f of boot) expect(read(DIST, f), f).not.toMatch(/THREE\./);
+      for (const f of boot) {
+        expect(read(DIST, f), f).not.toMatch(/THREE\./);
+        expect(read(DIST, f), f).not.toMatch(TONE);
+      }
 
-      const worlds = [...boot].flatMap((f) => dynamicImports(read(DIST, f)));
-      expect(worlds).toHaveLength(1);
-      const world = [...closure(DIST, worlds[0])].filter((f) => !boot.has(f));
+      const lazy = [...boot].flatMap((f) => dynamicImports(read(DIST, f)));
+      expect(lazy).toHaveLength(2);
+      const chunks = lazy.map((entry) => [...closure(DIST, entry)].filter((f) => !boot.has(f)));
+      const has = (files: string[], marker: RegExp) => files.some((f) => marker.test(read(DIST, f)));
+      const world = chunks.find((files) => has(files, /THREE\./)) as string[];
+      const sound = chunks.find((files) => has(files, TONE)) as string[];
+      expect(world).toBeDefined();
+      expect(sound).toBeDefined();
+      expect(has(world, TONE)).toBe(false);
+      expect(has(sound, /THREE\./)).toBe(false);
       const worldSize = sum(DIST, world);
-      expect(world.some((f) => /THREE\./.test(read(DIST, f)))).toBe(true);
       expect(worldSize).toBeLessThanOrEqual(WORLD_BUDGET_GZ);
-      console.log(`[bundle] ${home}: boot ${(bootSize / 1024).toFixed(1)} KB gz, world ${(worldSize / 1024).toFixed(1)} KB gz`);
+      const soundSize = sum(DIST, sound);
+      console.log(`[bundle] ${home}: boot ${(bootSize / 1024).toFixed(1)} KB gz, world ${(worldSize / 1024).toFixed(1)} KB gz, sound ${(soundSize / 1024).toFixed(1)} KB gz`);
     });
   }
 

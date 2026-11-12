@@ -1,7 +1,8 @@
 ---
 /**
  * The drift world layer of the home page (progressive enhancement): the
- * canvas, the always-visible "Wake up" control, help text (and the lens
+ * canvas, the always-visible "Wake up" control and mute toggle (sound,
+ * docs/adr/0011: Tone.js is imported only after the visitor's gesture), help text (and the lens
  * caption, a live region naming the lens in use), the horizon
  * compass, the keyboard work list, the focus dialog, the threshold (the
  * gaze line, the breathing leak's canvas and Enter), the world's text (gaze
@@ -33,6 +34,7 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
 <section class="drift" data-drift hidden tabindex="-1" aria-label={ui.t('drift_layer_label')}>
   <canvas class="drift-canvas" data-drift-canvas aria-hidden="true"></canvas>
   <div class="drift-top">
+    <button type="button" class="drift-sound" data-sound-toggle data-label-mute={ui.t('sound_mute')} data-label-unmute={ui.t('sound_unmute')}>{ui.t('sound_mute')}</button>
     <button type="button" class="drift-wake" data-drift-wake>{ui.t('wakeup')}</button>
     <button type="button" class="drift-tilt" data-drift-tilt hidden>{ui.t('drift_tilt')}</button>
   </div>
@@ -64,7 +66,14 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
 
 <script>
   import { bootDrift } from '../world/island/DriftBoot.js';
-  bootDrift(document, window, () => import('../world/gl/DriftWorld.js'));
+  bootDrift(
+    document,
+    window,
+    () => import('../world/gl/DriftWorld.js'),
+    undefined,
+    undefined,
+    () => import('../sound/engine/createSoundEngine.js'),
+  );
 </script>
 
 <style is:global>

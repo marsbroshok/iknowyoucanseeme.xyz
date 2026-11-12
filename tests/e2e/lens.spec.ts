@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import sharp from 'sharp';
+import { soundOff } from './soundOff.js';
 
 /**
  * The lens in the running world (keyed build, `window.__driftDebug`): it
@@ -21,6 +22,7 @@ const lensState = (page: Page) => page.evaluate(() => (window as unknown as { __
 
 /** Opens the world in front of a work and waits for its image. */
 async function inFrontOf(page: Page, slug: string): Promise<void> {
+  await soundOff(page);
   await page.goto(`${KEYED}/en/?w=${slug}`);
   await page.waitForFunction((s) => (window as unknown as { __driftDebug?: { loaded: Record<string, string> } }).__driftDebug?.loaded[s] !== undefined, slug, { timeout: 15_000 });
 }

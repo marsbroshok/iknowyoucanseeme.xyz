@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import { soundOff } from './soundOff.js';
 
 /**
  * The drift world in Chromium (WebGL2 on the GPU, or SwiftShader): it
@@ -52,6 +53,8 @@ async function recordAnalytics(page: Page): Promise<void> {
 }
 
 test.describe('Drift world', () => {
+  test.beforeEach(({ page }) => soundOff(page));
+
   test('mounts over the awake home after first paint and renders (canvas not blank)', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto(`${KEYED}/en/?w=arrivee`);
@@ -110,6 +113,8 @@ test.describe('Drift world', () => {
     await page.goto(`${KEYED}/en/?w=arrivee`);
     await worldReady(page);
     const historyLength = await page.evaluate(() => history.length);
+    // Mute toggle, Wake up, then the nearest work.
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => (document.activeElement as HTMLElement).dataset.slug ?? null);
@@ -198,6 +203,8 @@ test.describe('Drift world', () => {
   test('keyboard: Tab reaches the nearest work, Enter opens it', async ({ page }) => {
     await page.goto(`${KEYED}/en/?w=solitude`);
     await worldReady(page);
+    // Mute toggle, Wake up, then the nearest work.
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await expect(page.locator('[data-drift-works] button:focus')).toBeVisible();

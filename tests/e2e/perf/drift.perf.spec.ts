@@ -1,6 +1,7 @@
 import { test, expect, devices, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { soundOff } from '../soundOff.js';
 
 /**
  * Frame-rate trace of the drift world: drifts for a fixed time with steady
@@ -63,6 +64,7 @@ async function measure(page: Page): Promise<FrameStats> {
 
 /** Drifts in front of a work with the lens on it: the pointer circles over the work and L goes through every lens. */
 async function measureLens(page: Page, hold: (at: { x: number; y: number }) => Promise<unknown>, move: (at: { x: number; y: number }) => Promise<unknown>): Promise<FrameStats & { lensFrames: number }> {
+  await soundOff(page);
   await page.goto(`${KEYED}/en/?w=arrivee`);
   await page.waitForFunction(() => (window as unknown as { __driftDebug?: { loaded: Record<string, string> } }).__driftDebug?.loaded.arrivee !== undefined, null, { timeout: 30_000 });
   const box = await page.locator('[data-drift-canvas]').boundingBox();

@@ -1,4 +1,5 @@
 import { test, expect, devices, type Page, type CDPSession, type Browser } from '@playwright/test';
+import { soundOff } from './soundOff.js';
 
 /**
  * The lens on touch screens (FR3, FR4), with real touch events (Chrome
@@ -33,6 +34,7 @@ const touch = (cdp: CDPSession, type: 'touchStart' | 'touchMove' | 'touchEnd', p
 async function touchPage(browser: Browser, options: Parameters<Browser['newContext']>[0]) {
   const context = await browser.newContext(options);
   const page = await context.newPage();
+  await soundOff(page);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`${KEYED}/en/?w=arrivee`);

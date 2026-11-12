@@ -9,9 +9,9 @@ The site has two layers. The **awake layer** is plain, fast HTML for every
 work, territory and exhibition. **The drift** is a Three.js world mounted
 on the home pages `/en/` and `/fr/` on capable devices (see "The drift"
 below), opening on **the threshold**, with **the lens** over the work under
-the pointer, **the gaze** and **fragments** of text near the works; sound
-and the leak come in later tracks, see `conductor/product.md` and
-`conductor/tracks.md`.
+the pointer, **the gaze**, **fragments** of text near the works and
+**sound** (a generative ambience that follows the drift); the leak comes in
+a later track, see `conductor/product.md` and `conductor/tracks.md`.
 
 The former Hugo site is preserved under the git tag `legacy-hugo`.
 
@@ -86,11 +86,24 @@ never removed; while the world is shown it is made `inert`.
   you can see me / Je sais que tu me vois", one slowly breathing colour
   leak (from an Arrival work) and **Enter / Entrer** (focused; Enter or Space
   works). "Wake up / Se réveiller" stays visible above it. Returning
-  visitors (`localStorage`) and deep links get a short threshold that fades
-  in 1 s by itself; "Drift" on the awake page skips it. Entering dispatches
-  a bubbling `entered` event (`detail: { gesture, returning }`) on the world
-  layer for the sound track. Without JavaScript the awake page shows as
-  before.
+  visitors (`localStorage`) and deep links get a short threshold: while
+  sound is on it still waits for Enter (the click unlocks audio); muted, it
+  fades in 1 s by itself. "Drift" on the awake page skips it. Entering
+  dispatches a bubbling `entered` event (`detail: { gesture, returning }`)
+  on the world layer. Without JavaScript the awake page shows as before.
+- Sound: a generative ambience per zone (Arrival: a filtered sea and slow
+  drones; Lens: brighter, with glints as works approach; Leak: a low dry
+  pulse and a faint hum; the border is thin: wind, slow bends and a low
+  swell near the eclipse works), crossfading over 2 s as the camera moves.
+  Nothing audio exists before a gesture (Enter, Drift, or unmuting): Tone.js
+  is loaded only then, in its own chunk. **Mute sound / Couper le son**
+  stays visible next to "Wake up" and is remembered in `localStorage`; a
+  hidden tab, "Wake up" or mute suspend the audio; the level never goes
+  above −12 dBFS. Optional field recordings are listed in
+  `public/audio/manifest.json` (shipped empty: `{ "zones": {} }`; add
+  `{ "zones": { "arrival": [{ "src": "/audio/sea.ogg", "gain": 0.6 }] } }`
+  with the files under `public/audio/`); they stream only while their zone
+  is heard. Design notes: `docs/adr/0011-tone-js-behind-sound-engine.md`.
 - Gaze: after the pointer stays on a work for more than 2 s, it turns
   slightly toward it. After 3 minutes of drifting, the line may surface once
   in the fog (at most once per tab session, `sessionStorage`).
@@ -121,8 +134,11 @@ never removed; while the world is shown it is made `inert`.
   `tests/visual/` (`docs/adr/0008-lens-techniques-and-shader-harness.md`);
   refresh them after a deliberate change with
   `npx playwright test tests/e2e/lens.visual.spec.ts --update-snapshots`.
-- Code: pure logic in `src/world/core/`, DOM in `src/world/island/`, GPU code
-  only in `src/world/gl/` (verified by Playwright, see
+- Code: pure logic in `src/world/core/` and `src/sound/core/`, DOM in
+  `src/world/island/` and `src/sound/island/`, Tone.js only in
+  `src/sound/engine/` (unit-tested in Node with `node-web-audio-api` and
+  `Tone.Offline`; on Linux `npm run check` needs the ALSA library,
+  `libasound2`), GPU code only in `src/world/gl/` (verified by Playwright, see
   `docs/adr/0006-webgl-code-verified-in-browser.md`; module scripts on the
   home pages: `docs/adr/0007-home-pages-load-world-modules.md`).
 - Test-only flag: building with `PUBLIC_DRIFT_DEBUG=true` exposes read-only

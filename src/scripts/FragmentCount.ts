@@ -19,7 +19,8 @@ export interface FragmentCountWindow {
  * territory's fragment ids in `data-ids` and the text in `data-template`
  * with `{n}` and `{total}`) is rendered hidden and shown only here, with
  * the count of fragments read in the world (localStorage). Without
- * JavaScript, without fragments, or with storage blocked, it stays hidden;
+ * JavaScript, without fragments, with storage blocked, or with malformed
+ * build-time ids (fails closed, with a warning), it stays hidden;
  * an unreadable stored value counts as nothing read (with a warning, the
  * world replaces it on the next fragment).
  *
@@ -33,8 +34,8 @@ export function showFragmentCount(doc: Document, win: FragmentCountWindow): bool
   if (!el) return false;
   const { ids: rawIds, template } = el.dataset;
   if (rawIds === undefined || template === undefined) throw new Error('[fragments] [data-fragments-found] needs data-ids and data-template');
-  const ids = JSON.parse(rawIds) as string[];
-  if (ids.length === 0) return false;
+  const ids = stringList(rawIds, 'The territory fragment ids (data-ids)');
+  if (ids === null || ids.length === 0) return false;
   let raw: string | null;
   try {
     raw = win.localStorage.getItem(FRAGMENTS_KEY);
@@ -42,7 +43,7 @@ export function showFragmentCount(doc: Document, win: FragmentCountWindow): bool
     console.warn('[fragments] localStorage is blocked; the fragments found are not shown.', error);
     return false;
   }
-  const found = new Set(readIds(raw));
+  const found = new Set(raw === null ? [] : (stringList(raw, 'The stored fragment progress') ?? []));
   const n = ids.filter((id) => found.has(id)).length;
   el.textContent = template.replace('{n}', String(n)).replace('{total}', String(ids.length));
   el.hidden = false;
@@ -50,19 +51,21 @@ export function showFragmentCount(doc: Document, win: FragmentCountWindow): bool
 }
 
 /**
- * The stored list of fragment ids.
+ * A JSON list of strings, validated.
  *
- * @param raw - Stored JSON, or `null` when nothing was read yet.
- * @returns Ids (empty when none or unreadable, with a warning).
+ * @param raw - JSON text.
+ * @param what - What the text is, for the warning.
+ * @returns The strings, or `null` (with a warning) when the text is not valid JSON or not a list of strings.
  */
-function readIds(raw: string | null): string[] {
-  if (raw === null) return [];
+function stringList(raw: string, what: string): string[] | null {
+  let value: unknown;
   try {
-    const value: unknown = JSON.parse(raw);
-    if (Array.isArray(value) && value.every((v) => typeof v === 'string')) return value;
-    console.warn('[fragments] The stored fragment progress is not a list of ids; counting nothing.', value);
+    value = JSON.parse(raw);
   } catch (error) {
-    console.warn('[fragments] The stored fragment progress is not valid JSON; counting nothing.', error);
+    console.warn(`[fragments] ${what} is not valid JSON; counting nothing.`, error);
+    return null;
   }
-  return [];
+  if (Array.isArray(value) && value.every((v) => typeof v === 'string')) return value;
+  console.warn(`[fragments] ${what} is not a list of ids; counting nothing.`, value);
+  return null;
 }
