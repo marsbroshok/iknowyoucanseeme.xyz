@@ -33,3 +33,8 @@ From `drift-world_20261111` review (non-blocking; do first):
 - [x] Task: `ZONE_ORDER` is defined in both `src/domain/WorkQueries` and `src/world/core/FieldLayout`. Single source of truth + test. `128f8b6`
 - Note (artist decision pending, no action): a saved "Drift" choice keeps the world on even with prefers-reduced-motion; current behaviour stays unless the artist decides otherwise.
 - Note (manual, not for agents): real-phone ≥ 40 fps check in `docs/perf.md` is pending.
+
+## Assumptions
+
+- A1 (LensDirector): every work's `techniques[]` is empty today, so "caption techniques" are read at build time from the declared techniques, both titles and the work's own caption notes (`sourceNotes`, the artist's words and hashtags), by whole-word EN/FR matching (`src/world/manifest/TechniqueHints.ts`). Only the keys (`mirror`, `filter`, `icm`, `multiple-exposure`) reach the page. Priority when several match: mirror → filter → ICM → multiple exposure (spec order), so the eclipse works (mirror deflections + ND) get the mirror fold. "Gel" is not a keyword (French for frost).
+- A2 (LensDirector): cycled lenses are remembered per work for the visit only (not stored). The gel is the most colourful palette entry of another work (others in a slug-seeded order, grey palettes skipped; amber `#ff9a3c` if none). Multiple-exposure partners are works of the same zone, or of the same territory for works without a zone; the first partner whose texture is already loaded is used.

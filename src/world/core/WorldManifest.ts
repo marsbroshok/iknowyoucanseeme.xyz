@@ -22,6 +22,10 @@ export interface ManifestWork {
   contactHref: string | null;
   /** Dominant colour (first palette entry). */
   color: string;
+  /** Palette of the first image (CSS hex, dominant first; may be empty), for the lens gels. */
+  palette: string[];
+  /** Technique keys named in the work's texts (`mirror`, `filter`, `icm`, `multiple-exposure`), for the default lens. */
+  techniques: string[];
   /** Low (~480 px), mid (~1200 px) and high (≤ 2400 px) images. */
   images: { low: ManifestImage; mid: ManifestImage; high: ManifestImage };
 }
@@ -67,7 +71,7 @@ function work(input: unknown, path: string, territories: ReadonlySet<string>): M
   const territory = text(w.territory, `${path}.territory`);
   if (!territories.has(territory)) throw new Error(`[manifest] ${path}.territory "${territory}" is not in territories`);
   if (w.zone !== null && !ZONE_ORDER.includes(w.zone as ZoneSlug)) throw new Error(`[manifest] ${path}.zone must be one of ${ZONE_ORDER.join(', ')} or null`);
-  if (typeof w.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(w.color)) throw new Error(`[manifest] ${path}.color must be #rrggbb`);
+  const color = hex(w.color, `${path}.color`);
   const images = object(w.images, `${path}.images`);
   return {
     slug: text(w.slug, `${path}.slug`),
@@ -77,7 +81,9 @@ function work(input: unknown, path: string, territories: ReadonlySet<string>): M
     fragment: w.fragment === null ? null : text(w.fragment, `${path}.fragment`),
     href: link(w.href, `${path}.href`),
     contactHref: w.contactHref === null ? null : link(w.contactHref, `${path}.contactHref`),
-    color: w.color,
+    color,
+    palette: array(w.palette, `${path}.palette`).map((c, i) => hex(c, `${path}.palette[${i}]`)),
+    techniques: array(w.techniques, `${path}.techniques`).map((t, i) => text(t, `${path}.techniques[${i}]`)),
     images: {
       low: picture(images.low, `${path}.images.low`),
       mid: picture(images.mid, `${path}.images.mid`),
@@ -102,6 +108,11 @@ function link(input: unknown, path: string): string {
   const value = text(input, path);
   if (!value.startsWith('/') || value.startsWith('//')) throw new Error(`[manifest] ${path} must be a site-relative path`);
   return value;
+}
+
+function hex(input: unknown, path: string): string {
+  if (typeof input !== 'string' || !/^#[0-9a-f]{6}$/i.test(input)) throw new Error(`[manifest] ${path} must be #rrggbb`);
+  return input;
 }
 
 function text(input: unknown, path: string): string {
