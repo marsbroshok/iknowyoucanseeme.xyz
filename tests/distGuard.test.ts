@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { inspectPage, scriptBytes, jsBudgetFor, isAllowedExternalScript, CONTACT_JS_BUDGET, TERRITORY_JS_BUDGET } from '../src/tools/DistGuard.js';
+import { LEAK_SCRIPT_BUDGET, leakScript } from '../src/leak/LeakScript.js';
 
 const page = (body: string, head = '') => `<!DOCTYPE html><html lang="en"><head>
 <link rel="canonical" href="https://x/en/a/">
@@ -75,7 +76,7 @@ describe('inspectPage: analytics script', () => {
   it('still flags any other external script, and inline code next to GoatCounter', () => {
     const other = '<script async src="https://cdn.example.com/count.js"></script>';
     expect(inspectPage('en/a/index.html', page(goatcounter + other)).map((x) => x.detail)).toEqual([
-      'inline 0 B (budget 0 B), external https://cdn.example.com/count.js',
+      'inline 0 B (budget 0 B), leak script 0 B (budget 1536 B), external https://cdn.example.com/count.js',
     ]);
     expect(inspectPage('en/a/index.html', page(`${goatcounter}<script>track()</script>`)).map((x) => x.rule)).toEqual(['js-budget']);
   });
@@ -86,7 +87,7 @@ describe('scriptBytes', () => {
     const html =
       '<script type="application/ld+json">{"a":1}</script><script type="application/json" id="t">{}</script>' +
       '<script>abc</script><script type="module">de</script><script src="/x.js"></script>';
-    expect(scriptBytes(html)).toEqual({ inlineBytes: 5, external: ['/x.js'] });
+    expect(scriptBytes(html)).toEqual({ inlineBytes: 5, leakBytes: 0, external: ['/x.js'] });
   });
 });
 
@@ -131,5 +132,26 @@ describe('inspectPage: drift world modules (ADR 0007)', () => {
   it('keeps the home pages\' inline budget at zero', () => {
     expect(jsBudgetFor('en/index.html')).toBe(0);
     expect(inspectPage('en/index.html', page(`${boot}<script>x()</script>`)).map((v) => v.rule)).toEqual(['js-budget']);
+  });
+});
+
+describe('inspectPage: the leak script (leak track)', () => {
+  const leak = `<script>${leakScript()}</script>`;
+
+  it('counts the exact leak script on its own budget, on top of every page budget', () => {
+    expect(scriptBytes(page(leak))).toEqual({ inlineBytes: 0, leakBytes: Buffer.byteLength(leakScript()), external: [] });
+    expect(inspectPage('en/works/arrivee/index.html', page(leak))).toEqual([]);
+    expect(inspectPage('fr/index.html', page(leak))).toEqual([]);
+    expect(inspectPage('en/contact/index.html', page(leak + '<script>' + 'x'.repeat(CONTACT_JS_BUDGET) + '</script>'))).toEqual([]);
+  });
+
+  it('treats any other inline code as before, even next to the leak script or looking like it', () => {
+    expect(inspectPage('en/works/arrivee/index.html', page(`${leak}<script>x()</script>`)).map((v) => v.rule)).toEqual(['js-budget']);
+    expect(inspectPage('en/works/arrivee/index.html', page(`<script>${leakScript()};x()</script>`)).map((v) => v.rule)).toEqual(['js-budget']);
+  });
+
+  it('flags a page that carries the leak script twice (over its 1.5 KB budget)', () => {
+    expect(LEAK_SCRIPT_BUDGET).toBe(1536);
+    expect(inspectPage('en/about/index.html', page(leak + leak)).map((v) => v.rule)).toEqual(['js-budget']);
   });
 });

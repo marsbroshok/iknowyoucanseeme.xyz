@@ -1,4 +1,5 @@
 import { GOATCOUNTER_SCRIPT_SRC } from '../analytics/AnalyticsConfig.js';
+import { LEAK_SCRIPT_BUDGET, leakScript } from '../leak/LeakScript.js';
 
 /** One rule broken by a built page. */
 export interface GuardViolation {
@@ -44,24 +45,31 @@ export function isAllowedExternalScript(file: string, src: string): boolean {
 /** Price-like content: a currency sign/code, or the words price/prix/tarif. */
 const PRICE_PATTERNS: readonly RegExp[] = [/€/, /\bEUR\b/, /\$\s?\d/, /\bprices?\b/i, /\bprix\b/i, /\btarifs?\b/i];
 
+/** The leak's inline script (exact source), counted on its own budget. */
+const LEAK_SOURCE = leakScript();
+
 /**
  * Executable JavaScript of a page: inline bytes and external script URLs.
  * JSON data blocks (`application/ld+json`, `application/json`) are ignored.
+ * An inline script that is exactly the leak script (`LeakScript`) is
+ * counted apart, in `leakBytes`; anything else, even similar, is inline.
  *
  * @param html - Page HTML.
- * @returns Inline byte count and external sources.
+ * @returns Inline byte count, leak script bytes and external sources.
  */
-export function scriptBytes(html: string): { inlineBytes: number; external: string[] } {
+export function scriptBytes(html: string): { inlineBytes: number; leakBytes: number; external: string[] } {
   let inlineBytes = 0;
+  let leakBytes = 0;
   const external: string[] = [];
   for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
     const attrs = match[1];
     if (/type="application\/(ld\+)?json"/i.test(attrs)) continue;
     const src = /\bsrc="([^"]+)"/i.exec(attrs);
     if (src) external.push(src[1]);
+    else if (match[2] === LEAK_SOURCE) leakBytes += Buffer.byteLength(match[2], 'utf8');
     else inlineBytes += Buffer.byteLength(match[2], 'utf8');
   }
-  return { inlineBytes, external };
+  return { inlineBytes, leakBytes, external };
 }
 
 /**
@@ -83,8 +91,9 @@ export function jsBudgetFor(file: string): number {
  * Checks one built HTML page: no price content, `<html lang>`, and (for
  * localized pages) exactly one canonical plus EN/FR/x-default alternates
  * (redirect pages of old addresses: canonical = refresh target, noindex);
- * JavaScript within the page's budget, never as external files except
- * those allowed by {@link isAllowedExternalScript}.
+ * JavaScript within the page's budget (plus the leak script on its own
+ * 1.5 KB budget), never as external files except those allowed by
+ * {@link isAllowedExternalScript}.
  *
  * @param file - Path relative to the build directory (e.g. `fr/oeuvres/x/index.html`).
  * @param html - Page HTML.
@@ -127,11 +136,15 @@ export function inspectPage(file: string, html: string): GuardViolation[] {
  * @returns All violations.
  */
 function withScriptCheck(file: string, html: string, violations: GuardViolation[]): GuardViolation[] {
-  const { inlineBytes, external: allExternal } = scriptBytes(html);
+  const { inlineBytes, leakBytes, external: allExternal } = scriptBytes(html);
   const external = allExternal.filter((src) => !isAllowedExternalScript(file, src));
   const budget = jsBudgetFor(file);
-  if (external.length > 0 || inlineBytes > budget) {
-    violations.push({ file, rule: 'js-budget', detail: `inline ${inlineBytes} B (budget ${budget} B), external ${external.join(', ') || 'none'}` });
+  if (external.length > 0 || inlineBytes > budget || leakBytes > LEAK_SCRIPT_BUDGET) {
+    violations.push({
+      file,
+      rule: 'js-budget',
+      detail: `inline ${inlineBytes} B (budget ${budget} B), leak script ${leakBytes} B (budget ${LEAK_SCRIPT_BUDGET} B), external ${external.join(', ') || 'none'}`,
+    });
   }
   return violations;
 }

@@ -2,8 +2,11 @@
 /**
  * Page shell for every awake-layer page: `<html lang>`, title/description,
  * canonical + hreflang alternates, Open Graph, optional JSON-LD, header and
- * footer. Ships no JavaScript of its own; adds GoatCounter's async script
- * only when analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`). The `world`
+ * footer. Its only JavaScript is the leak's tiny inline script in the head
+ * (`LeakScript`: dream colour from the drift, "Clear the leak"); adds
+ * GoatCounter's async script only when analytics is enabled
+ * (`PUBLIC_GOATCOUNTER_CODE`). The leak's stray apparition waits, hidden,
+ * at the end of `<main>`. The `world`
  * slot (home page only) holds the drift layer as a direct child of `<body>`.
  */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
@@ -13,6 +16,7 @@ import Footer from './Footer.astro';
 import AnalyticsScript from './AnalyticsScript.astro';
 import { readAnalyticsConfig, type AnalyticsConfig } from '../analytics/AnalyticsConfig.js';
 import { inlineJson } from '../domain/InlineJson.js';
+import { leakScript } from '../leak/LeakScript.js';
 import '../styles/base.css';
 
 interface Props {
@@ -29,6 +33,8 @@ interface Props {
   noindex?: boolean;
   /** Analytics settings; defaults to `PUBLIC_GOATCOUNTER_CODE` of the build. */
   analytics?: AnalyticsConfig;
+  /** Room for the leak's stray apparition in the margins (off on full-width sheets). */
+  apparition?: boolean;
 }
 
 const {
@@ -41,6 +47,7 @@ const {
   jsonLd = [],
   noindex = false,
   analytics = readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE),
+  apparition = true,
 } = Astro.props;
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
 const canonical = canonicalUrl(routeKey, lang, siteUrl, routeParams);
@@ -52,6 +59,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script is:inline set:html={leakScript()} />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
   {noindex && <meta name="robots" content="noindex" />}
@@ -95,6 +103,11 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   <Header lang={lang} currentRouteKey={routeKey} routeParams={routeParams} />
   <main id="main-content">
     <slot />
+    {apparition && (
+      <div class="leak-margin" aria-hidden="true">
+        <img class="leak-apparition" src="/leak/apparition.webp" alt="" width="224" height="224" loading="lazy" decoding="async" />
+      </div>
+    )}
   </main>
   <Footer lang={lang} />
   <slot name="world" />

@@ -19,7 +19,7 @@ const { lang, labels } = Astro.props;
 const ui = uiText(lang);
 const title = ui.t('labels_title');
 ---
-<BaseLayout lang={lang} routeKey="labels" title={title} noindex>
+<BaseLayout lang={lang} routeKey="labels" title={title} noindex apparition={false}>
   <section class="labels-sheet">
     <h1 class="labels-heading">{title}</h1>
     <p class="labels-intro">{ui.t('labels_intro')}</p>

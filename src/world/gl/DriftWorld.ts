@@ -32,6 +32,7 @@ import { modeIndex, type LensMode } from '../core/LensMode.js';
 import type { MountOptions, WorldHandle } from '../island/DriftBoot.js';
 import { SoundScene } from '../../sound/core/SoundScene.js';
 import type { SoundFeed } from '../../sound/core/SoundDirector.js';
+import { LeakRecorder } from '../../leak/LeakRecorder.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
 import { WorkTextureLoader } from './WorkTextureLoader.js';
 import { WorldStage } from './WorldStage.js';
@@ -154,6 +155,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     new FragmentProgress(webStorage(win, 'localStorage')),
   );
   const whisper = new WorldWhisper(root);
+  // The leak (src/leak): drift time and the last work seen, kept locally for the awake pages.
+  const leakRecorder = new LeakRecorder(webStorage(win, 'localStorage'), () => Date.now(), win);
   // The sound hears the camera's zone and what is near (decisions in src/sound/core).
   const soundScene = SoundScene.of(session.layout, manifest.works);
   const above = new Vector3();
@@ -225,6 +228,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     }
     sound?.frame(soundScene.read(f.state), dt);
     metrics.frame(f.nearest, f.nearestDistance, dt);
+    leakRecorder.frame(dt, threshold.holding, f.nearest ? { color: work(f.nearest).color, distance: f.nearestDistance } : null);
     if (f.plan) streamer.update(f.plan);
     if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
     if (f.compass) {
@@ -254,6 +258,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       whisper.fragment(null, false);
       whisper.gaze(0, false);
       metrics.finish();
+      leakRecorder.flush();
+      leakRecorder.detach();
       stage.dispose();
       streamer.dispose();
       for (const mesh of meshes.values()) mesh.dispose();
