@@ -102,7 +102,8 @@ export function bootDrift(
   if (sound) {
     const toggle = root.querySelector<HTMLButtonElement>('[data-sound-toggle]');
     if (!toggle) throw new Error('[drift] Missing [data-sound-toggle] in the world layer');
-    new SoundControls(toggle, sound, doc);
+    // A mute change while a short threshold is up changes whether it waits for Enter.
+    new SoundControls(toggle, sound, doc, (muted) => threshold?.soundChanged(!muted));
   }
 
   const showStarts = (visible: boolean) => starts.forEach((b) => (b.hidden = !visible));

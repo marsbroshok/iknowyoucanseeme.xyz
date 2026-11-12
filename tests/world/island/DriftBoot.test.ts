@@ -387,6 +387,49 @@ describe('bootDrift — the sound (docs/adr/0011)', () => {
     expect(localStorage.getItem(SoundPreference.KEY)).toBe('on');
   });
 
+  it('muting while a returning visitor\'s short threshold waits lets it enter by itself (no gesture, no audio)', async () => {
+    vi.useFakeTimers();
+    withToggle();
+    localStorage.setItem(VisitMemory.KEY, '1');
+    const seen = enteredEvents();
+    const sound = fakeSound();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, sound.load);
+    expect($('[data-threshold-enter]').hidden).toBe(false);
+    expect($('canvas[data-drift-canvas]').hasAttribute('inert')).toBe(true);
+    $('[data-sound-toggle]').click();
+    expect($('[data-threshold-enter]').hidden).toBe(true);
+    expect($('canvas[data-drift-canvas]').hasAttribute('inert')).toBe(false);
+    vi.advanceTimersByTime(0);
+    expect(seen).toEqual([{ gesture: false, returning: true }]);
+    vi.useRealTimers();
+    await flush();
+    expect(sound.load).not.toHaveBeenCalled();
+  });
+
+  it('unmuting again before the short threshold entered asks for the click once more', async () => {
+    vi.useFakeTimers();
+    withToggle();
+    localStorage.setItem(VisitMemory.KEY, '1');
+    const seen = enteredEvents();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, fakeSound().load);
+    $('[data-sound-toggle]').click();
+    $('[data-sound-toggle]').click();
+    expect($('[data-threshold-enter]').hidden).toBe(false);
+    vi.advanceTimersByTime(5000);
+    expect(seen).toEqual([]);
+    vi.useRealTimers();
+  });
+
+  it('a mute change after the threshold is gone changes nothing on it', async () => {
+    withToggle();
+    const seen = enteredEvents();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, fakeSound().load);
+    $('[data-threshold-enter]').click();
+    $('[data-sound-toggle]').click();
+    $('[data-sound-toggle]').click();
+    expect(seen).toEqual([{ gesture: true, returning: false }]);
+  });
+
   it('reports a world layer without the mute toggle when sound is wired', () => {
     expect(() => bootDrift(document, win, fakeWorld().load, () => capable, now, fakeSound().load)).toThrow('[drift] Missing [data-sound-toggle] in the world layer');
   });
