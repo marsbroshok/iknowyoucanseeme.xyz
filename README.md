@@ -30,6 +30,7 @@ Useful extras:
 | `npm test` | Unit and property tests (Vitest) without coverage |
 | `npm run test:coverage` | The same with the 100% coverage gate |
 | `npm run lint` | ESLint |
+| `npm run lint:workflows` | Optional: [actionlint](https://github.com/rhysd/actionlint) on `.github/workflows/` (needs `actionlint` installed, e.g. `brew install actionlint`; CI always runs it) |
 | `npm run typecheck` | `astro sync` + TypeScript (site, tools and e2e tests) |
 | `npm run intake <step>` | Content intake from the Instagram export (see below) |
 | `npm run copy:review` | Writes `docs/copy/REVIEW.md`, the copy review sheet |
