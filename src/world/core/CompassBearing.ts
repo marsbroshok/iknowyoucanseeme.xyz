@@ -48,13 +48,14 @@ export class CompassBearing {
   }
 
   /**
-   * Ground distance from a point to a region's stretch of path.
+   * Ground distance from a point to a region's stretch of path (also used
+   * by the sound's zone weights, src/sound/core/ZoneField.ts).
    *
    * @param p - Point.
    * @param r - Region.
    * @returns Distance to the segment start–end.
    */
-  private static toSegment(p: GroundPoint, r: Region): number {
+  static toSegment(p: GroundPoint, r: Region): number {
     const dx = r.end.x - r.start.x;
     const dz = r.end.z - r.start.z;
     const t = Math.min(Math.max(((p.x - r.start.x) * dx + (p.z - r.start.z) * dz) / (dx * dx + dz * dz), 0), 1);
