@@ -3,8 +3,10 @@
  * The drift world layer of the home page (progressive enhancement): the
  * canvas, the always-visible "Wake up" control, help text (and the lens
  * caption, a live region naming the lens in use), the horizon
- * compass, the keyboard work list, the focus dialog and the build-time world
- * manifest. It is
+ * compass, the keyboard work list, the focus dialog, the threshold (the
+ * gaze line, the breathing leak's canvas and Enter), the world's text (gaze
+ * line and fragments, mirrored into a polite live region) and the
+ * build-time world manifest. It is
  * rendered hidden; `bootDrift` shows it on capable devices after first
  * paint and lazy-loads the Three.js world. Without JavaScript, or on the
  * awake layer, the page below is untouched.
@@ -41,6 +43,9 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   </div>
   <div class="drift-compass" data-drift-compass></div>
   <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
+  <p class="drift-gaze" data-drift-gaze aria-hidden="true">{ui.t('gaze')}</p>
+  <p class="drift-fragment" data-drift-fragment aria-hidden="true"></p>
+  <p class="drift-said" data-drift-said aria-live="polite"></p>
   <dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title">
     <img class="drift-focus-image" data-focus-image alt="" />
     <h2 id="drift-focus-title" data-focus-title></h2>
@@ -49,6 +54,11 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     <p data-focus-contact-row><a data-focus-contact>{ui.t('work_contact_link')}</a></p>
     <button type="button" data-focus-close>{ui.t('dialog_close')}</button>
   </dialog>
+  <div class="drift-threshold" data-threshold hidden>
+    <canvas class="drift-threshold-leak" data-threshold-leak aria-hidden="true"></canvas>
+    <p class="drift-threshold-line">{ui.t('gaze')}</p>
+    <button type="button" class="drift-enter" data-threshold-enter hidden>{ui.t('enter')}</button>
+  </div>
 </section>
 <script type="application/json" id="drift-manifest" set:html={inlineJson(manifest)} />
 
@@ -95,6 +105,8 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     right: var(--space-3);
     display: flex;
     gap: var(--space-2);
+    /* Above the threshold: "Wake up" is never covered (FR4). */
+    z-index: 2;
   }
   .drift button {
     font: inherit;
@@ -202,6 +214,98 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-focus a {
     color: var(--text-primary);
+  }
+  .drift-threshold {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--ink);
+    opacity: 1;
+    transition: opacity 1.6s ease;
+  }
+  .drift-threshold[hidden] {
+    display: none;
+  }
+  .drift-threshold[data-kind='short'] {
+    transition-duration: 1s;
+  }
+  .drift-threshold[data-phase='leaving'] {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .drift-threshold-leak {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .drift-threshold-line,
+  .drift .drift-enter {
+    position: relative;
+  }
+  .drift-threshold-line {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-xl);
+    font-weight: 300;
+    font-style: italic;
+    text-align: center;
+    color: var(--text-primary);
+  }
+  .drift .drift-enter {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    letter-spacing: 0.08em;
+    padding: var(--space-2) var(--space-4);
+  }
+  .drift-gaze,
+  .drift-fragment {
+    position: absolute;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-sans);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--text-primary);
+    text-align: center;
+    text-shadow: 0 0 1.2rem var(--ink), 0 0 0.3rem var(--ink);
+  }
+  .drift-gaze {
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    max-width: 80vw;
+    font-size: var(--text-2xl);
+    letter-spacing: 0.04em;
+    filter: blur(0.4px);
+  }
+  .drift-fragment {
+    left: var(--x, 50%);
+    top: var(--y, 30%);
+    transform: translate(-50%, -100%);
+    max-width: min(26rem, 80vw);
+    font-size: var(--text-lg);
+    line-height: 1.4;
+  }
+  .drift-fragment:empty {
+    display: none;
+  }
+  .drift-said {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .drift-works {
     list-style: none;

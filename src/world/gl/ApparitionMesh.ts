@@ -181,13 +181,17 @@ export class ApparitionMesh {
   }
 
   /**
-   * Turns the plane to face a camera position (about the vertical axis).
+   * Turns the work to face the camera, plus the gaze turn toward a
+   * lingering pointer (GazeDirector).
    *
    * @param x - Camera x.
    * @param z - Camera z.
+   * @param turn - Extra yaw / pitch toward the pointer (radians), or none.
    */
-  face(x: number, z: number): void {
-    this.mesh.rotation.y = Math.atan2(x - this.mesh.position.x, z - this.mesh.position.z);
+  face(x: number, z: number, turn: { yaw: number; pitch: number } | null = null): void {
+    this.mesh.rotation.y = Math.atan2(x - this.mesh.position.x, z - this.mesh.position.z) + (turn?.yaw ?? 0);
+    this.mesh.rotation.order = 'YXZ';
+    this.mesh.rotation.x = -(turn?.pitch ?? 0);
   }
 
   /** Frees the material (the shared geometry stays). */
