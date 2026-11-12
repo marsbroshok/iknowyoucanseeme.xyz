@@ -21,7 +21,7 @@ export class LeakVoice extends VoiceGraph {
     const beat = this.own(new Gain({ context, gain: 0 }));
     beat.connect(this.output);
     this.source(new Oscillator({ context, frequency: 46, type: 'sine' })).connect(beat);
-    this.source(new LFO({ context, frequency: 0.85, min: 0.05, max: 0.75 })).connect(beat.gain);
+    this.source(new LFO({ context, frequency: 0.85, min: 0.3, max: 0.8 })).connect(beat.gain);
 
     // The hum: G2 sawtooth → vowel band-pass → low-pass → quiet.
     this.close = this.own(new Filter({ context, type: 'lowpass', frequency: 420, Q: 0.3 }));

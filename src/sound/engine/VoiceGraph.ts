@@ -1,4 +1,5 @@
-import { Gain, Reverb, type BaseContext, type ReverbOptions } from 'tone';
+import { Gain, type BaseContext } from 'tone';
+import { ImpulseReverb, type ImpulseReverbOptions } from './ImpulseReverb.js';
 import type { VoiceParams } from '../core/SoundRecipes.js';
 
 /** What every voice is built with. */
@@ -30,18 +31,12 @@ export abstract class VoiceGraph {
   readonly output: Gain;
   private readonly owned: Disposable[] = [];
   private readonly sources: Startable[] = [];
-  private readonly reverbs: Reverb[] = [];
 
   /**
    * @param kit - Context and randomness.
    */
   protected constructor(protected readonly kit: VoiceKit) {
     this.output = this.own(new Gain({ context: kit.context, gain: 0 }));
-  }
-
-  /** Settles when the voice's reverbs have generated their impulse responses. */
-  get ready(): Promise<void> {
-    return Promise.all(this.reverbs.map((r) => r.ready)).then(() => undefined);
   }
 
   /**
@@ -102,14 +97,14 @@ export abstract class VoiceGraph {
   }
 
   /**
-   * A reverb owned by the voice (its impulse response is generated asynchronously; see {@link VoiceGraph.ready}).
+   * A reverb owned by the voice, its output routed to the voice's level.
    *
-   * @param options - Decay and wet mix.
-   * @returns The reverb.
+   * @param options - Decay, pre-delay and wet share.
+   * @returns The reverb (feed its `input`).
    */
-  protected reverb(options: Pick<ReverbOptions, 'decay' | 'wet' | 'preDelay'>): Reverb {
-    const reverb = this.own(new Reverb({ context: this.kit.context, ...options }));
-    this.reverbs.push(reverb);
+  protected reverb(options: ImpulseReverbOptions): ImpulseReverb {
+    const reverb = this.own(new ImpulseReverb(this.kit.context, options, this.kit.random));
+    reverb.output.connect(this.output);
     return reverb;
   }
 }

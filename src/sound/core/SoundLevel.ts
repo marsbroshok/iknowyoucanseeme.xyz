@@ -11,7 +11,7 @@ export const VOLUME = {
   /** Fade to and from mute (s). */
   muteSeconds: 0.3,
   /** Ramp of each mix or cue update (s), short enough to follow ZoneMixer, long enough to avoid zipper noise. */
-  applySeconds: 0.12,
+  applySeconds: 0.08,
 } as const;
 
 /**

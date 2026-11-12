@@ -26,19 +26,18 @@ export class LensVoice extends VoiceGraph {
     super(kit);
     const context = kit.context;
     const reverb = this.reverb({ decay: 4, wet: 0.45, preDelay: 0.02 });
-    reverb.connect(this.output);
     this.tone = this.own(new Filter({ context, type: 'lowpass', frequency: 1800, Q: 0.5 }));
-    this.tone.connect(reverb);
+    this.tone.connect(reverb.input);
 
     // The shimmer: two quiet high partials (E6, B6) with a slow tremolo.
     const shimmer = this.own(new Gain({ context, gain: 0 }));
     shimmer.connect(this.tone);
-    this.source(new Oscillator({ context, frequency: 1318.5, type: 'sine', volume: -18 })).connect(shimmer);
-    this.source(new Oscillator({ context, frequency: 1975.5, type: 'sine', volume: -24 })).connect(shimmer);
-    this.source(new LFO({ context, frequency: 0.19, min: 0.05, max: 0.35 })).connect(shimmer.gain);
+    this.source(new Oscillator({ context, frequency: 1318.5, type: 'sine', volume: -4 })).connect(shimmer);
+    this.source(new Oscillator({ context, frequency: 1975.5, type: 'sine', volume: -10 })).connect(shimmer);
+    this.source(new LFO({ context, frequency: 0.19, min: 0.2, max: 0.8 })).connect(shimmer.gain);
 
     // The glints.
-    this.glint = this.own(new Synth({ context, volume: -14, oscillator: { type: 'sine' }, envelope: { attack: 0.004, decay: 0.22, sustain: 0, release: 0.3 } }));
+    this.glint = this.own(new Synth({ context, volume: -2, oscillator: { type: 'sine' }, envelope: { attack: 0.004, decay: 0.22, sustain: 0, release: 0.3 } }));
     this.glint.connect(this.tone);
   }
 

@@ -55,8 +55,6 @@ export interface ToneSoundEngineOptions {
  * Built on any Tone context, so tests render it offline (`Tone.Offline`).
  */
 export class ToneSoundEngine implements SoundEngine {
-  /** Settles once every reverb is ready (start waits for it). */
-  readonly ready: Promise<void>;
   /** Master input (voices and recordings). */
   readonly input: Gain;
   private readonly limiter: Limiter;
@@ -86,7 +84,6 @@ export class ToneSoundEngine implements SoundEngine {
     this.voices = { arrival: new ArrivalVoice(kit), lens: new LensVoice(kit), leak: new LeakVoice(kit), border: new BorderVoice(kit) };
     for (const z of SOUND_ZONES) this.voices[z].output.connect(this.input);
     this.recordings = options.recordings ? options.recordings(this.input) : null;
-    this.ready = Promise.all(SOUND_ZONES.map((z) => this.voices[z].ready)).then(() => undefined);
     this.apply(0);
   }
 
@@ -95,8 +92,7 @@ export class ToneSoundEngine implements SoundEngine {
     if (this.disposed) return;
     this.running = true;
     if (this.options.clock.state !== 'running') await this.options.clock.resume();
-    await this.ready;
-    if (!this.running || this.disposed) return;
+    if (!this.running) return; // stopped or disposed while resuming
     if (!this.sourcesStarted) {
       this.sourcesStarted = true;
       for (const z of SOUND_ZONES) this.voices[z].start(this.context.currentTime);
