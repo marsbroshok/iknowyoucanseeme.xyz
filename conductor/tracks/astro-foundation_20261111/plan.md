@@ -21,13 +21,21 @@ Track: `astro-foundation_20261111` · Spec: [spec.md](./spec.md) · Workflow: [.
 
 ## Phase 3: Design system
 
-- [ ] Task: Tokens & base CSS (`src/styles/tokens.css`, `base.css`, layers, reduced-motion)
-- [ ] Task: Accent contrast helper
-    - [ ] Red: property test: for any hex palette colour, `accentFor(hex)` ≥ 4.5:1 vs `--ink`
-    - [ ] Green: `src/design/AccentColor.ts`
-- [ ] Task: Self-hosted fonts (subset files in `public/fonts/`, licence files included, preload in layout)
-- [ ] Task: `BaseLayout`, `Header`, `Footer`, `SkipLink`, `WorkImage`, `Fragment`, `Meta` components
-    - [ ] Red: Astro container-API rendering tests (lang attr, hreflang, canonical, alt text present, no search/theme toggle)
-    - [ ] Green: implement
-- [ ] Task: Playwright + axe setup; e2e smoke for `/`, `/en/`, `/fr/` (axe zero violations)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Tokens & base CSS (`src/styles/tokens.css`, `base.css`, layers, reduced-motion)
+- [x] Task: Accent contrast helper
+    - [x] Red: property test: for any hex palette colour, `accentFor(hex)` ≥ 4.5:1 vs `--ink`
+    - [x] Green: `src/design/AccentColor.ts`
+- [x] Task: Self-hosted fonts (subset files in `public/fonts/`, licence files included, preload in layout)
+- [x] Task: `BaseLayout`, `Header`, `Footer`, `SkipLink`, `WorkImage`, `Fragment`, `Meta` components
+    - [x] Red: Astro container-API rendering tests (lang attr, hreflang, canonical, alt text present, no search/theme toggle)
+    - [x] Green: implement
+- [x] Task: Playwright + axe setup; e2e smoke for `/`, `/en/`, `/fr/` (axe zero violations)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Review fixes
+- `7f248fd` build: add astro build and test:e2e to check script
+- `294928e` fix(components): remove invalid React key from Astro Fragment
+- `3a671e0` build: typecheck e2e files properly using dedicated tsconfig
+- `7330427` test: remove v8 ignore comments and strengthen assertions
+- `0b5168e` feat(content): implement copy join helper with tests
+- `b53712f` test(components): implement Astro container-API tests for all components
