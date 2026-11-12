@@ -4,7 +4,7 @@ Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 
 ## Phase 1: Lens logic
 
-- [ ] Task: `LensDirector` (technique → mode mapping, seeded fallback, cycling) — Red/Green with property tests
+- [x] Task: `LensDirector` (technique → mode mapping, seeded fallback, cycling) — Red/Green with property tests `36d7b06`
 - [ ] Task: `LensCrossfade` + `LensUniforms` (pointer region, velocity smoothing, touch fade) — Red/Green
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
