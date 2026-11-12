@@ -147,8 +147,15 @@ export async function generateContentFiles(
   }
 
   // Write exhibitions
-  const mpaa = { slug: 'mpaa-2019', title: { fr: 'MPAA 2019' } };
-  const atelier = { slug: 'atelier-51-2025', title: { fr: 'Atelier 51' } };
+  // Facts from conductor/product.md (also stated in the About copy).
+  const mpaa = { slug: 'mpaa-2019', title: { fr: "L'Emprunt, la Citation" }, year: 2019, venue: 'MPAA', dates: { en: 'Dec 2019', fr: 'déc. 2019' } };
+  const atelier = {
+    slug: 'atelier-51-2025',
+    title: { fr: 'Dreamland' },
+    year: 2025,
+    venue: 'Atelier 51',
+    dates: { en: '16–30 Oct 2025', fr: '16–30 oct. 2025' }
+  };
   ExhibitionSchema.parse(mpaa);
   ExhibitionSchema.parse(atelier);
   fs.writeFileSync(path.join(exhibitionsDir, 'mpaa-2019.yaml'), String(new yaml.Document(mpaa)));

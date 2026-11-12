@@ -9,6 +9,8 @@
 | pages/gaze.yaml | blocks.title | draft | The Gaze | Le Regard | spec |
 | pages/legal.yaml | blocks.copyright | draft | © all rights reserved. | © tous droits réservés. | spec |
 | pages/legal.yaml | blocks.privacy | draft | Cookieless analytics are used to respect your privacy. | Des analyses sans cookies sont utilisées pour respecter votre vie privée. | spec |
+| pages/legal.yaml | blocks.image_use | draft | All images on this site belong to Alexander Usoltsev. Please ask before you use them. | Toutes les images de ce site appartiennent à Alexander Usoltsev. Merci de demander avant de les utiliser. | spec |
+| pages/legal.yaml | blocks.publisher | draft | This site is published by Alexander Usoltsev. | Ce site est publié par Alexander Usoltsev. | spec |
 | pages/threshold.yaml | blocks.title | draft | Threshold | Le Seuil | spec |
 | pages/ui.yaml | blocks.threshold | draft | Threshold | Le Seuil | spec |
 | pages/ui.yaml | blocks.gaze | draft | I know you can see me | Je sais que tu me vois | spec |
@@ -33,6 +35,34 @@
 | pages/ui.yaml | blocks.skip_content | draft | Skip to content | Passer au contenu | spec |
 | pages/ui.yaml | blocks.toggle_wakeup | draft | Toggle wake up mode | Activer le mode réveil | spec |
 | pages/ui.yaml | blocks.toggle_drift | draft | Toggle drift mode | Activer le mode dérive | spec |
+| pages/ui.yaml | blocks.nav_label | draft | Main | Principal | spec |
+| pages/ui.yaml | blocks.nav_home | draft | Home | Accueil | spec |
+| pages/ui.yaml | blocks.nav_works | draft | Works | Œuvres | spec |
+| pages/ui.yaml | blocks.nav_about | draft | About | À propos | spec |
+| pages/ui.yaml | blocks.nav_exhibitions | draft | Exhibitions | Expositions | spec |
+| pages/ui.yaml | blocks.nav_contact | draft | Contact | Contact | spec |
+| pages/ui.yaml | blocks.nav_legal | draft | Legal notice | Mentions légales | spec |
+| pages/ui.yaml | blocks.territories_heading | draft | Territories | Territoires | spec |
+| pages/ui.yaml | blocks.territory_link | draft | See the territory | Voir le territoire | spec |
+| pages/ui.yaml | blocks.works_all_link | draft | See all works | Voir toutes les œuvres | spec |
+| pages/ui.yaml | blocks.works_filter_label | draft | Filter by territory | Filtrer par territoire | spec |
+| pages/ui.yaml | blocks.drift_link | draft | See it in the drift | Voir dans la dérive | spec |
+| pages/ui.yaml | blocks.medium_photo | draft | photograph | photographie | spec |
+| pages/ui.yaml | blocks.medium_ceramic | draft | ceramic | céramique | spec |
+| pages/ui.yaml | blocks.work_contact_link | draft | Ask about this work | Demander au sujet de cette œuvre | spec |
+| pages/ui.yaml | blocks.contact_intro | draft | Write to me about a work, an exhibition or anything else. | Écrivez-moi au sujet d'une œuvre, d'une exposition ou d'autre chose. | spec |
+| pages/ui.yaml | blocks.contact_email_only | draft | The best way to reach me is by email. | Le mieux est de m'écrire par email. | spec |
+| pages/ui.yaml | blocks.contact_email_fallback | draft | You can also write to me directly. | Vous pouvez aussi m'écrire directement. | spec |
+| pages/ui.yaml | blocks.contact_about_work | draft | About the work | Au sujet de l'œuvre | spec |
+| pages/ui.yaml | blocks.form_sending | draft | Sending | Envoi en cours | spec |
+| pages/ui.yaml | blocks.exhibitions_empty | draft | No exhibitions yet. | Pas encore d'exposition. | spec |
+| pages/ui.yaml | blocks.legal_contact_label | draft | Contact | Contact | spec |
+| pages/ui.yaml | blocks.desc_home | draft | Photographs and ceramics by Alexander Usoltsev, between dream and the waking world. | Photographies et céramiques d'Alexander Usoltsev, entre le rêve et le monde éveillé. | product |
+| pages/ui.yaml | blocks.desc_works | draft | All works by Alexander Usoltsev, by territory. | Toutes les œuvres d'Alexander Usoltsev, par territoire. | spec |
+| pages/ui.yaml | blocks.desc_exhibitions | draft | Past exhibitions of Alexander Usoltsev. | Les expositions passées d'Alexander Usoltsev. | spec |
+| pages/ui.yaml | blocks.desc_about | draft | About Alexander Usoltsev, photographer and ceramic artist living in France. | À propos d'Alexander Usoltsev, photographe et céramiste vivant en France. | about |
+| pages/ui.yaml | blocks.desc_contact | draft | Contact Alexander Usoltsev about a work or an exhibition. | Contacter Alexander Usoltsev au sujet d'une œuvre ou d'une exposition. | spec |
+| pages/ui.yaml | blocks.desc_legal | draft | Legal notice of iknowyoucanseeme. | Mentions légales de iknowyoucanseeme. | spec |
 | territories/dreamland.yaml | statement | draft | A journey is traditionally defined as a cycle whose final step is the return home. But as someone who has changed countries, I found myself adrift from the classic story of voyage and return. This work is born from that experience. It proposes that our most constant home is not a physical place, but the internal landscape of the dream. This inner world is a resonant space with a permeable boundary. As memory and present experience merge, the concept of 'home' evolves. The journey explored here is not of departure and return, but of this quiet, continuous transformation. | Un voyage est souvent vu comme un cycle dont l'étape finale est le retour chez soi. Mais ayant changé de pays, je me suis éloigné de cette histoire classique. Ce travail est né de cette expérience : notre véritable maison n'est pas un lieu physique, mais le paysage intérieur du rêve. Ce monde intérieur a une frontière perméable. Au fur et à mesure que la mémoire et le présent se mélangent, l'idée de maison évolue. Le voyage exploré ici n'est pas un départ ou un retour, mais une transformation silencieuse et continue. | exhibition_statement_2026 |
 | territories/the-border-is-thin.yaml | statement | draft | There is a border between these worlds. If you point the camera in the right direction and apply some pressure, it becomes thin and reveals what is out there. | Il y a une frontière entre ces mondes. Mais si vous dirigez l'appareil photo dans la bonne direction, elle s'affine et révèle ce qui se cache de l'autre côté. | cygne-icm-1, eclipse-miroir-9 |
 | works/arrivee.yaml | fragment | draft | The moment of return. | Le moment du retour. | arrivee, exhibition_statement_2025_p1 |

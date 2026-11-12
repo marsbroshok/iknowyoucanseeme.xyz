@@ -1,0 +1,38 @@
+---
+/**
+ * About `/{lang}/about|a-propos/`: bio, the 2019 origin story and an
+ * exhibitions summary, with `Person` JSON-LD. No portrait is shown until
+ * the artist provides one.
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import type { PersonJsonLd } from '../../domain/JsonLd.js';
+import { localizedPath } from '../../i18n/LocalizedPath.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import BaseLayout from '../BaseLayout.astro';
+
+interface Props {
+  lang: Locale;
+  title: string;
+  bio: string;
+  origin: string;
+  exhibitionsSummary: string;
+  personJsonLd: PersonJsonLd;
+}
+
+const { lang, title, bio, origin, exhibitionsSummary, personJsonLd } = Astro.props;
+const ui = uiText(lang);
+---
+<BaseLayout lang={lang} routeKey="about" title={`${title} · Alexander Usoltsev`} description={ui.t('desc_about')} jsonLd={[personJsonLd]}>
+  <article class="page">
+    <h1>{title}</h1>
+    <div class="prose">
+      <p class="bio">{bio}</p>
+      <p class="origin">{origin}</p>
+    </div>
+    <h2>{ui.t('nav_exhibitions')}</h2>
+    <div class="prose">
+      <p>{exhibitionsSummary}</p>
+      <p><a href={localizedPath('exhibitions', lang)}>{ui.t('nav_exhibitions')}</a></p>
+    </div>
+  </article>
+</BaseLayout>
