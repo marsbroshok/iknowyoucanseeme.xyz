@@ -1,10 +1,9 @@
 import { SeededRandom } from './SeededRandom.js';
 
-/** Zones of Dreamland, in path order. */
-export const ZONE_ORDER = ['arrival', 'lens', 'leak'] as const;
+import { ZONE_ORDER, type ZoneSlug } from '../../domain/ZoneOrder.js';
 
-/** A Dreamland zone. */
-export type ZoneSlug = (typeof ZONE_ORDER)[number];
+/** Zones of Dreamland, in path order (single source: src/domain/ZoneOrder.ts). */
+export { ZONE_ORDER, type ZoneSlug };
 
 /** What the layout needs to know about a work. */
 export interface LayoutWork {

@@ -1,13 +1,8 @@
 import type { Work } from '../content/schema/index.js';
+import { ZONE_ORDER, type ZoneSlug } from './ZoneOrder.js';
 
-/**
- * Narrative order of the Dreamland zones: Arrival → Lens → Leak.
- * Works without a zone sort after every zoned work.
- */
-export const ZONE_ORDER = ['arrival', 'lens', 'leak'] as const;
-
-/** A zone slug, as declared on a work. */
-export type ZoneSlug = (typeof ZONE_ORDER)[number];
+/** Zone order (Arrival → Lens → Leak); works without a zone sort after every zoned work. */
+export { ZONE_ORDER, type ZoneSlug };
 
 /** The works immediately before and after a given work in a list. */
 export interface PrevNext {
