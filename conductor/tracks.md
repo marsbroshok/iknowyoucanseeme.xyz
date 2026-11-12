@@ -24,7 +24,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 5: Launch: retire Hugo, GitHub Pages deploy, analytics, QR labels**
+- [x] **Track 5: Launch: retire Hugo, GitHub Pages deploy, analytics, QR labels**
   *Link: [./tracks/launch_20261111/index.md](./tracks/launch_20261111/index.md)*
 
 ---
