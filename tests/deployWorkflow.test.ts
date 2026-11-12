@@ -83,6 +83,12 @@ describe('deploy.yml', () => {
     expect(pkg.scripts.check).toMatch(/astro build$/);
   });
 
+  it('installs the ALSA library before the checks (node-web-audio-api links it for the sound engine tests, docs/adr/0011)', () => {
+    const s = build.steps;
+    const alsa = stepIndex(s, 'alsa', (x) => /apt-get install\b.*\blibasound2t64\b/.test(x.run ?? ''));
+    expect(alsa).toBeLessThan(stepIndex(s, 'check', (x) => x.run === 'npm run check'));
+  });
+
   it('pins actionlint to a release and runs it on the workflows', () => {
     const lint = build.steps.find((x) => /actionlint/.test(x.run ?? ''));
     expect(lint?.run).toMatch(/rhysd\/actionlint\/v\d+\.\d+\.\d+\/scripts\/download-actionlint\.bash/);

@@ -44,6 +44,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v6
 
+      # The sound engine's unit tests run Web Audio in Node (node-web-audio-api),
+      # whose Linux binary links the ALSA library (docs/adr/0011).
+      - name: Install the ALSA library (sound engine tests)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2t64
+
       # npm run check ends with `astro build`, so dist/ is built exactly once.
       - name: Check and build (types, lint, unit tests with coverage, astro build)
         run: npm run check
