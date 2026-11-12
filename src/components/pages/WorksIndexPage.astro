@@ -1,0 +1,54 @@
+---
+/**
+ * Works index `/{lang}/works|oeuvres/`: every work (thumbnail, title,
+ * territory, year), grouped by territory. Filtering works without JS: the
+ * territory links are fragment anchors, and CSS `:target` hides the other
+ * sections while one is targeted.
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import type { IndexSectionView } from '../../domain/TerritoryView.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import BaseLayout from '../BaseLayout.astro';
+import WorkCard from '../WorkCard.astro';
+
+interface Props {
+  lang: Locale;
+  sections: readonly IndexSectionView[];
+}
+
+const { lang, sections } = Astro.props;
+const ui = uiText(lang);
+---
+<BaseLayout lang={lang} routeKey="works" title={`${ui.t('nav_works')} · Alexander Usoltsev`} description={ui.t('desc_works')}>
+  <div class="page works-index">
+    <h1>{ui.t('nav_works')}</h1>
+    <nav aria-label={ui.t('works_filter_label')}>
+      <p class="meta-line">{ui.t('works_filter_label')}</p>
+      <ul class="filters">
+        {sections.map((s) => <li><a href={`#${s.slug}`}>{s.title}</a></li>)}
+      </ul>
+    </nav>
+    {sections.map((s) => (
+      <section id={s.slug} aria-labelledby={`${s.slug}-heading`}>
+        <h2 id={`${s.slug}-heading`}>{s.title}</h2>
+        <ul class="work-grid">
+          {s.works.map((w) => <li><WorkCard work={w} territoryName={s.title} /></li>)}
+        </ul>
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+    margin: var(--space-2) 0 0;
+  }
+  .works-index:has(section:target) section:not(:target) {
+    display: none;
+  }
+</style>

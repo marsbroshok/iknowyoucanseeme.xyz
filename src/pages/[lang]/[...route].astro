@@ -10,10 +10,11 @@ import { withCopy } from '../../content/helpers.js';
 import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
 import type { Locale } from '../../i18n/RouteMap.js';
 import { uiText } from '../../i18n/UiCatalog.js';
-import { buildTerritoryTeaser, buildTerritoryView, titleOf } from '../../domain/TerritoryView.js';
+import { buildIndexSections, buildTerritoryTeaser, buildTerritoryView, titleOf } from '../../domain/TerritoryView.js';
 import HomePage from '../../components/pages/HomePage.astro';
 import TerritoryPage from '../../components/pages/TerritoryPage.astro';
 import WorkPage from '../../components/pages/WorkPage.astro';
+import WorksIndexPage from '../../components/pages/WorksIndexPage.astro';
 import { buildWorkView } from '../../domain/WorkView.js';
 import { buildVisualArtworkJsonLd } from '../../domain/JsonLd.js';
 import { getPrevNextWork } from '../../domain/WorkQueries.js';
@@ -23,7 +24,7 @@ import { localizedPath } from '../../i18n/LocalizedPath.js';
 export async function getStaticPaths() {
   const works = await getCollection('works');
   const territories = await getCollection('territories');
-  const implemented = new Set<PageRef['kind']>(['home', 'territory', 'work']);
+  const implemented = new Set<PageRef['kind']>(['home', 'territory', 'work', 'works']);
   return buildSiteRoutes({
     works: works.map((w) => w.data.slug),
     territories: territories.map((t) => t.data.slug),
@@ -74,3 +75,4 @@ function territoryFor(slug: string) {
   <TerritoryPage lang={lang} territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)} />
 )}
 {page.kind === 'work' && <WorkPage lang={lang} {...workPageProps(page.slug)} />}
+{page.kind === 'works' && <WorksIndexPage lang={lang} sections={buildIndexSections(territories, works, ui)} />}

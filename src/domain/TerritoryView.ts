@@ -97,6 +97,29 @@ export function buildTerritoryView(
   };
 }
 
+/** One territory section of the works index. */
+export interface IndexSectionView {
+  slug: string;
+  title: string;
+  works: WorkView[];
+}
+
+/**
+ * Builds the works-index sections: one per territory that has works, in
+ * territory-slug order (same as `sortWorksForIndex`), works in zone order.
+ *
+ * @param territories - Territories (with copy).
+ * @param works - All works.
+ * @param ui - UI strings of the target locale.
+ * @returns Non-empty sections.
+ */
+export function buildIndexSections(territories: readonly TitledEntry[], works: readonly Work[], ui: UiText): IndexSectionView[] {
+  return [...territories]
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .map((t) => ({ slug: t.slug, title: titleOf(t, ui), works: getWorksByTerritory(works, t.slug).map((w) => buildWorkView(w, ui)) }))
+    .filter((s) => s.works.length > 0);
+}
+
 /**
  * Builds the home-page entry block of a territory.
  *
