@@ -18,16 +18,16 @@ Track: `sound_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workfl
 
 ## Phase 3: Integration
 
-- [ ] Task: Wire to drift position + `entered`; mute toggle UI (persisted); visibility suspend
-- [ ] Task: Bundle test: `tone` absent from initial chunks
-- [ ] Task: ADR "Tone.js behind SoundEngine"
+- [x] Task: Wire to drift position + `entered`; mute toggle UI (persisted); visibility suspend (d110429; `SoundDirector`, `SoundPreference`, `SoundControls`, e2e `sound.spec.ts`)
+- [x] Task: Bundle test: `tone` absent from initial chunks (9e2b8da; boot 5.4 KB gz, world 133.2 KB gz, sound 64.3 KB gz; boundary test)
+- [x] Task: ADR "Tone.js behind SoundEngine" (39be02a; ADR 0011, README, tech stack)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
 
 From `threshold-gaze_20261111` review (non-blocking):
 
-- [ ] Task: the `entered` event (with `gesture: true`) is emitted both by the threshold's **Enter** and by **Drift** on the awake page (`ThresholdOverlay.skip()`, assumption A8). The sound engine must treat any `entered` with `gesture: true` as the user gesture that may unlock audio, and must never start audio from `entered` without `gesture: true`. Test both sources.
+- [x] Task: the `entered` event (with `gesture: true`) is emitted both by the threshold's **Enter** and by **Drift** on the awake page (`ThresholdOverlay.skip()`, assumption A8). The sound engine must treat any `entered` with `gesture: true` as the user gesture that may unlock audio, and must never start audio from `entered` without `gesture: true`. Test both sources. (d110429: `SoundDirector` tests and boot tests for Enter and Drift; e2e for both)
 - [x] Task: `src/scripts/FragmentCount.ts` parses build-time ids with `JSON.parse(rawIds) as string[]` without validation; validate with a tiny guard (array of strings) and test malformed input (fail closed: show nothing). (c7acc25)
 - [x] Task: ADR 0007 still describes reduced-motion phones as an awake-layer case; add a "Superseded in part by ADR 0009" note (do not rewrite history). (50a4cae)
 - Note (artist decision pending): the threshold line currently reuses the gaze sentence (`ui.t('gaze')`, ADR 0010 A7). Keep unless the artist decides otherwise.
@@ -43,4 +43,10 @@ Ledger of reasonable assumptions made while the artist was away (also in commit 
 - A6 (afbb0e5): voices balanced to about −30 dBFS each after the master (lens sparser, about −40 dBFS); mix ramps 0.08 s under the 0.1 s update cadence.
 - A7 (da520df): recordings share the master (ceiling, mute, fades); a recording streams from the first time its zone weighs over 0.05 and pauses below 0.01.
 - A8 (06f3e90): CI installs `libasound2t64` (ubuntu 24.04+) for node-web-audio-api's Linux binary.
+- A9 (d110429): unmuting is itself a gesture and may unlock audio; while sound is on, returning and deep-linked visitors click Enter on the short threshold (threshold spec FR1), muted it fades by itself; world-only e2e specs start muted. The mute toggle comes first in the top bar so "Wake up" stays right before Enter in tab order. The first frame places the mix where the camera is (the world starts in the first territory of the manifest, currently the border).
 - A4 (b29ea7d): eclipse works are those whose slug has the word `eclipse` or whose title has "éclipse"/"eclipse"; closeness is 1 within 4 m, 0 beyond 24 m; master ceiling −12 dBFS with a limiter at −6 dBFS.
+
+## Out-of-scope findings
+
+- Tone.js creates its own `AudioContext` when its module is evaluated (after the gesture); `createSoundEngine` replaces and closes it. Harmless, noted in ADR 0011.
+- The world starts at the head of the first territory in the manifest's order (`the-border-is-thin` today, not Dreamland's Arrival); not changed here (layout is outside this track).
