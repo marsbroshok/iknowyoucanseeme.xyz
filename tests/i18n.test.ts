@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { RouteMap, type RouteKey, type Locale } from '../src/i18n/RouteMap.js';
 import { localizedPath, pathToKey } from '../src/i18n/LocalizedPath.js';
-import { alternateLinks } from '../src/i18n/Alternates.js';
+import { alternateLinks, canonicalUrl } from '../src/i18n/Alternates.js';
 import { getPreferredLocale } from '../src/i18n/ChooseLocale.js';
 
 describe('i18n Route Helpers', () => {
@@ -34,8 +34,12 @@ describe('i18n Route Helpers', () => {
         fc.constantFrom(...keys),
         fc.constantFrom('en', 'fr'),
         fc.array(fc.string({ minLength: 1 }).filter(s => !s.includes('/'))),
-        (key, lang, params) => {
+        (key, lang, rawParams) => {
+          // The home route takes no parameters (it throws, see below).
+          const params = key === 'home' ? [] : rawParams;
           const path = localizedPath(key as RouteKey, lang as Locale, params);
+          expect(path.startsWith(`/${lang}/`)).toBe(true);
+          expect(path.endsWith('/')).toBe(true);
           const roundTrippedKey = pathToKey(path);
           expect(roundTrippedKey).toBe(key);
         }
@@ -46,18 +50,18 @@ describe('i18n Route Helpers', () => {
   it('alternateLinks returns expected links', () => {
     const links = alternateLinks('works', 'https://example.com');
     expect(links).toEqual([
-      { href: 'https://example.com/en/works', hreflang: 'en' },
-      { href: 'https://example.com/fr/oeuvres', hreflang: 'fr' },
-      { href: 'https://example.com/en/works', hreflang: 'x-default' },
+      { href: 'https://example.com/en/works/', hreflang: 'en' },
+      { href: 'https://example.com/fr/oeuvres/', hreflang: 'fr' },
+      { href: 'https://example.com/en/works/', hreflang: 'x-default' },
     ]);
   });
   
   it('alternateLinks works with params', () => {
     const links = alternateLinks('works', 'https://example.com', { en: ['item-1'], fr: ['item-fr'] });
     expect(links).toEqual([
-      { href: 'https://example.com/en/works/item-1', hreflang: 'en' },
-      { href: 'https://example.com/fr/oeuvres/item-fr', hreflang: 'fr' },
-      { href: 'https://example.com/en/works/item-1', hreflang: 'x-default' },
+      { href: 'https://example.com/en/works/item-1/', hreflang: 'en' },
+      { href: 'https://example.com/fr/oeuvres/item-fr/', hreflang: 'fr' },
+      { href: 'https://example.com/en/works/item-1/', hreflang: 'x-default' },
     ]);
   });
 
@@ -70,9 +74,32 @@ describe('i18n Route Helpers', () => {
     expect(getPreferredLocale(undefined)).toBe('en');
   });
 
+  it('home route: /{lang}/ with no parameters', () => {
+    expect(localizedPath('home', 'en')).toBe('/en/');
+    expect(localizedPath('home', 'fr')).toBe('/fr/');
+    expect(pathToKey('/en/')).toBe('home');
+    expect(pathToKey('/fr')).toBe('home');
+    expect(() => localizedPath('home', 'en', ['x'])).toThrow(/home/);
+  });
+
+  it('localizedPath uses trailing slashes (spec URLs)', () => {
+    expect(localizedPath('works', 'fr', ['arrivee'])).toBe('/fr/oeuvres/arrivee/');
+    expect(localizedPath('territories', 'en', ['dreamland'])).toBe('/en/territories/dreamland/');
+    expect(localizedPath('contact', 'en')).toBe('/en/contact/');
+  });
+
   it('pathToKey returns undefined for unknown paths or segments', () => {
-    expect(pathToKey('/en')).toBeUndefined();
+    expect(pathToKey('/')).toBeUndefined();
     expect(pathToKey('/de/works')).toBeUndefined();
     expect(pathToKey('/en/unknown-segment')).toBeUndefined();
+  });
+});
+
+describe('canonicalUrl', () => {
+  it('uses the page locale params and a trailing slash', () => {
+    expect(canonicalUrl('works', 'fr', 'https://example.com/', { en: ['a'], fr: ['b'] })).toBe(
+      'https://example.com/fr/oeuvres/b/',
+    );
+    expect(canonicalUrl('home', 'en', 'https://example.com')).toBe('https://example.com/en/');
   });
 });

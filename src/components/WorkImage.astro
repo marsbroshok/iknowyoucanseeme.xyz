@@ -1,4 +1,8 @@
 ---
+/**
+ * Responsive work image (AVIF/WebP + JPEG fallback) on a placeholder of the
+ * work's dominant colour. Throws at build time if the asset does not exist.
+ */
 import { Picture } from 'astro:assets';
 
 interface Props {
@@ -7,9 +11,13 @@ interface Props {
   palette?: string[]; // hex array
   sizes?: string;
   className?: string;
+  /** `eager` + high fetch priority for the page's main (LCP) image. */
+  priority?: boolean;
+  /** Generated widths (px); defaults to full-size work widths. */
+  widths?: number[];
 }
 
-const { src, alt, palette, sizes = "(max-width: 2400px) 100vw, 2400px", className = "" } = Astro.props;
+const { src, alt, palette, sizes = "(max-width: 2400px) 100vw, 2400px", className = "", priority = false, widths = [600, 1200, 2400] } = Astro.props;
 
 const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/works/**/*.{jpeg,jpg,png,gif,avif,webp}');
 const imagePath = `/src/assets/${src}`;
@@ -24,10 +32,12 @@ const bgColor = palette && palette.length > 0 ? palette[0] : 'transparent';
   <Picture
     src={images[imagePath]()}
     alt={alt}
-    widths={[600, 1200, 2400]}
+    widths={widths}
     sizes={sizes}
     formats={['avif', 'webp']}
     fallbackFormat="jpg"
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : 'auto'}
     style="width: 100%; height: auto;"
   />
 </div>

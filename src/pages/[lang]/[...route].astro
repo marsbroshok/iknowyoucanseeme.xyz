@@ -1,0 +1,39 @@
+---
+/**
+ * Single static route for every awake-layer page in both locales. Localized
+ * first segments differ per locale (`works` / `oeuvres`), so one rest
+ * parameter covers them all; `buildSiteRoutes` is the tested source of truth
+ * for which paths exist. This file only loads content and picks the page.
+ */
+import { getCollection } from 'astro:content';
+import { withCopy } from '../../content/helpers.js';
+import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
+import type { Locale } from '../../i18n/RouteMap.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import { buildTerritoryTeaser } from '../../domain/TerritoryView.js';
+import HomePage from '../../components/pages/HomePage.astro';
+
+export async function getStaticPaths() {
+  const works = await getCollection('works');
+  const territories = await getCollection('territories');
+  const implemented = new Set<PageRef['kind']>(['home']);
+  return buildSiteRoutes({
+    works: works.map((w) => w.data.slug),
+    territories: territories.map((t) => t.data.slug),
+  }).filter((r) => implemented.has(r.props.page.kind));
+}
+
+interface Props {
+  page: PageRef;
+}
+
+const { page } = Astro.props;
+const lang = Astro.params.lang as Locale;
+const ui = uiText(lang);
+
+const works = (await Promise.all((await getCollection('works')).map(withCopy))).map((e) => e.data);
+const territories = (await Promise.all((await getCollection('territories')).map(withCopy))).map((e) => e.data);
+---
+{page.kind === 'home' && (
+  <HomePage lang={lang} territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))} />
+)}

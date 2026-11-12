@@ -1,0 +1,109 @@
+---
+/**
+ * Awake home `/{lang}/`: signature, the threshold line, one entry block per
+ * territory (statement excerpt + three works) and links to About,
+ * Exhibitions and Contact. Meaningful on its own; the drift world will later
+ * enhance this page progressively.
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import type { TerritoryTeaserView } from '../../domain/TerritoryView.js';
+import { localizedPath } from '../../i18n/LocalizedPath.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import BaseLayout from '../BaseLayout.astro';
+import WorkCard from '../WorkCard.astro';
+
+interface Props {
+  lang: Locale;
+  territories: readonly TerritoryTeaserView[];
+}
+
+const { lang, territories } = Astro.props;
+const ui = uiText(lang);
+---
+<BaseLayout lang={lang} routeKey="home" title="iknowyoucanseeme · Alexander Usoltsev" description={ui.t('desc_home')}>
+  <section class="home-intro">
+    <h1>iknowyoucanseeme</h1>
+    <p class="threshold-line">{ui.t('gaze')}</p>
+    <p class="artist">Alexander Usoltsev</p>
+  </section>
+
+  <section class="home-territories" aria-labelledby="territories-heading">
+    <h2 id="territories-heading">{ui.t('territories_heading')}</h2>
+    {territories.map((t) => (
+      <article class="territory-teaser" data-territory={t.slug}>
+        <h3><a href={t.href}>{t.title}</a></h3>
+        {t.excerpt && <p class="statement">{t.excerpt}</p>}
+        <ul class="work-grid">
+          {t.featured.map((w) => <li><WorkCard work={w} /></li>)}
+        </ul>
+        <p><a href={t.href}>{ui.t('territory_link')}</a></p>
+      </article>
+    ))}
+  </section>
+
+  <nav class="home-links" aria-label={ui.t('nav_label')}>
+    <ul>
+      <li><a href={localizedPath('works', lang)}>{ui.t('works_all_link')}</a></li>
+      <li><a href={localizedPath('about', lang)}>{ui.t('nav_about')}</a></li>
+      <li><a href={localizedPath('exhibitions', lang)}>{ui.t('nav_exhibitions')}</a></li>
+      <li><a href={localizedPath('contact', lang)}>{ui.t('nav_contact')}</a></li>
+    </ul>
+  </nav>
+</BaseLayout>
+
+<style>
+  section, nav.home-links {
+    padding: var(--space-4) var(--space-3);
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: 300;
+  }
+  .threshold-line {
+    font-size: var(--text-xl);
+    font-style: italic;
+    margin-top: var(--space-2);
+  }
+  .artist {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+  }
+  h2 {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .territory-teaser {
+    margin-top: var(--space-4);
+  }
+  h3 {
+    font-size: var(--text-xl);
+    font-weight: 400;
+  }
+  .statement {
+    max-width: 40rem;
+    margin: var(--space-2) 0 var(--space-3);
+  }
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3);
+  }
+  .home-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+</style>

@@ -23,12 +23,12 @@ describe('Astro Components Container', () => {
           routeKey: 'works',
           title: 'Test Title'
         },
-        request: new Request('https://www.iknowyoucanseeme.xyz/en/works')
+        request: new Request('https://www.iknowyoucanseeme.xyz/en/works/')
       });
 
       expect(result).toContain('lang="en"');
       expect(result).toContain('<title>Test Title</title>');
-      expect(result).toContain('rel="canonical" href="https://www.iknowyoucanseeme.xyz/en/works"');
+      expect(result).toContain('rel="canonical" href="https://www.iknowyoucanseeme.xyz/en/works/"');
       expect(result).toContain('hreflang="fr"');
       expect(result).toContain('hreflang="en"');
       
@@ -50,7 +50,7 @@ describe('Astro Components Container', () => {
           currentRouteKey: 'works'
         }
       });
-      expect(result).toContain('href="/fr/oeuvres"');
+      expect(result).toContain('href="/fr/oeuvres/"');
       expect(result).toContain('iknowyoucanseeme');
     });
   });

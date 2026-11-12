@@ -73,6 +73,23 @@ export function getWorksByTerritory(works: readonly Work[], territory: string): 
 }
 
 /**
+ * Picks `n` items spread evenly from first to last, keeping order (used for
+ * the three works shown per territory on the home page, so every zone is
+ * represented).
+ *
+ * @param items - Ordered items.
+ * @param n - How many to pick.
+ * @returns At most `n` distinct items, in input order.
+ */
+export function pickSpread<T>(items: readonly T[], n: number): T[] {
+  if (n <= 0) return [];
+  if (n >= items.length) return [...items];
+  if (n === 1) return [items[0]];
+  const step = (items.length - 1) / (n - 1);
+  return Array.from({ length: n }, (_, i) => items[Math.round(i * step)]);
+}
+
+/**
  * Finds the previous and next works around `currentSlug`, inside its
  * territory when `territory` is given, otherwise in index order.
  *
