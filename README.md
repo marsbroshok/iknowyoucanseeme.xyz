@@ -88,7 +88,10 @@ never removed; while the world is shown it is made `inert`.
   works). "Wake up / Se réveiller" stays visible above it. Returning
   visitors (`localStorage`) and deep links get a short threshold: while
   sound is on it still waits for Enter (the click unlocks audio); muted, it
-  fades in 1 s by itself. "Drift" on the awake page skips it. Entering
+  fades in 1 s by itself. Sound is on by default, so a visitor who arrives
+  from a QR wall label or another deep link clicks Enter once (that click
+  is the gesture that allows audio); muting while the short threshold waits
+  lets it fade by itself. "Drift" on the awake page skips it. Entering
   dispatches a bubbling `entered` event (`detail: { gesture, returning }`)
   on the world layer. Without JavaScript the awake page shows as before.
 - Sound: a generative ambience per zone (Arrival: a filtered sea and slow
