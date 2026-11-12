@@ -98,9 +98,21 @@ describe('bootDrift', () => {
     history.replaceState(null, '', '/');
   });
 
-  it('keeps the awake layer for reduced motion, and offers "Drift"', async () => {
+  it('mounts the world for reduced motion too (ADR 0009), with "Wake up" at hand', async () => {
     const world = fakeWorld();
-    bootDrift(document, win, world.load, () => ({ ...capable, reducedMotion: true }), now);
+    const boot = bootDrift(document, win, world.load, () => ({ ...capable, reducedMotion: true }), now);
+    await flush();
+    expect(boot?.decision).toMatchObject({ mode: 'world', reasons: [] });
+    expect(world.mounts).toHaveLength(1);
+    expect($('[data-drift]').hidden).toBe(false);
+    $('[data-drift-wake]').click();
+    expect($('[data-drift]').hidden).toBe(true);
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+  });
+
+  it('keeps the awake layer on Save-Data, and offers "Drift"', async () => {
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => ({ ...capable, saveData: true }), now);
     await flush();
     expect(world.load).not.toHaveBeenCalled();
     expect($('[data-drift]').hidden).toBe(true);
@@ -163,7 +175,7 @@ describe('bootDrift', () => {
 
   it('does not mount twice when "Drift" is pressed while loading', async () => {
     const world = fakeWorld();
-    bootDrift(document, win, world.load, () => ({ ...capable, reducedMotion: true }), now);
+    bootDrift(document, win, world.load, () => ({ ...capable, saveData: true }), now);
     $('[data-drift-start]').click();
     $('[data-drift-start]').click();
     await flush();

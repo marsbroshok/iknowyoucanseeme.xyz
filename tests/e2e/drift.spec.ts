@@ -7,7 +7,8 @@ import sharp from 'sharp';
 /**
  * The drift world in Chromium (WebGL2 on the GPU, or SwiftShader): it
  * mounts on the home pages, renders, lands deep links on the right work,
- * keeps the awake layer for reduced motion, passes axe while mounted, and
+ * keeps the awake layer on Save-Data (reduced motion does not route, ADR
+ * 0009), passes axe while mounted, and
  * sends its metrics. Assertions about the camera read `window.__driftDebug`,
  * which only the keyed test build (port 4326, PUBLIC_DRIFT_DEBUG=true) has.
  */
@@ -120,8 +121,23 @@ test.describe('Drift world', () => {
     expect(await page.evaluate(() => history.length)).toBe(historyLength);
   });
 
-  test('reduced motion keeps the awake layer and never loads the world', async ({ page }) => {
+  test('reduced motion still gets the world (ADR 0009); "Wake up" is visible and leads to the awake page', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`${KEYED}/en/`);
+    await worldReady(page);
+    await expect(page.locator('[data-drift]')).toBeVisible();
+    expect(await page.locator('main').getAttribute('inert')).toBe('');
+    const wake = page.locator('[data-drift-wake]');
+    await expect(wake).toBeVisible();
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await wake.click();
+    await expect(page.locator('[data-drift]')).toBeHidden();
+    expect(await page.locator('main').getAttribute('inert')).toBeNull();
+    await expect(page.locator('[data-drift-start]')).toBeFocused();
+  });
+
+  test('Save-Data keeps the awake layer and never loads the world', async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(navigator, 'connection', { value: { saveData: true } }));
     const chunks: string[] = [];
     page.on('request', (r) => {
       if (/DriftWorld/.test(r.url())) chunks.push(r.url());

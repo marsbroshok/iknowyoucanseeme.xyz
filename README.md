@@ -71,9 +71,11 @@ Old addresses of the Hugo site (`/dreamland/`, `/blog/`,
 ## The drift
 
 On `/en/` and `/fr/` a small boot script (`src/world/island/DriftBoot.ts`)
-decides between the world and the awake page: the world needs WebGL2, no
-`prefers-reduced-motion`, Save-Data off and, where the browser says, at
-least 4 GB of memory and 4 cores. The visitor's "Wake up / Se réveiller"
+decides between the world and the awake page: the world needs WebGL2,
+Save-Data off and, where the browser says, at least 4 GB of memory and 4
+cores. `prefers-reduced-motion` does not route (artist decision,
+`docs/adr/0009-reduced-motion-does-not-route.md`): the always-visible
+"Wake up / Se réveiller" control is the opt-out. The visitor's "Wake up / Se réveiller"
 and "Drift / Dériver" choice is remembered in `localStorage`. Three.js is
 loaded only after the first paint and only when the world is shown
 (≤ 250 KB gzipped, checked by `tests/e2e/bundle.spec.ts`). The awake HTML is

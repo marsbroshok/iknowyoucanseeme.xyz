@@ -14,7 +14,7 @@ The drift world (track `drift-world_20261111`) draws with Three.js and custom GL
 
 - All code that needs a GPU context lives in one directory, `src/world/gl/`, and that directory is excluded from Vitest coverage (`coverage.exclude` in `vitest.config.ts`).
 - `src/world/gl/` stays thin: it only wires Three.js objects to decisions made elsewhere. Every decision (capability routing, layout, motion, apparition curve, texture budget and streaming, sky colour, compass bearings, deep links, metrics, DOM controls) lives in `src/world/core/`, `src/world/stream/` or `src/world/island/`, which stay under the 100% gate with unit and fast-check property tests.
-- The GL code is verified by Playwright in Chromium (WebGL2 through SwiftShader): the canvas renders, a deep link lands on the right work, reduced motion keeps the awake layer, axe passes with the world mounted, and a bundle-size test keeps the world chunk within its budget.
+- The GL code is verified by Playwright in Chromium (WebGL2 through SwiftShader): the canvas renders, a deep link lands on the right work, reduced motion keeps the awake layer (since ADR 0009: Save-Data keeps the awake layer; reduced motion no longer routes), axe passes with the world mounted, and a bundle-size test keeps the world chunk within its budget.
 - A unit test asserts that no file outside `src/world/gl/` imports `three`, so GPU code cannot spread into covered directories unnoticed, and that the exclusion stays limited to that one directory.
 
 ## Considered & Rejected Alternatives

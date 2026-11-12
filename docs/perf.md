@@ -16,7 +16,8 @@ its pure logic and input) adds about 5.5 KB gzipped to the world chunk and
 nothing to the boot module (before: 3.7 KB / 124.2 KB).
 
 Other pages load no JavaScript file. Devices that get the awake layer
-(reduced motion, Save-Data, no WebGL2, < 4 GB or < 4 cores) never request
+(Save-Data, no WebGL2, < 4 GB or < 4 cores; reduced motion does not route,
+ADR 0009) never request
 the world chunk (`tests/e2e/drift.spec.ts`).
 
 ## Frame rate (measured 2026-11-12, `npm run perf:trace`)
