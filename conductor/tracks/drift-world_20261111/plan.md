@@ -12,10 +12,10 @@ Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 
 ## Phase 2: Rendering
 
-- [ ] Task: Install `three`; `WorldStage` (renderer, fog, camera, resize, DPR cap by tier)
-- [ ] Task: `ApparitionMesh` (alpha-mask shader, distance fade) + `TextureLoader` LOD adapter
-- [ ] Task: `PaletteSky` background shift + `HorizonCompass`
-- [ ] Task: Input adapters (wheel, pointer drag, keyboard, device orientation with iOS permission flow)
+- [x] Task: Install `three`; `WorldStage` (renderer, fog, camera, resize, DPR cap by tier) `50cff7d` (ADR 0006: GPU code in `src/world/gl/`, verified by Playwright)
+- [x] Task: `ApparitionMesh` (alpha-mask shader, distance fade) + `TextureLoader` LOD adapter `fd80309` (`TextureStreamer` generic + `WorkTextureLoader`)
+- [x] Task: `PaletteSky` background shift + `HorizonCompass` `0f35afc`
+- [x] Task: Input adapters (wheel, pointer drag, keyboard, device orientation with iOS permission flow) `0aef2d7`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Integration
@@ -42,4 +42,7 @@ From `launch_20261111` review (non-blocking; do them as the first small task):
 - **Override (FR1):** "Drift" can show the world on a device routed to the awake layer automatically (deliberate choice of the visitor), never without WebGL2; such devices render in the low tier. "Wake up" always wins.
 - **Layout (FR2):** works sit in single file along each territory path with seeded sideways offsets (±7 units), so minimum spacing is provable by construction and Tab cycling is natural. Territory paths are 300 units apart.
 - **Keyboard (FR3):** the first Tab goes to the nearest work, then Tab/Shift+Tab follow path order (wrapping).
+- **Sky (FR4):** the sky leans at most 30 % towards the nearest work's dominant colour (within 20 units) and is capped so the light UI text over the world keeps ≥ 4.5:1.
+- **Compass (FR4):** HTML over the canvas (real text, translatable, read by screen readers); current region = nearest stretch of path.
+- **Input (FR3):** drag "pulls the world"; tilt uses a 5° dead zone with the first reading as neutral; a texture that fails to load is reported once and not retried (the work keeps its colour veil).
 - **Texture memory (FR5):** RGBA8 × 4/3 per texture; high tier 192 MB (2400 px full images), low tier 64 MB (1200 px full images).
