@@ -7,15 +7,15 @@ Track: `threshold-gaze_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../
 - [x] Task: `ThresholdState` machine (first/returning/reduced-motion; emits `entered`) — Red/Green (716eba7; reduced motion is deliberately not an input, ADR 0009)
 - [x] Task: `GazeDirector` (dwell detection, bounded rotation, once-per-session line with fake clock) — Red/Green + property tests (946ade8)
 - [x] Task: `FragmentSurfacer` + `FragmentProgress` store — Red/Green + property tests (3a02cdd; with `FragmentCatalog`, `splitSentences` and territory sentences in the manifest)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — gates at 4d772e5 in a fresh clone: `npm run check` exit 0 and `npm run test:e2e` exit 0 (191 passed) with `CI=true` and with `env -u CI` (a first run at a79497f failed coverage on the shared test storage, fixed in 4d772e5)
 
 ## Phase 2: Presentation
 
-- [ ] Task: Threshold overlay (HTML/CSS + breathing-leak shader), Enter / Wake up controls, keyboard support
-- [ ] Task: Gaze rotation on apparitions + fog text rendering for the gaze line
-- [ ] Task: Fragment text in the world + `aria-live` mirror
-- [ ] Task: "Fragments found n / N" on awake territory pages (progressive, JS-only enhancement)
-- [ ] Task: e2e: first vs returning visit, keyboard entry, aria-live
+- [x] Task: Threshold overlay (HTML/CSS + breathing-leak shader), Enter / Wake up controls, keyboard support (4bd10d9, 6c19608, 4497c91, 34f1a1e)
+- [x] Task: Gaze rotation on apparitions + fog text rendering for the gaze line (4497c91, 34f1a1e)
+- [x] Task: Fragment text in the world + `aria-live` mirror (4497c91, 34f1a1e)
+- [x] Task: "Fragments found n / N" on awake territory pages (progressive, JS-only enhancement) (36d1b30)
+- [x] Task: e2e: first vs returning visit, keyboard entry, aria-live (bb61eae; docs 1c6a46f)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
@@ -39,3 +39,11 @@ Ledger of reasonable assumptions made while the artist was away (also in commit 
 - A4 (59cff04): blank entries in declared techniques do not count as declared.
 - A6 (3a02cdd): sentence ids are per-language indices (EN Dreamland 7 sentences, FR 6); "found n / N" counts only ids valid in the page language, so n ≤ N. A territory without works has no place for sentences and does not count them.
 - A5 (13a864a): declared techniques are a small vocabulary named in `ui.yaml` (`technique_<key>`); FR label for "colour filter" is "filtre coloré" (draft, native proof pending); "ICM" stays "ICM".
+- A7 (34f1a1e, ADR 0010): the threshold line is the gaze line (`ui.yaml` `gaze`, as on the awake home); `pages/threshold.yaml` keeps only its title. World text (gaze line, fragments) is HTML over the canvas, `aria-hidden`, mirrored into a polite live region.
+- A8 (6c19608): "Drift" on the awake page skips the threshold (the click is the gesture); "Wake up" on the threshold dismisses it without `entered`. The `entered` event bubbles from the world layer with `detail: { gesture, returning }`.
+- A9 (36d1b30): the territory counter shows with JavaScript even at 0 / N; `FragmentCount` keeps its own copy of the storage key (tested against `FragmentProgress.KEY`) so the script stays inline (ADR 0007); territory pages get a 2 KB inline budget.
+- A10 (34f1a1e): while the full threshold is up the world holds still and settling does not surface fragments behind it.
+
+## Out-of-scope findings
+
+- None blocking. Note: ADR 0007 still mentions "phones with reduced motion" as an awake-layer case in its rejected alternatives (historical wording; superseded by ADR 0009).
