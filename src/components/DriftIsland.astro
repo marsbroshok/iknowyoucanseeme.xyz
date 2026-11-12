@@ -2,7 +2,8 @@
 /**
  * The drift world layer of the home page (progressive enhancement): the
  * canvas, the always-visible "Wake up" control, help text, the horizon
- * compass, the keyboard work list and the build-time world manifest. It is
+ * compass, the keyboard work list, the focus dialog and the build-time world
+ * manifest. It is
  * rendered hidden; `bootDrift` shows it on capable devices after first
  * paint and lazy-loads the Three.js world. Without JavaScript, or on the
  * awake layer, the page below is untouched.
@@ -31,6 +32,14 @@ const ui = uiText(lang);
   <p class="drift-help">{ui.t('drift_help')}</p>
   <div class="drift-compass" data-drift-compass></div>
   <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
+  <dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title">
+    <img class="drift-focus-image" data-focus-image alt="" />
+    <h2 id="drift-focus-title" data-focus-title></h2>
+    <p class="drift-focus-fragment" data-focus-fragment></p>
+    <p><a data-focus-work>{ui.t('drift_open_work')}</a></p>
+    <p data-focus-contact-row><a data-focus-contact>{ui.t('work_contact_link')}</a></p>
+    <button type="button" data-focus-close>{ui.t('dialog_close')}</button>
+  </dialog>
 </section>
 <script type="application/json" id="drift-manifest" set:html={JSON.stringify(manifest)} />
 
@@ -140,6 +149,39 @@ const ui = uiText(lang);
   .drift-marker[data-side='right'] {
     transform: translateX(-100%);
   }
+  .drift-focus {
+    max-width: min(40rem, 92vw);
+    max-height: 92vh;
+    padding: var(--space-3);
+    background: var(--ink);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+  }
+  .drift-focus::backdrop {
+    background: rgb(11 16 48 / 0.6);
+  }
+  .drift-focus-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 60vh;
+    margin: 0 auto var(--space-3);
+  }
+  .drift-focus h2 {
+    font-size: var(--text-xl);
+    font-weight: 400;
+    margin: 0 0 var(--space-2);
+  }
+  .drift-focus-fragment {
+    font-style: italic;
+    margin: 0 0 var(--space-3);
+  }
+  .drift-focus a {
+    color: var(--text-primary);
+  }
   .drift-works {
     list-style: none;
     margin: 0;
@@ -148,7 +190,7 @@ const ui = uiText(lang);
   .drift-works button {
     position: absolute;
     left: 50%;
-    bottom: calc(var(--space-5) + var(--space-4));
+    bottom: 9rem;
     transform: translateX(-50%);
     max-width: 90vw;
     opacity: 0;

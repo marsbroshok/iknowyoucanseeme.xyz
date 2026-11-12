@@ -7,6 +7,7 @@ import { CAMERA } from '../core/StageSettings.js';
 import { TextureStreamer } from '../stream/TextureStreamer.js';
 import { HorizonCompass } from '../island/HorizonCompass.js';
 import { WorkList } from '../island/WorkList.js';
+import { FocusOverlay } from '../island/FocusOverlay.js';
 import { TiltControl } from '../island/TiltControl.js';
 import { WheelInput } from '../island/input/WheelInput.js';
 import { PointerDragInput } from '../island/input/PointerDragInput.js';
@@ -94,7 +95,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     halfFov(),
   );
 
-  const open = (slug: string) => win.location.assign(work(slug).href);
+  const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'));
+  const open = (slug: string) => overlay.open(work(slug));
   const list = new WorkList(part<HTMLUListElement>(root, '[data-drift-works]'), session.stops.map((s) => ({ slug: s.slug, title: work(s.slug).title })), {
     onFocus: (slug) => session.focus(slug),
     onOpen: open,
@@ -119,7 +121,9 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   stage.start((dt) => {
     keys.poll(acc, dt);
     tilt.poll(acc, dt);
-    const f = session.frame(acc.drain(), dt);
+    const input = acc.drain();
+    // The world holds still while a work is open in the focus dialog.
+    const f = session.frame(overlay.isOpen ? { thrust: 0, turn: 0 } : input, dt);
     frames++;
     stage.setPose(f.state);
     stage.setSkyColor(f.sky);
@@ -157,6 +161,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       keys.detach();
       tilt.detach();
       list.detach();
+      overlay.detach();
     },
   };
 }

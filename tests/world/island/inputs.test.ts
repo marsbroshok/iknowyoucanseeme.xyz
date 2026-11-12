@@ -29,6 +29,14 @@ describe('WheelInput', () => {
     layer.dispatchEvent(new WheelEvent('wheel', { deltaY: 120 }));
     expect(acc.drain()).toEqual({ thrust: 0, turn: 0 });
   });
+
+  it('leaves wheel events over the open focus dialog alone (it may scroll)', () => {
+    new WheelInput(layer, acc);
+    const event = new WheelEvent('wheel', { deltaY: 120, cancelable: true, bubbles: true });
+    (document.querySelector('#d a') as HTMLElement).dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(acc.drain()).toEqual({ thrust: 0, turn: 0 });
+  });
 });
 
 describe('PointerDragInput', () => {

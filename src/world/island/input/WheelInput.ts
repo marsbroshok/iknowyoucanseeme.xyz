@@ -3,10 +3,12 @@ import { InputMapping } from '../../core/InputMapping.js';
 
 /**
  * Wheel and trackpad scrolling over the world drift forward and back
- * (FR3). The page itself does not scroll while the world is shown.
+ * (FR3). The page itself does not scroll while the world is shown; wheel
+ * events over the open focus dialog are left alone.
  */
 export class WheelInput {
   private readonly onWheel = (event: WheelEvent): void => {
+    if ((event.target as Element).closest('dialog')) return;
     event.preventDefault();
     this.acc.add(InputMapping.wheel(event.deltaY, event.deltaMode));
   };

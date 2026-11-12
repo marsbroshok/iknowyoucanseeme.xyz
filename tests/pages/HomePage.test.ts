@@ -80,6 +80,14 @@ describe('HomePage', () => {
       expect(html).toMatch(/<canvas[^>]*data-drift-canvas[^>]*aria-hidden="true"/);
     });
 
+    it('has the focus dialog, labelled by its title, with light dismiss and localized links', async () => {
+      const html = await renderWorld('fr');
+      expect(html).toMatch(/<dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title"/);
+      expect(html).toContain('>Voir la page de l&#39;œuvre</a>');
+      expect(html).toContain('>Demander au sujet de cette œuvre</a>');
+      expect(html).toContain('>Fermer la boîte de dialogue</button>');
+    });
+
     it('offers a hidden "Drift" button in the intro (shown by the boot script on the awake layer)', async () => {
       const html = await renderWorld('fr');
       expect(html).toMatch(/<button type="button" class="drift-start"[^>]*data-drift-start[^>]*hidden[^>]*>Dériver<\/button>/);
