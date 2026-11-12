@@ -1,0 +1,4 @@
+{
+  "gates": ["npm run check", "npm run test:e2e"],
+  "ignoredDirsToPreserve": ["intake"]
+}
