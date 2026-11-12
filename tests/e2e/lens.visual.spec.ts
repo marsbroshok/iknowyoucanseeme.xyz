@@ -203,12 +203,12 @@ test.describe('Lens shaders (fixed test texture)', () => {
     const idx = inside();
     const lowBase = await draw(page, null, 'low');
     expect(maxDiff(await draw(page, { mode: 'fracture' }, 'low'), lowBase, idx)).toBeLessThanOrEqual(1);
-    const blur = { mode: 'icm', blur: [0.08, 0] } as const;
+    const blur: Lens = { mode: 'icm', blur: [0.08, 0] };
     const lowBlur = await draw(page, blur, 'low');
     expect(steps(lowBlur, idx).dx).toBeLessThan(steps(lowBase, idx).dx * 0.8);
     // Fewer samples along the streak: visibly not the high-tier picture.
     expect(meanDiff(lowBlur, await draw(page, blur, 'high'), idx)).toBeGreaterThan(0.5);
-    const flare = { mode: 'flare', center: [0.3, 0.6] } as const;
+    const flare: Lens = { mode: 'flare', center: [0.3, 0.6] };
     expect(meanDiff(await draw(page, flare, 'low'), await draw(page, flare, 'high'), idx)).toBeGreaterThan(0.5);
     for (const mode of ['gel', 'mirror', 'exposure', 'flare'] as const) expect(meanDiff(await draw(page, { mode }, 'low'), lowBase, idx), mode).toBeGreaterThan(6);
     expect(await shaderErrors(page)).toEqual([]);
