@@ -20,7 +20,7 @@ Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 ## Phase 3: Integration
 
 - [x] Task: Wire lens into `ApparitionMesh`; Shift / two-finger "see unaltered" `90ec068`
-- [ ] Task: Touch behaviour e2e (emulated touch) + fps trace with lens active
+- [x] Task: Touch behaviour e2e (emulated touch) + fps trace with lens active `2bfd05f`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
