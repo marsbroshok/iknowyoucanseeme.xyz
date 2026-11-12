@@ -65,10 +65,14 @@ test.describe('Drift world', () => {
     await expect(page.locator('main [data-territory="dreamland"]')).toHaveCount(1);
     expect(await page.locator('main').getAttribute('inert')).toBe('');
     await page.waitForFunction(() => (window as unknown as { __driftDebug: DebugState }).__driftDebug.loaded.arrivee !== undefined, null, { timeout: 15_000 });
-    await page.waitForTimeout(300);
-    const { channels } = await sharp(await page.locator('[data-drift-canvas]').screenshot()).stats();
-    const spread = Math.max(...channels.map((c) => c.stdev));
-    expect(spread).toBeGreaterThan(8);
+    // Wait for the drawn picture itself (state), not a fixed delay: a slow
+    // software renderer may need several frames after the texture arrived.
+    await expect
+      .poll(async () => {
+        const { channels } = await sharp(await page.locator('[data-drift-canvas]').screenshot()).stats();
+        return Math.max(...channels.map((c) => c.stdev));
+      }, { timeout: 10_000 })
+      .toBeGreaterThan(8);
     expect(errors).toEqual([]);
   });
 
