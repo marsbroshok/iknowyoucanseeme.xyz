@@ -50,3 +50,10 @@ From `sound_20261111` and earlier reviews (do first):
 - Review of every fixed delay in `tests/e2e/`: all but one guard negative checks (nothing happens during the delay: no AudioContext, pose unchanged, no gaze turn before 2 s). The one positive check after a fixed delay was `drift.spec.ts` "canvas not blank" (texture loaded → 300 ms → one screenshot), sensitive to slow SwiftShader frames under load; it now polls the drawn picture with the same threshold (`e1b7e12`).
 - Remaining suspect (not reproduced, left unchanged): `lens.touch.spec.ts` measures the lens fade in wall-clock ms (400–900 ms) while the fade advances with frame time; a heavily loaded machine with very slow frames could stretch it. Recorded as out-of-scope finding; no retry or skip added.
 - New e2e of this track wait for state (frames, `expect.poll`) and use Playwright's fake clock (`page.clock.fastForward`) for the 5 s / 10 s / 90 s kiosk timers.
+
+## Review fixes
+
+- [x] Blocking (`src/world/island/DriftBoot.ts`, `src/world/gl/DriftWorld.ts`): ignore `?w=` on open and on `"Wake up"` → 90 s idle reset in `?kiosk=1` (`startSlug = null`, `deepLink = false`), skip `history.replaceState` when `kiosk` is true, and cover `?kiosk=1&w=<slug>` plus settle → `"Wake up"` → 90 s reset to `Dreamland · Arrival` in `tests/world/island/DriftBoot.test.ts` and `tests/e2e/kiosk.spec.ts` (pausing live fake-clock ticks around `fastForward` so Playwright's `_runTo` does not rewind ticks) `00bb469`
+- [x] Non-blocking (`src/world/island/DriftBoot.ts`): guard `if (!kiosk) preference.write('world')` on `[data-drift-start]` to match `[data-drift-wake]`, with unit test in `tests/world/island/DriftBoot.test.ts` `d4d112d`
+- [x] Non-blocking (`README.md`): update the intro so it describes the shipped leak, specimens and exhibition mode (`?kiosk=1`) instead of saying the leak comes in a later track, with guard in `tests/readme.test.ts` `1922a29`
+- [x] Non-blocking (`tests/qr/QrCode.test.ts`): add an explicit `15_000` ms timeout to the 15-run Sharp + `jsqr` property test `cb8f376`
