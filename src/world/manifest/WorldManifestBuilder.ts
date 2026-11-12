@@ -5,7 +5,7 @@ import { titleOf, type TitledEntry } from '../../domain/TerritoryView.js';
 import { NIGHT_BLUE } from '../core/StageSettings.js';
 import type { ManifestImage, ManifestWork, WorldManifest } from '../core/WorldManifest.js';
 import type { ZoneSlug } from '../core/FieldLayout.js';
-import { techniqueHints } from './TechniqueHints.js';
+import { lensTechniques } from './TechniqueHints.js';
 
 /** Long edge (px) of the three image sizes the world streams. */
 export const IMAGE_EDGES = { low: 480, mid: 1200, high: 2400 } as const;
@@ -33,8 +33,8 @@ export interface ManifestSources {
 /**
  * The world manifest embedded in the home page of one language: names of
  * territories and zones, and for every work its title, fragment, links,
- * dominant colour and palette, the techniques its texts name (for the
- * lens) and three image sizes (FR5 low/full levels).
+ * dominant colour and palette, the techniques it declares (or, without
+ * declared ones, that its title and caption name; for the lens) and three image sizes (FR5 low/full levels).
  *
  * @param sources - Content, UI strings and image builder.
  * @returns The manifest.
@@ -74,7 +74,7 @@ async function manifestWork(work: Work, sources: ManifestSources): Promise<Manif
     contactHref: view.enquirable ? view.contactHref : null,
     color: first.palette[0] ?? NIGHT_BLUE,
     palette: [...first.palette],
-    techniques: techniqueHints([...(work.techniques ?? []), work.title.fr, work.title.en ?? '', work.sourceNotes ?? '']),
+    techniques: lensTechniques(work.techniques ?? [], [work.title.fr, work.title.en ?? '', work.sourceNotes ?? '']),
     images: { low, mid, high },
   };
 }

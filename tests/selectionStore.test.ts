@@ -9,10 +9,10 @@ describe('SelectionStore', () => {
     fc.assert(
       fc.property(
         fc.uniqueArray(fc.record({
-          src: fc.string(), keep: fc.boolean(), slug: fc.string(), title_fr: fc.string(), territory: fc.string(), zone: fc.string()
+          src: fc.string(), keep: fc.boolean(), slug: fc.string(), title_fr: fc.string(), territory: fc.string(), zone: fc.string(), techniques: fc.array(fc.string())
         }, { requiredKeys: ['src', 'keep', 'slug', 'title_fr', 'territory'] }), { selector: o => o.src }),
         fc.uniqueArray(fc.record({
-          src: fc.string(), keep: fc.boolean(), slug: fc.string(), title_fr: fc.string(), territory: fc.string(), zone: fc.string()
+          src: fc.string(), keep: fc.boolean(), slug: fc.string(), title_fr: fc.string(), territory: fc.string(), zone: fc.string(), techniques: fc.array(fc.string())
         }, { requiredKeys: ['src', 'keep', 'slug', 'title_fr', 'territory'] }), { selector: o => o.src }),
         (original, proposed) => {
           const merged = mergeSelection(original as SelectionEntry[], proposed as SelectionEntry[]);
@@ -40,7 +40,10 @@ describe('SelectionStore', () => {
     fs.writeFileSync(temp, 'foo: bar'); // missing selection key
     expect(readSelection(temp)).toEqual([]);
     
-    const entries: SelectionEntry[] = [{ src: '1.jpg', keep: true, slug: 's', title_fr: 't', territory: 't1' }];
+    const entries: SelectionEntry[] = [
+      { src: '1.jpg', keep: true, slug: 's', title_fr: 't', territory: 't1' },
+      { src: '2.jpg', keep: true, slug: 'r', title_fr: 'Les Reflets', territory: 't1', techniques: ['colour filter'] },
+    ];
     writeSelection(temp, entries);
     
     expect(readSelection(temp)).toEqual(entries);

@@ -79,6 +79,16 @@ describe('buildWorldManifest', () => {
     expect(JSON.stringify(m)).not.toContain('Tech details');
   });
 
+  it('takes the lens techniques only from declared techniques when there are any (artist decision 2026-11-12)', async () => {
+    const works = [
+      fixtureWork({ slug: 'declared', title: { fr: 'Les Reflets II' }, techniques: ['colour filter'] }),
+      fixtureWork({ slug: 'inferred', title: { fr: 'Les Reflets III' }, techniques: [] }),
+      fixtureWork({ slug: 'unknown', title: { fr: 'Éclipse au miroir' }, sourceNotes: '#icm', techniques: ['cyanotype'] }),
+    ];
+    const m = await buildWorldManifest({ works, territories, zones, ui: uiText('en'), resolve });
+    expect(m.works.map((w) => w.techniques)).toEqual([['filter'], ['mirror'], []]);
+  });
+
   it('asks for the low, mid and high sizes', () => {
     expect(IMAGE_EDGES).toEqual({ low: 480, mid: 1200, high: 2400 });
   });

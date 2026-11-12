@@ -36,7 +36,7 @@ describe('ContentGenerator', () => {
     const selection: SelectionEntry[] = [
       { src: 'temp_ig.jpg', keep: true, slug: 'work-1', title_fr: 'w1', territory: 'dreamland', zone: 'arrival', people: { consent: 'confirmed' } },
       { src: 'not_in_ig.jpg', keep: true, slug: 'work-1', title_fr: 'w1', territory: 'dreamland', zone: 'arrival' }, // 2nd image for work-1
-      { src: 'temp_ig.jpg', keep: true, slug: 'work-3', title_fr: 'w3', territory: 'dreamland', zone: 'arrival' }, // no original
+      { src: 'temp_ig.jpg', keep: true, slug: 'work-3', title_fr: 'w3', territory: 'dreamland', zone: 'arrival', techniques: ['colour filter'] }, // no original; declared technique
       { src: 'temp_ig_invalid.jpg', keep: true, slug: 'work-4', title_fr: 'w4', territory: 'dreamland', zone: 'arrival' }, // invalid image throws
       { src: 'not_in_ig.jpg', keep: true, slug: 'work-5', title_fr: 'w5', territory: 't2' }, // missing from igImages
       { src: 'temp_ig.jpg', keep: true, slug: 'work-7', title_fr: 'w7', territory: 't7' }, // has .png
@@ -65,6 +65,10 @@ describe('ContentGenerator', () => {
     expect(content).toContain('caption');
     expect(content).toContain('source: original'); // due to swap
     
+    // Declared techniques are written; works without them get []
+    expect(yaml.parse(fs.readFileSync(path.join(srcDir, 'content/works/work-3.yaml'), 'utf-8')).techniques).toEqual(['colour filter']);
+    expect(yaml.parse(content).techniques).toEqual([]);
+
     // Dropped work absent
     expect(fs.existsSync(path.join(srcDir, 'content/works/work-2.yaml'))).toBe(false);
     

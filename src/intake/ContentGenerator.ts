@@ -55,7 +55,7 @@ export async function generateContentFiles(
         zone: s.zone as "arrival" | "lens" | "leak" | undefined,
         year: s.slug.startsWith('venise-portrait') ? 2025 : 2026,
         medium: s.slug.startsWith('esquisse-argile') ? 'ceramic' : 'photo',
-        techniques: [],
+        techniques: [...(s.techniques ?? [])],
         availability: 'unknown',
         images: [],
         sourceNotes: `${postDate}\n${postCaption}`
