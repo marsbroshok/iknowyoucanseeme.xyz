@@ -71,7 +71,7 @@ Then open **Actions → "Deploy to GitHub Pages"** and watch the run:
    integrity hash matches the public tarballs (ADR 0004). If it fails with
    `ENOTFOUND`/`E404` on a strange host, run `npm run lockfile:normalize`,
    commit and push again.
-3. **Check** and **Build site** pass; **deploy** shows the page URL.
+3. **Check and build** passes; **deploy** shows the page URL.
 
 ## 6. DNS / HTTPS check
 
