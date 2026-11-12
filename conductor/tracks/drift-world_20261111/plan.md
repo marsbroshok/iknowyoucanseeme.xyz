@@ -10,13 +10,13 @@ Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 - [x] Task: `ApparitionCurve` + `TextureBudget` — Red: monotonic opacity by distance; budget cap never exceeded — Green `9ed231e`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run check` exit 0 / `npm run test:e2e` exit 0 with `CI=true`; check 0 / e2e 0 with `CI` unset (423 unit tests, 100% coverage; 140 e2e).
 
-## Phase 2: Rendering
+## Phase 2: Rendering [checkpoint: 0aef2d7]
 
 - [x] Task: Install `three`; `WorldStage` (renderer, fog, camera, resize, DPR cap by tier) `50cff7d` (ADR 0006: GPU code in `src/world/gl/`, verified by Playwright)
 - [x] Task: `ApparitionMesh` (alpha-mask shader, distance fade) + `TextureLoader` LOD adapter `fd80309` (`TextureStreamer` generic + `WorkTextureLoader`)
 - [x] Task: `PaletteSky` background shift + `HorizonCompass` `0f35afc`
 - [x] Task: Input adapters (wheel, pointer drag, keyboard, device orientation with iOS permission flow) `0aef2d7`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run check` 0 / `npm run test:e2e` 0 with `CI=true`; 0 / 0 with `CI` unset. Rendering is not mounted yet; its browser verification (SwiftShader smoke, deep link, reduced motion, axe, bundle size) lands with the island in phase 3.
 
 ## Phase 3: Integration
 
