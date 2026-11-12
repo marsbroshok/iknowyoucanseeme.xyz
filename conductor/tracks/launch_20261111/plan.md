@@ -18,10 +18,10 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 
 ## Phase 3: Exhibition labels & docs
 
-- [ ] Task: `QrCode` wrapper (SVG) — Red: decode round-trip test — Green
-- [ ] Task: Labels page `/{lang}/labels/` (noindex, print CSS, excluded from sitemap)
-- [ ] Task: `docs/deploy.md` cutover + rollback runbook
-- [ ] Task: Clean-clone build test
+- [x] Task: `QrCode` wrapper (SVG) — Red: decode round-trip test — Green `28711ee`
+- [x] Task: Labels page `/{lang}/labels/` (noindex, print CSS, excluded from sitemap) `1d7176a`
+- [x] Task: `docs/deploy.md` cutover + rollback runbook `22030cd`
+- [x] Task: Clean-clone build test `ac8398f` — `npm run verify:clean-clone` at `ac8398f`: exit 0 (fresh clone, `npm ci` from registry.npmjs.org with empty cache: 654 packages; `npm run check` 62 files passed; `astro build` 104 pages)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
@@ -31,7 +31,7 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
     - Verify integrity hashes match public tarballs for a sample (and document any mismatch); if public access is blocked from this machine, document the verification step for the artist in `docs/deploy.md` (first GitHub Actions run).
     - Add a lockfile guard test (no `airlock-proxy`/private hosts) to the gates.
     - Done `f99c3cd`: normalizer in `tools/lockfile/` (not `scripts/`, so it is inside the 100% coverage scope), `npm run lockfile:normalize`, project `.npmrc` `replace-registry-host=npmjs`, guard `tests/lockfile/committedLockfile.test.ts`, ADR 0004. Public registry IS reachable from this machine: `npm ci --registry=https://registry.npmjs.org/ --replace-registry-host=never` with a fresh cache → exit 0, all 625 tarballs fetched from the public registry with integrity verified (no mismatch). Local `npm ci` with a fresh cache → exit 0 via the mirror. Also found and repaired a version-less stub entry (`astro/node_modules/sharp/node_modules/@img/sharp-linuxmusl-arm64`) that crashed the public install (`Invalid Version`).
-- [ ] Task: Footer/skip-link localisation was fixed in awake-layer; keep the FR/EN UI-string regression test green when removing Hugo.
+- [x] Task: Footer/skip-link localisation was fixed in awake-layer; keep the FR/EN UI-string regression test green when removing Hugo. — green at every phase gate (LanguageGuard over `dist/` and `dist-e2e-keyed/`, new UI strings added in EN + FR)
 
 ## Assumptions ledger
 
@@ -41,4 +41,7 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 - GitHub Actions uses Node 24 (LTS) and `registry.npmjs.org`; build variables are repository *variables* (public values), not secrets.
 - Old Hugo addresses: only menu/post pages existed (authors `render: never`, no tags on the post); RSS feeds are left as 404.
 - GoatCounter custom event data is sent as the event title (`key=value`, sorted keys); page views are counted by `count.js` itself.
+- `qrcode` pinned at 1.4.1: newest version the local npm mirror serves (public latest 1.5.4).
+- Labels: FR sheet keeps the spec's `/fr/labels/` address; labels sorted by French title; each sheet's QR codes point to that language's work pages.
+- The clean-clone rehearsal (done before `docs/deploy.md`) runs `npm run check` + `astro build` with placeholder deploy variables, like the CI job.
 - Code license stays MIT (holder → Alexander Usoltsev, 2026); works, images and texts are all rights reserved (matches `legal.yaml` `image_use`).
