@@ -19,11 +19,13 @@ export default defineConfig({
     },
   ],
   // Two builds: the default one (no Web3Forms key → email-only contact page;
-  // no GoatCounter code → no analytics script) and a keyed one (contact form
-  // and GoatCounter script rendered; both services are mocked in tests).
+  // no GoatCounter code → no analytics script; production-identical) and a
+  // keyed test build (contact form and GoatCounter script rendered, both
+  // services mocked in tests; PUBLIC_DRIFT_DEBUG exposes the drift world's
+  // read-only state as window.__driftDebug).
   webServer: {
     command:
-      'npm run build && ASTRO_OUT_DIR=dist-e2e-keyed PUBLIC_WEB3FORMS_KEY=e2e-test-key PUBLIC_GOATCOUNTER_CODE=e2e-test npx astro build && npx tsx tests/e2e/staticServer.ts',
+      'npm run build && ASTRO_OUT_DIR=dist-e2e-keyed PUBLIC_WEB3FORMS_KEY=e2e-test-key PUBLIC_GOATCOUNTER_CODE=e2e-test PUBLIC_DRIFT_DEBUG=true npx astro build && npx tsx tests/e2e/staticServer.ts',
     url: 'http://localhost:4325',
     reuseExistingServer: false,
     timeout: 300_000,
