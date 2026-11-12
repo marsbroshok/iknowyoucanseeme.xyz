@@ -14,7 +14,7 @@ Track: `sound_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workfl
 - [x] Task: Install `tone`; `ToneSoundEngine` with lazy import after `entered` (46a9126; tone 15.2.6, node-web-audio-api 2.1.0 dev; `createSoundEngine` is the lazy chunk's entry, wired to `entered` in phase 3)
 - [x] Task: Offline render tests per recipe (non-silent, muted = silent, no discontinuities on crossfade) (afbb0e5, 78fc44e; `ImpulseReverb` replaces `Tone.Reverb`)
 - [x] Task: Field-recording layer player (streamed loops from manifest) (da520df; CI installs ALSA for the Node Web Audio tests, 06f3e90)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — gates at 1dba530: `npm run check` exit 0 and `npm run test:e2e` exit 0 (200 passed) with `CI=true` and with `env -u CI`
 
 ## Phase 3: Integration
 
