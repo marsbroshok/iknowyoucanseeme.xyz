@@ -54,6 +54,9 @@ export interface SoundEngine {
   dispose(): Promise<void>;
 }
 
+/** The part of `window` the engine module uses. */
+export type SoundWindow = Pick<Window & typeof globalThis, 'AudioContext' | 'fetch' | 'document'>;
+
 /** The lazily loaded engine module (`src/sound/engine/createSoundEngine.ts`). */
 export interface SoundEngineModule {
   /**
@@ -62,5 +65,5 @@ export interface SoundEngineModule {
    * @param win - The window.
    * @returns The engine, stopped.
    */
-  createSoundEngine(win: Window): Promise<SoundEngine>;
+  createSoundEngine(win: SoundWindow): Promise<SoundEngine>;
 }
