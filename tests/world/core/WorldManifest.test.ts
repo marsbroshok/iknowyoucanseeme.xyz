@@ -7,6 +7,11 @@ describe('parseManifest', () => {
     expect(parseManifest(JSON.parse(JSON.stringify(sampleManifest)))).toEqual(sampleManifest);
   });
 
+  it('accepts a specimen label on a Leak-zone work', () => {
+    const leak = { ...sampleManifest.works[0], zone: 'leak' as const, specimen: 'spécimen 01 · Venise · 2025' };
+    expect(parseManifest(JSON.parse(JSON.stringify({ ...sampleManifest, works: [leak] }))).works[0].specimen).toBe('spécimen 01 · Venise · 2025');
+  });
+
   it.each([
     ['not an object', 42, /manifest must be an object/],
     ['a wrong language', { ...sampleManifest, lang: 'de' }, /lang/],
@@ -24,6 +29,8 @@ describe('parseManifest', () => {
     ['a technique that is not text', { ...sampleManifest, works: [{ ...sampleManifest.works[0], techniques: [7] }] }, /works\[0\]\.techniques\[0\]/],
     ['a palette that is not a list', { ...sampleManifest, works: [{ ...sampleManifest.works[0], palette: null }] }, /works\[0\]\.palette must be an array/],
     ['a palette entry that is not a colour', { ...sampleManifest, works: [{ ...sampleManifest.works[0], palette: ['#123456', 'red'] }] }, /works\[0\]\.palette\[1\] must be #rrggbb/],
+    ['a specimen label that is not text', { ...sampleManifest, works: [{ ...sampleManifest.works[0], specimen: 3 }] }, /works\[0\]\.specimen/],
+    ['an off-site QR code', { ...sampleManifest, works: [{ ...sampleManifest.works[0], qr: 'https://evil.example/qr.svg' }] }, /works\[0\]\.qr/],
     ['a territory without title', { ...sampleManifest, territories: [{ slug: 'dreamland', sentences: [] }] }, /territories\[0\]\.title/],
     ['a territory without sentences', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland' }] }, /territories\[0\]\.sentences must be an array/],
     ['an empty sentence', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland', sentences: [''] }] }, /territories\[0\]\.sentences\[0\]/],

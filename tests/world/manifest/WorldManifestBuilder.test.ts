@@ -46,6 +46,8 @@ describe('buildWorldManifest', () => {
       color: '#8299fa',
       palette: ['#8299fa'],
       techniques: [],
+      specimen: null,
+      qr: '/qr/en/arrivee.svg',
       images: {
         low: { url: '/_astro/arrivee-480.webp', width: 384, height: 480 },
         mid: { url: '/_astro/arrivee-1200.webp', width: 960, height: 1200 },
@@ -65,6 +67,18 @@ describe('buildWorldManifest', () => {
     expect(cygne.color).toBe('#0b1030');
     expect(cygne.palette).toEqual([]);
     expect(m.zones.map((z) => z.title)).toEqual(['Arrivée', 'La Loupe', "L'Infiltration"]);
+  });
+
+  it('labels the Leak zone\'s works as specimens, like the awake territory page, and points every work to its QR code', async () => {
+    const leakWorks = [
+      fixtureWork({ slug: 'venise-portrait-7', zone: 'leak' }),
+      fixtureWork({ slug: 'venise-portrait-5', zone: 'leak' }),
+      fixtureWork({ slug: 'esquisse-argile-1', zone: 'leak', medium: 'ceramic', year: 2026 }),
+      fixtureWork({ slug: 'solitude', zone: 'lens' }),
+    ];
+    const m = await buildWorldManifest({ works: leakWorks, territories, zones, ui: uiText('fr'), resolve });
+    expect(m.works.map((w) => w.specimen)).toEqual(['spécimen 02 · Venise · 2025', 'spécimen 01 · Venise · 2025', 'esquisse 01 · argile · 2026', null]);
+    expect(m.works.map((w) => w.qr)).toEqual(['/qr/fr/venise-portrait-7.svg', '/qr/fr/venise-portrait-5.svg', '/qr/fr/esquisse-argile-1.svg', '/qr/fr/solitude.svg']);
   });
 
   it('lists the techniques named in a work\'s declared techniques, titles and caption notes (keys only, no text)', async () => {

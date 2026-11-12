@@ -82,7 +82,7 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
  * @throws Error when the page lacks a part of the layer or WebGL2 fails.
  */
 export async function mountWorld(root: HTMLElement, options: MountOptions): Promise<WorldHandle> {
-  const { manifest, tier, startSlug, win, threshold, sound } = options;
+  const { manifest, tier, startSlug, win, threshold, sound, kiosk } = options;
   const canvas = part<HTMLCanvasElement>(root, '[data-drift-canvas]');
   const stage = new WorldStage(canvas, tier, win.devicePixelRatio);
   const session = new DriftSession(manifest, tier, startSlug);
@@ -91,7 +91,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const meshes = new Map<string, ApparitionMesh>();
   for (const p of session.layout.placements) {
     const w = work(p.slug);
-    const mesh = new ApparitionMesh(p.slug, p, w.images.low.width / w.images.low.height, w.color, tier);
+    const mesh = new ApparitionMesh(p.slug, p, w.images.low.width / w.images.low.height, w.color, tier, w.specimen !== null);
     meshes.set(p.slug, mesh);
     stage.scene.add(mesh.mesh);
   }
@@ -123,7 +123,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     halfFov(),
   );
 
-  const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'));
+  const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'), undefined, { kiosk });
   const open = (slug: string) => overlay.open(work(slug));
   const list = new WorkList(part<HTMLUListElement>(root, '[data-drift-works]'), session.stops.map((s) => ({ slug: s.slug, title: work(s.slug).title })), {
     onFocus: (slug) => session.focus(slug),
@@ -160,6 +160,13 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   // The sound hears the camera's zone and what is near (decisions in src/sound/core).
   const soundScene = SoundScene.of(session.layout, manifest.works);
   const above = new Vector3();
+  const below = new Vector3();
+  /** Screen position (NDC) just below a work, or `null` when it is behind the camera. */
+  const screenBelow = (slug: string): { x: number; y: number } | null => {
+    const mesh = (meshes.get(slug) as ApparitionMesh).mesh;
+    below.set(mesh.position.x, mesh.position.y - mesh.scale.y * 0.5 - 0.1, mesh.position.z).project(stage.camera);
+    return below.z < 1 ? { x: below.x, y: below.y } : null;
+  };
   /** Screen position (NDC) just above a work, or `null` when it is behind the camera. */
   const screenAbove = (slug: string): { x: number; y: number } | null => {
     const mesh = (meshes.get(slug) as ApparitionMesh).mesh;
@@ -217,6 +224,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     whisper.gaze(g.lineOpacity, g.lineStarted);
     const fr = fragments.frame({ facing: f.facing, settled: held ? null : f.settled }, dt);
     whisper.fragment(fr.current && { text: fr.current.text, opacity: fr.current.opacity, at: screenAbove(fr.current.slug) }, fr.started !== null);
+    const specimen = !held && f.facing ? work(f.facing).specimen : null;
+    whisper.specimen(specimen && f.facing ? { label: specimen, at: screenBelow(f.facing) } : null);
     const aim = held ? null : LensUniforms.aimFrom(hovered, li.keyboard, f.facing);
     const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt, (slug) => meshes.get(slug)?.texture != null);
     if (lf.released) meshes.get(lf.released)?.setLens(null);
@@ -257,6 +266,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       leak?.dispose();
       whisper.fragment(null, false);
       whisper.gaze(0, false);
+      whisper.specimen(null);
       metrics.finish();
       leakRecorder.flush();
       leakRecorder.detach();

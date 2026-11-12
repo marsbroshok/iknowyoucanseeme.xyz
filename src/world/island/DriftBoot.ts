@@ -24,6 +24,8 @@ export interface MountOptions {
   threshold: ThresholdView;
   /** The sound, fed the camera's surroundings each frame, or `null` without sound. */
   sound: SoundFeed | null;
+  /** Exhibition mode (`?kiosk=1`, FR5): QR codes instead of links in the focus dialog. */
+  kiosk: boolean;
 }
 
 /** A mounted world. */
@@ -139,7 +141,7 @@ export function bootDrift(
       .then((module) => {
         const manifest = readManifest(doc);
         const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
-        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound });
+        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk: false });
       })
       .then(
         (mounted) => {

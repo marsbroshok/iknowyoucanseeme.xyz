@@ -26,6 +26,10 @@ export interface ManifestWork {
   palette: string[];
   /** Technique keys named in the work's texts (`mirror`, `filter`, `icm`, `multiple-exposure`), for the default lens. */
   techniques: string[];
+  /** Museum-tag label of a Leak-zone specimen (`specimen 03 · Venise · 2025`), or `null`. */
+  specimen: string | null;
+  /** QR code of the work page (site-relative SVG), shown in exhibition mode. */
+  qr: string;
   /** Low (~480 px), mid (~1200 px) and high (≤ 2400 px) images. */
   images: { low: ManifestImage; mid: ManifestImage; high: ManifestImage };
 }
@@ -89,6 +93,8 @@ function work(input: unknown, path: string, territories: ReadonlySet<string>): M
     color,
     palette: array(w.palette, `${path}.palette`).map((c, i) => hex(c, `${path}.palette[${i}]`)),
     techniques: array(w.techniques, `${path}.techniques`).map((t, i) => text(t, `${path}.techniques[${i}]`)),
+    specimen: w.specimen === null ? null : text(w.specimen, `${path}.specimen`),
+    qr: link(w.qr, `${path}.qr`),
     images: {
       low: picture(images.low, `${path}.images.low`),
       mid: picture(images.mid, `${path}.images.mid`),

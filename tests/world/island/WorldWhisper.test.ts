@@ -9,11 +9,38 @@ beforeEach(() => {
     <section data-drift>
       <p data-drift-gaze aria-hidden="true">I know you can see me</p>
       <p data-drift-fragment aria-hidden="true"></p>
+      <p data-drift-specimen aria-hidden="true"></p>
       <p data-drift-said aria-live="polite"></p>
     </section>`;
 });
 
 const whisper = () => new WorldWhisper($('[data-drift]'));
+
+describe('WorldWhisper — specimen tags (Leak zone)', () => {
+  it('hangs the museum tag under the specimen the visitor faces, and takes it down after', () => {
+    const w = whisper();
+    const el = $('[data-drift-specimen]');
+    expect(el.style.opacity).toBe('0');
+    w.specimen({ label: 'specimen 03 · Venice · 2025', at: { x: 0, y: -0.5 } });
+    expect(el.textContent).toBe('specimen 03 · Venice · 2025');
+    expect(el.style.opacity).toBe('1');
+    expect(el.style.getPropertyValue('--x')).toBe('50%');
+    expect(el.style.getPropertyValue('--y')).toBe('75%');
+    w.specimen({ label: 'sketch 01 · clay · 2026', at: null });
+    expect(el.textContent).toBe('sketch 01 · clay · 2026');
+    expect(el.style.getPropertyValue('--y')).toBe('75%');
+    w.specimen(null);
+    expect(el.textContent).toBe('');
+    expect(el.style.opacity).toBe('0');
+  });
+
+  it('keeps the tag off the screen edges and never announces it (the focus dialog has it as text)', () => {
+    const w = whisper();
+    w.specimen({ label: 'specimen 01 · 2025', at: { x: 1, y: -1 } });
+    expect($('[data-drift-specimen]').style.getPropertyValue('--x')).toBe('85%');
+    expect($('[data-drift-said]').textContent).toBe('');
+  });
+});
 
 describe('WorldWhisper', () => {
   it('starts silent and invisible', () => {

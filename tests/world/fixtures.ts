@@ -25,6 +25,8 @@ export const sampleManifest: WorldManifest = {
       color: '#8299fa',
       palette: ['#8299fa', '#0b1030'],
       techniques: [],
+      specimen: null,
+      qr: '/qr/fr/arrivee.svg',
       images: { low: image(384, 480), mid: image(960, 1200), high: image(1440, 1800) },
     },
     {
@@ -38,6 +40,8 @@ export const sampleManifest: WorldManifest = {
       color: '#203040',
       palette: ['#203040'],
       techniques: ['icm'],
+      specimen: null,
+      qr: '/qr/fr/cygne-icm-1.svg',
       images: { low: image(480, 320), mid: image(1200, 800), high: image(1440, 960) },
     },
   ],

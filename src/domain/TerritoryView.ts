@@ -4,6 +4,7 @@ import { localizedPath } from '../i18n/LocalizedPath.js';
 import { ZONE_ORDER, getWorksByTerritory, pickSpread, type ZoneSlug } from './WorkQueries.js';
 import { buildWorkView, type WorkView } from './WorkView.js';
 import { excerpt } from './TextExcerpt.js';
+import { specimenLabels } from './SpecimenLabel.js';
 
 /** Territory or zone data after `withCopy` (title and statement from copy files). */
 export interface TitledEntry {
@@ -19,6 +20,8 @@ export interface ZoneGroupView {
   title?: string;
   statement?: string;
   works: WorkView[];
+  /** Museum-tag label by work slug, for the Leak zone's specimen grid (FR4); absent elsewhere. */
+  specimens?: Readonly<Record<string, string>>;
 }
 
 /** Display model of a territory page. */
@@ -61,7 +64,8 @@ export function titleOf(entry: TitledEntry, ui: UiText): string {
 
 /**
  * Builds the territory page model: statement, then works grouped by zone in
- * the order Arrival → Lens → Leak, then works without a zone.
+ * the order Arrival → Lens → Leak, then works without a zone. The Leak
+ * group carries its specimen labels (`specimenLabels`).
  *
  * @param territory - Territory data (with copy).
  * @param zones - All zones (with copy).
@@ -77,6 +81,7 @@ export function buildTerritoryView(
   ui: UiText,
 ): TerritoryView {
   const own = getWorksByTerritory(works, territory.slug);
+  const labels = specimenLabels(own, ui);
   const groupSlugs: (ZoneSlug | undefined)[] = [...ZONE_ORDER, undefined];
   const groups = groupSlugs
     .map((zoneSlug): ZoneGroupView => {
@@ -84,7 +89,9 @@ export function buildTerritoryView(
       if (zoneSlug === undefined) return { works: zoneWorks };
       const zone = zones.find((z) => z.slug === zoneSlug);
       if (!zone) throw new Error(`[content] Unknown zone "${zoneSlug}"`);
-      return { slug: zoneSlug, title: titleOf(zone, ui), statement: zone.statement?.[ui.lang], works: zoneWorks };
+      const group: ZoneGroupView = { slug: zoneSlug, title: titleOf(zone, ui), statement: zone.statement?.[ui.lang], works: zoneWorks };
+      if (zoneSlug === 'leak') group.specimens = Object.fromEntries(zoneWorks.map((w) => [w.slug, labels.get(w.slug) as string]));
+      return group;
     })
     .filter((g) => g.works.length > 0);
 

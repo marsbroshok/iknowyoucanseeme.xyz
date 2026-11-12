@@ -47,13 +47,19 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
   <p class="drift-gaze" data-drift-gaze aria-hidden="true">{ui.t('gaze')}</p>
   <p class="drift-fragment" data-drift-fragment aria-hidden="true"></p>
+  <p class="drift-specimen" data-drift-specimen aria-hidden="true"></p>
   <p class="drift-said" data-drift-said aria-live="polite"></p>
   <dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title">
     <img class="drift-focus-image" data-focus-image alt="" />
     <h2 id="drift-focus-title" data-focus-title></h2>
     <p class="drift-focus-fragment" data-focus-fragment></p>
-    <p><a data-focus-work>{ui.t('drift_open_work')}</a></p>
+    <p class="drift-focus-specimen" data-focus-specimen hidden></p>
+    <p data-focus-work-row><a data-focus-work>{ui.t('drift_open_work')}</a></p>
     <p data-focus-contact-row><a data-focus-contact>{ui.t('work_contact_link')}</a></p>
+    <figure class="drift-focus-qr" data-focus-qr-row hidden>
+      <img data-focus-qr alt={ui.t('kiosk_qr_alt')} width="160" height="160" />
+      <figcaption>{ui.t('kiosk_qr')}</figcaption>
+    </figure>
     <button type="button" data-focus-close>{ui.t('dialog_close')}</button>
   </dialog>
   <div class="drift-threshold" data-threshold hidden>
@@ -224,6 +230,27 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   .drift-focus a {
     color: var(--text-primary);
   }
+  .drift-focus-specimen {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-3);
+  }
+  .drift-focus-qr {
+    margin: 0 0 var(--space-3);
+  }
+  .drift-focus-qr img {
+    display: block;
+    width: 10rem;
+    height: 10rem;
+    background: #fff;
+  }
+  /* Exhibition mode: the cursor hides after 5 s without input (KioskMode). */
+  html.kiosk-idle,
+  html.kiosk-idle * {
+    cursor: none !important;
+  }
   .drift-threshold {
     position: absolute;
     inset: 0;
@@ -304,6 +331,26 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     line-height: 1.4;
   }
   .drift-fragment:empty {
+    display: none;
+  }
+  /* A specimen's museum tag, under its work (WorldWhisper.specimen). */
+  .drift-specimen {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 70%);
+    transform: translate(-50%, 0.5rem);
+    margin: 0;
+    pointer-events: none;
+    padding: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    background: rgb(11 16 48 / 0.72);
+    border: 1px solid var(--text-secondary);
+    transition: opacity 600ms ease-out;
+  }
+  .drift-specimen:empty {
     display: none;
   }
   .drift-said {
