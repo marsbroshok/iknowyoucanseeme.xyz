@@ -19,6 +19,9 @@ import ExhibitionsPage from '../../components/pages/ExhibitionsPage.astro';
 import AboutPage from '../../components/pages/AboutPage.astro';
 import LegalPage from '../../components/pages/LegalPage.astro';
 import ContactPage from '../../components/pages/ContactPage.astro';
+import LabelsPage from '../../components/pages/LabelsPage.astro';
+import { buildLabelViews } from '../../domain/LabelView.js';
+import { QrCode } from '../../qr/QrCode.js';
 import { buildExhibitionViews } from '../../domain/ExhibitionQueries.js';
 import { buildPersonJsonLd } from '../../domain/JsonLd.js';
 import { requireBlock } from '../../content/PageBlocks.js';
@@ -64,6 +67,12 @@ const aboutTitle = about.title?.[lang];
 if (!aboutTitle) throw new Error(`[route] Missing ${lang} title in about.yaml`);
 
 const site = (Astro.site ?? new URL('https://www.iknowyoucanseeme.xyz')).toString();
+
+/** Labels of the printable sheet, each with its QR code (only built for that page). */
+const labels =
+  page.kind === 'labels'
+    ? await Promise.all(buildLabelViews(works, ui, site).map(async (label) => ({ ...label, qrSvg: await QrCode.svg(label.url) })))
+    : [];
 
 /** Everything the work page needs; throws when the route points nowhere. */
 function workPageProps(slug: string) {
@@ -118,6 +127,7 @@ function territoryFor(slug: string) {
     publisher={requireBlock(legal, 'publisher', lang)}
   />
 )}
+{page.kind === 'labels' && <LabelsPage lang={lang} labels={labels} />}
 {page.kind === 'contact' && (
   <ContactPage
     lang={lang}

@@ -31,7 +31,7 @@ test.describe('Built site guard (dist/)', () => {
   test('no page shows UI text in the other language (FR pages: no EN UI strings; EN pages: no FR ones)', () => {
     const guard = new LanguageGuard(loadUiBlocks());
     const localized = pages.filter((p) => /^(en|fr)\//.test(p));
-    expect(localized.length).toBe(2 * (6 + 40 + 2));
+    expect(localized.length).toBe(2 * (7 + 40 + 2));
     const violations = localized.flatMap((file) => guard.inspect(file, fs.readFileSync(path.join(DIST, file), 'utf8')));
     expect(violations).toEqual([]);
   });
@@ -57,11 +57,16 @@ test.describe('Built site guard (dist/)', () => {
     }
   });
 
+  test('without PUBLIC_GOATCOUNTER_CODE no page has an analytics script', () => {
+    const tagged = pages.filter((file) => fs.readFileSync(path.join(DIST, file), 'utf8').includes('goatcounter'));
+    expect(tagged).toEqual([]);
+  });
+
   test('both locales have the same number of pages', () => {
     const en = pages.filter((p) => p.startsWith('en/'));
     const fr = pages.filter((p) => p.startsWith('fr/'));
     expect(en.length).toBe(fr.length);
-    expect(en.length).toBe(6 + 40 + 2);
+    expect(en.length).toBe(7 + 40 + 2);
   });
 });
 
@@ -79,6 +84,15 @@ test.describe('Built site guard (dist-e2e-keyed/, contact form rendered)', () =>
       expect(html, file).toContain('data-contact-form');
       expect(inspectPage(file, html), file).toEqual([]);
       expect(guard.inspect(file, html), file).toEqual([]);
+    }
+  });
+
+  test('with PUBLIC_GOATCOUNTER_CODE every localized page loads GoatCounter for that code', () => {
+    const localized = pages.filter((p) => /^(en|fr)\//.test(p));
+    expect(localized.length).toBeGreaterThan(0);
+    for (const file of localized) {
+      const html = fs.readFileSync(path.join(KEYED, file), 'utf8');
+      expect(html, file).toMatch(/<script[^>]*data-goatcounter="https:\/\/e2e-test\.goatcounter\.com\/count"[^>]*src="https:\/\/gc\.zgo\.at\/count\.js"/);
     }
   });
 

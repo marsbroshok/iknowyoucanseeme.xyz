@@ -7,8 +7,8 @@ describe('buildSiteRoutes', () => {
   const routes = buildSiteRoutes({ works: ['arrivee', 'solitude'], territories: ['dreamland'] });
 
   it('creates every static page and every work/territory in both locales', () => {
-    // 6 static pages + 2 works + 1 territory, per locale
-    expect(routes).toHaveLength(2 * (6 + 2 + 1));
+    // 7 static pages (incl. the printable labels sheet) + 2 works + 1 territory, per locale
+    expect(routes).toHaveLength(2 * (7 + 2 + 1));
     const paths = routes.map(routePath);
     expect(paths).toContain('/en/');
     expect(paths).toContain('/fr/');
@@ -20,6 +20,8 @@ describe('buildSiteRoutes', () => {
     expect(paths).toContain('/fr/a-propos/');
     expect(paths).toContain('/fr/mentions-legales/');
     expect(paths).toContain('/en/contact/');
+    expect(paths).toContain('/en/labels/');
+    expect(paths).toContain('/fr/labels/');
   });
 
   it('home has an undefined rest param (Astro root of [...route])', () => {
@@ -41,7 +43,7 @@ describe('buildSiteRoutes', () => {
         const all = buildSiteRoutes({ works, territories });
         const paths = all.map(routePath);
         expect(new Set(paths).size).toBe(paths.length);
-        expect(all).toHaveLength(2 * (6 + works.length + territories.length));
+        expect(all).toHaveLength(2 * (7 + works.length + territories.length));
         for (const r of all) {
           const expected = r.props.page.kind === 'work' ? 'works' : r.props.page.kind === 'territory' ? 'territories' : r.props.page.kind;
           expect(pathToKey(routePath(r))).toBe(expected);

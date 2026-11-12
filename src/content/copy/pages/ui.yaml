@@ -324,3 +324,39 @@ blocks:
     fr: Mentions légales de iknowyoucanseeme.
     sources:
       - spec
+  legacy_title:
+    status: draft
+    en: Page moved
+    fr: Page déplacée
+    sources:
+      - spec
+  legacy_moved:
+    status: draft
+    en: This page has moved.
+    fr: Cette page a changé d'adresse.
+    sources:
+      - spec
+  legacy_link:
+    status: draft
+    en: Go to the new page
+    fr: Aller à la nouvelle page
+    sources:
+      - spec
+  labels_title:
+    status: draft
+    en: Exhibition labels
+    fr: Étiquettes pour l'exposition
+    sources:
+      - spec
+  labels_intro:
+    status: draft
+    en: Print this page on A4. One label per work. The QR code opens the page of the work.
+    fr: Imprimez cette page en A4. Une étiquette par œuvre. Le code QR ouvre la page de l'œuvre.
+    sources:
+      - spec
+  labels_qr:
+    status: draft
+    en: QR code to the page of the work
+    fr: Code QR vers la page de l'œuvre
+    sources:
+      - spec

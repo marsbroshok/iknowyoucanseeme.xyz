@@ -1,0 +1,19 @@
+---
+/**
+ * Redirect pages for the addresses of the former Hugo site; the list and
+ * targets live in `src/i18n/LegacyRedirects.ts`.
+ */
+import RedirectPage from '../components/RedirectPage.astro';
+import { legacyRedirectPaths, type LegacyRedirect } from '../i18n/LegacyRedirects.js';
+
+export function getStaticPaths() {
+  return legacyRedirectPaths();
+}
+
+interface Props {
+  redirect: LegacyRedirect;
+}
+
+const { redirect } = Astro.props;
+---
+<RedirectPage redirect={redirect} />

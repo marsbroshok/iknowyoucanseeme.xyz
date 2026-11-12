@@ -1,0 +1,15 @@
+---
+/**
+ * GoatCounter's counting script (cookieless page views), rendered only when
+ * analytics is enabled by configuration (`PUBLIC_GOATCOUNTER_CODE`). Loads
+ * async, so it never blocks the page.
+ */
+import type { AnalyticsConfig } from '../analytics/AnalyticsConfig.js';
+
+interface Props {
+  config: AnalyticsConfig;
+}
+
+const { config } = Astro.props;
+---
+{config.enabled && <script is:inline async data-goatcounter={config.endpoint} src={config.scriptSrc}></script>}

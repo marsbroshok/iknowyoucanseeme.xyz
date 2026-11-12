@@ -2,12 +2,15 @@
 /**
  * Page shell for every awake-layer page: `<html lang>`, title/description,
  * canonical + hreflang alternates, Open Graph, optional JSON-LD, header and
- * footer. Ships no JavaScript.
+ * footer. Ships no JavaScript of its own; adds GoatCounter's async script
+ * only when analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`).
  */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
 import { alternateLinks, canonicalUrl, type LocalizedParams } from '../i18n/Alternates.js';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
+import AnalyticsScript from './AnalyticsScript.astro';
+import { readAnalyticsConfig, type AnalyticsConfig } from '../analytics/AnalyticsConfig.js';
 import '../styles/base.css';
 
 interface Props {
@@ -20,9 +23,23 @@ interface Props {
   ogImage?: string;
   /** JSON-LD objects to embed in the head. */
   jsonLd?: readonly object[];
+  /** Keep the page out of search engines (`<meta name="robots" content="noindex">`). */
+  noindex?: boolean;
+  /** Analytics settings; defaults to `PUBLIC_GOATCOUNTER_CODE` of the build. */
+  analytics?: AnalyticsConfig;
 }
 
-const { lang, routeKey, routeParams, title, description, ogImage, jsonLd = [] } = Astro.props;
+const {
+  lang,
+  routeKey,
+  routeParams,
+  title,
+  description,
+  ogImage,
+  jsonLd = [],
+  noindex = false,
+  analytics = readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE),
+} = Astro.props;
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
 const canonical = canonicalUrl(routeKey, lang, siteUrl, routeParams);
 const alternates = alternateLinks(routeKey, siteUrl, routeParams);
@@ -35,6 +52,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
+  {noindex && <meta name="robots" content="noindex" />}
 
   <link rel="canonical" href={canonical} />
   {alternates.map(alt => (
@@ -77,5 +95,6 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
     <slot />
   </main>
   <Footer lang={lang} />
+  <AnalyticsScript config={analytics} />
 </body>
 </html>

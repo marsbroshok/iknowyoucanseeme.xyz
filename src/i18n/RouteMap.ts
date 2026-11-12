@@ -9,7 +9,9 @@ export const RouteMap = {
   exhibitions: { en: 'exhibitions', fr: 'expositions' },
   about: { en: 'about', fr: 'a-propos' },
   legal: { en: 'legal', fr: 'mentions-legales' },
-  contact: { en: 'contact', fr: 'contact' }
+  contact: { en: 'contact', fr: 'contact' },
+  /** Printable exhibition labels (not indexed, not in the sitemap or menu). */
+  labels: { en: 'labels', fr: 'labels' }
 } as const;
 
 /** Supported locales. */

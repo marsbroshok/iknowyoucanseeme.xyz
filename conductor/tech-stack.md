@@ -61,3 +61,6 @@
 - Web3Forms access key and any tokens provided via environment variables / GitHub Actions secrets; never committed.
 
 - **npm instead of pnpm (2026-11-11).** pnpm is not installed and Node v25 no longer bundles Corepack. Installing a global tool overnight without the artist's OK was rejected; npm is already present, is one less tool for the artist to learn, and is sufficient for a single-package static site.
+
+- **GoatCounter integration (2026-11-12, launch).** `PUBLIC_GOATCOUNTER_CODE` (GitHub repository variable) enables GoatCounter's async `https://gc.zgo.at/count.js`, the only external script the dist guard allows; unset or blank means no script and `Analytics.track()` is a no-op. A set but invalid code fails the build.
+- **QR codes (2026-11-12, launch).** `qrcode` generates the exhibition-label QR codes as SVG at build time (`src/qr/QrCode.ts`); tests decode them with `jsqr` (dev) after rasterizing with Sharp. `qrcode` is pinned at 1.4.1, the newest version this machine's npm mirror serves (public latest: 1.5.4); upgrade when the mirror has it.

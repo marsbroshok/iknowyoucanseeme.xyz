@@ -42,6 +42,45 @@ describe('inspectPage', () => {
   });
 });
 
+describe('inspectPage: redirect pages of old addresses', () => {
+  const redirect = (head: string) => `<!DOCTYPE html><html lang="en"><head>${head}</head><body><a href="/en/">Go</a></body></html>`;
+  const good = '<meta http-equiv="refresh" content="0; url=/en/territories/dreamland/"><link rel="canonical" href="https://x/en/territories/dreamland/"><meta name="robots" content="noindex">';
+
+  it('accepts a refresh to the canonical page, not indexed, without hreflang', () => {
+    expect(inspectPage('dreamland/index.html', redirect(good))).toEqual([]);
+  });
+
+  it('flags a refresh that disagrees with the canonical, a missing noindex or a missing canonical', () => {
+    const other = good.replace('url=/en/territories/dreamland/', 'url=/en/');
+    expect(inspectPage('dreamland/index.html', redirect(other)).map((v) => v.rule)).toEqual(['redirect']);
+    expect(inspectPage('blog/index.html', redirect(good.replace('<meta name="robots" content="noindex">', ''))).map((v) => v.detail)).toEqual([
+      'redirect page must be noindex',
+    ]);
+    expect(inspectPage('uses/index.html', redirect(good.replace(/<link[^>]*>/, ''))).map((v) => v.rule)).toEqual(['canonical', 'redirect']);
+  });
+
+  it('still requires hreflang alternates on localized pages, even with a refresh', () => {
+    expect(inspectPage('en/x/index.html', redirect(good)).map((v) => v.rule)).toEqual(['hreflang-en', 'hreflang-fr', 'hreflang-x-default']);
+  });
+});
+
+describe('inspectPage: analytics script', () => {
+  const goatcounter = '<script async data-goatcounter="https://site.goatcounter.com/count" src="https://gc.zgo.at/count.js"></script>';
+
+  it('allows GoatCounter\'s external script on any page, on top of the inline budget', () => {
+    expect(inspectPage('en/a/index.html', page(goatcounter))).toEqual([]);
+    expect(inspectPage('index.html', `<html lang="en"><body>${goatcounter}<script>${'x'.repeat(10)}</script></body></html>`)).toEqual([]);
+  });
+
+  it('still flags any other external script, and inline code next to GoatCounter', () => {
+    const other = '<script async src="https://cdn.example.com/count.js"></script>';
+    expect(inspectPage('en/a/index.html', page(goatcounter + other)).map((x) => x.detail)).toEqual([
+      'inline 0 B (budget 0 B), external https://cdn.example.com/count.js',
+    ]);
+    expect(inspectPage('en/a/index.html', page(`${goatcounter}<script>track()</script>`)).map((x) => x.rule)).toEqual(['js-budget']);
+  });
+});
+
 describe('scriptBytes', () => {
   it('counts executable scripts and ignores JSON data blocks', () => {
     const html =
