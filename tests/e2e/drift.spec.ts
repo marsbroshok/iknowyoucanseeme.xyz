@@ -199,7 +199,9 @@ test.describe('Drift world', () => {
     await expect(dialog.locator('h2')).toHaveText('Arrivée');
     await expect(dialog.locator('[data-focus-work]')).toHaveAttribute('href', '/en/works/arrivee/');
     await expect(dialog.locator('[data-focus-contact]')).toHaveAttribute('href', '/en/contact/?work=arrivee');
-    await expect(dialog.locator('img')).toHaveAttribute('alt', 'Arrivée');
+    await expect(dialog.locator('[data-focus-image]')).toBeVisible();
+    await expect(dialog.locator('[data-focus-image]')).toHaveAttribute('alt', 'Arrivée');
+    await expect(dialog.locator('[data-focus-qr-row]')).toBeHidden();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
   });
