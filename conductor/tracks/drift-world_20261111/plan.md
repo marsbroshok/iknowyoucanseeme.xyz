@@ -18,7 +18,7 @@ Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 - [x] Task: Input adapters (wheel, pointer drag, keyboard, device orientation with iOS permission flow) `0aef2d7`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run check` 0 / `npm run test:e2e` 0 with `CI=true`; 0 / 0 with `CI` unset. Rendering is not mounted yet; its browser verification (SwiftShader smoke, deep link, reduced motion, axe, bundle size) lands with the island in phase 3.
 
-## Phase 3: Integration
+## Phase 3: Integration [checkpoint: 97d8557]
 
 - [x] Task: `DriftIsland` mount on `/{lang}/` (lazy import after first paint; awake DOM preserved; Wake up/Drift toggle) `1c89cb3` (manifest), `5a30e79` (island, ADR 0007)
 - [x] Task: Deep links `?w=<slug>` + replaceState; enable "see it in the drift" links on work pages `eeef18a`
@@ -26,7 +26,7 @@ Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 - [x] Task: Metrics events through `track()` `a21226b`
 - [x] Task: Bundle-size test (≤ 250 KB gz) + Playwright SwiftShader smoke + reduced-motion e2e + axe with world mounted `bc5ee2f` (boot 3.7 KB gz, world 124.2 KB gz)
 - [x] Task: Performance trace script and `docs/perf.md` with measured numbers `97d8557` (desktop 60.0 fps; phone tier manual)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run check` 0 / `npm run test:e2e` 0 with `CI=true`; 0 / 0 with `CI` unset (unit 100% coverage; e2e incl. drift and bundle specs). `npm run perf:trace` (not a gate) 0.
 
 ## Inherited Findings
 
