@@ -12,6 +12,8 @@ import { loadUiBlocks } from './uiBlocks.js';
  * acceptance criterion that every work has an EN and a FR page.
  */
 const DIST = path.resolve('dist');
+/** The keyed build (contact form rendered), served on port 4326. */
+const KEYED = path.resolve('dist-e2e-keyed');
 
 test.describe('Built site guard (dist/)', () => {
   // Read lazily: test files are collected before the web server builds dist/.
@@ -60,5 +62,33 @@ test.describe('Built site guard (dist/)', () => {
     const fr = pages.filter((p) => p.startsWith('fr/'));
     expect(en.length).toBe(fr.length);
     expect(en.length).toBe(6 + 40 + 2);
+  });
+});
+
+test.describe('Built site guard (dist-e2e-keyed/, contact form rendered)', () => {
+  let pages: string[] = [];
+  test.beforeAll(() => {
+    pages = listBuiltPages(KEYED);
+  });
+
+  test('the keyed contact pages render the form and pass the page and language checks', () => {
+    const guard = new LanguageGuard(loadUiBlocks());
+    for (const file of ['en/contact/index.html', 'fr/contact/index.html']) {
+      expect(pages, file).toContain(file);
+      const html = fs.readFileSync(path.join(KEYED, file), 'utf8');
+      expect(html, file).toContain('data-contact-form');
+      expect(inspectPage(file, html), file).toEqual([]);
+      expect(guard.inspect(file, html), file).toEqual([]);
+    }
+  });
+
+  test('every keyed page passes the price, lang, canonical, hreflang, JS and language checks', () => {
+    const guard = new LanguageGuard(loadUiBlocks());
+    expect(pages.length).toBeGreaterThan(0);
+    const violations = pages.flatMap((file) => {
+      const html = fs.readFileSync(path.join(KEYED, file), 'utf8');
+      return [...inspectPage(file, html), ...guard.inspect(file, html)];
+    });
+    expect(violations).toEqual([]);
   });
 });
