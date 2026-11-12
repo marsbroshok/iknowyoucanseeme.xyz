@@ -11,6 +11,13 @@ describe('VisitMemory', () => {
     expect(storage.items.get(VisitMemory.KEY)).toBe('1');
   });
 
+  it('forgets the return when the visitor clears the site\'s storage', () => {
+    const storage = new MemoryStorage();
+    new VisitMemory(storage).mark();
+    storage.removeItem(VisitMemory.KEY);
+    expect(new VisitMemory(storage).returning).toBe(false);
+  });
+
   it('treats blocked storage as a first visit and remembers nothing', () => {
     const memory = new VisitMemory(null);
     memory.mark();
