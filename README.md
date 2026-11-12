@@ -58,6 +58,10 @@ All routes come from `src/i18n/SiteRoutes.ts` (one Astro route,
 shows a price: availability is "contact for availability / disponibilité
 sur demande" unless a work is marked sold or not for sale.
 
+Old addresses of the Hugo site (`/dreamland/`, `/blog/`,
+`/blog/colors-and-shapes/`, `/uses/`, `/tags/`) are small redirect pages
+(`src/i18n/LegacyRedirects.ts`, see `docs/adr/0005-legacy-redirect-pages.md`).
+
 ## Content
 
 - **Works, territories, zones, exhibitions:** YAML files in `src/content/`,

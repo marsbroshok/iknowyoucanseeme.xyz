@@ -1,0 +1,35 @@
+---
+/**
+ * Redirect page of an old (Hugo) address: refreshes at once to the new page,
+ * names it as canonical, is not indexed, and shows a plain link for browsers
+ * that do not follow the refresh. Ships no JavaScript. Text in English (the
+ * targets are English pages), from ui.yaml.
+ */
+import type { LegacyRedirect } from '../i18n/LegacyRedirects.js';
+import { uiText } from '../i18n/UiCatalog.js';
+
+interface Props {
+  redirect: LegacyRedirect;
+}
+
+const { redirect } = Astro.props;
+const ui = uiText('en');
+const site = Astro.site ?? new URL('https://www.iknowyoucanseeme.xyz');
+const canonical = new URL(redirect.to, site).toString();
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{ui.t('legacy_title')}</title>
+  <meta http-equiv="refresh" content={`0; url=${redirect.to}`} />
+  <link rel="canonical" href={canonical} />
+  <meta name="robots" content="noindex" />
+</head>
+<body>
+  <main>
+    <p>{ui.t('legacy_moved')} <a href={redirect.to}>{ui.t('legacy_link')}</a></p>
+  </main>
+</body>
+</html>

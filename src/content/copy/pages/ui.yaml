@@ -324,3 +324,21 @@ blocks:
     fr: Mentions légales de iknowyoucanseeme.
     sources:
       - spec
+  legacy_title:
+    status: draft
+    en: Page moved
+    fr: Page déplacée
+    sources:
+      - spec
+  legacy_moved:
+    status: draft
+    en: This page has moved.
+    fr: Cette page a changé d'adresse.
+    sources:
+      - spec
+  legacy_link:
+    status: draft
+    en: Go to the new page
+    fr: Aller à la nouvelle page
+    sources:
+      - spec

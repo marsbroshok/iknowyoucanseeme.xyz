@@ -4,12 +4,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { buildSiteRoutes, routePath } from '../../src/i18n/SiteRoutes.js';
 import { listBuiltPages, pageUrlPath } from './builtPages.js';
+import { LEGACY_REDIRECTS } from '../../src/i18n/LegacyRedirects.js';
 
 /**
  * Crawls every route (both locales) and runs axe on each; also fails on
  * broken same-origin resources and page errors. The route list comes from
  * the route map + content slugs (available at collection time, before the
  * web server builds), and a first test checks the build matches it exactly.
+ * Redirect pages of old addresses are part of the build but are checked in
+ * legacyRedirects.spec.ts (they navigate away at once).
  */
 const slugsIn = (dir: string) =>
   fs
@@ -25,7 +28,7 @@ const routes = [
 test.describe('Crawl: every route is accessible', () => {
   test('the build contains exactly the expected routes', () => {
     const built = listBuiltPages(path.resolve('dist')).map(pageUrlPath).sort();
-    expect(built).toEqual(routes);
+    expect(built).toEqual([...routes, ...LEGACY_REDIRECTS.map((r) => r.from)].sort());
     expect(routes.filter((r) => r.startsWith('/en/'))).toHaveLength(48);
     expect(routes.filter((r) => r.startsWith('/fr/'))).toHaveLength(48);
   });
