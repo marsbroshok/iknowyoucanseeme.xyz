@@ -38,7 +38,28 @@ float lensMask(vec2 uv) {
 vec3 lensSample(vec2 uv) { return texture2D(map, clamp(uv, 0.0, 1.0)).rgb; }
 float lensLuma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 
+// 0. Colour filter / gel: the gel passes its own colour and holds back the
+// others; exposure is partly compensated, as a photographer would.
+vec3 lensGelFilter(vec3 base) {
+  vec3 gel = lensGel / max(max(lensGel.r, max(lensGel.g, lensGel.b)), 1e-3);
+  vec3 filtered = base * gel;
+  float gain = mix(1.0, lensLuma(base) / max(lensLuma(filtered), 1e-3), 0.6);
+  return clamp(filtered * gain, 0.0, 1.0);
+}
+
+// 1. Mirror fold: a kaleidoscope of 2-6 segments around the pointer,
+// symmetric across the horizontal line through it.
+vec3 lensMirror(vec2 uv) {
+  vec2 p = lensToLocal(uv);
+  float seg = 6.28318530718 / lensSegments;
+  float a = mod(atan(p.y, p.x), seg);
+  a = min(a, seg - a);
+  return lensSample(lensFromLocal(length(p) * vec2(cos(a), sin(a))));
+}
+
 vec3 lensMode(int mode, vec2 uv, vec3 base) {
+  if (mode == 0) return lensGelFilter(base);
+  if (mode == 1) return lensMirror(uv);
   return base;
 }
 

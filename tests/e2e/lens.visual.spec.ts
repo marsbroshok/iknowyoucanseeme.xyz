@@ -14,6 +14,8 @@ import ts from 'typescript';
  */
 
 const SIZE = 256;
+/** Lens radius (LENS.radius in src/world/core/LensUniforms.ts). */
+const RADIUS = 0.24;
 const ROOT = path.resolve('.');
 const HARNESS = 'http://localhost:4325/__lens/';
 
@@ -69,8 +71,15 @@ function region(keep: (u: number, v: number) => boolean): number[] {
   for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) if (keep((x + 0.5) / SIZE, (y + 0.5) / SIZE)) out.push(y * SIZE + x);
   return out;
 }
+const dist = (u: number, v: number, c: [number, number]) => Math.hypot(u - c[0], v - c[1]);
+/** Well inside the lens (full strength). */
+const inside = (c: [number, number] = [0.5, 0.5]) => region((u, v) => dist(u, v, c) < RADIUS * 0.5);
+/** Outside the lens, away from the apparition's soft border. */
+const outside = (c: [number, number] = [0.5, 0.5]) => region((u, v) => dist(u, v, c) > RADIUS * 1.05 && Math.min(u, v, 1 - u, 1 - v) > 0.12);
 const luma = (p: number[], i: number) => 0.2126 * p[i * 4] + 0.7152 * p[i * 4 + 1] + 0.0722 * p[i * 4 + 2];
 const maxDiff = (a: number[], b: number[], idx: number[]) => idx.reduce((m, i) => Math.max(m, Math.abs(a[i * 4] - b[i * 4]), Math.abs(a[i * 4 + 1] - b[i * 4 + 1]), Math.abs(a[i * 4 + 2] - b[i * 4 + 2])), 0);
+const meanDiff = (a: number[], b: number[], idx: number[]) =>
+  idx.reduce((s, i) => s + (Math.abs(a[i * 4] - b[i * 4]) + Math.abs(a[i * 4 + 1] - b[i * 4 + 1]) + Math.abs(a[i * 4 + 2] - b[i * 4 + 2])) / 3, 0) / idx.length;
 const meanLuma = (p: number[], idx: number[]) => idx.reduce((s, i) => s + luma(p, i), 0) / idx.length;
 /** Mean luminance step between neighbouring pixels (sharpness). */
 function detail(p: number[], idx: number[]): number {
@@ -109,10 +118,44 @@ test.describe('Lens shaders (fixed test texture)', () => {
     expect(maxDiff(await draw(page, { mode: 'flare', strength: 0 }), base, region(() => true))).toBeLessThanOrEqual(1);
   });
 
+  for (const mode of ['gel', 'mirror'] as const) {
+    test(`${mode}: changes the soft circle around the pointer and nothing outside it`, async () => {
+      const c: [number, number] = [0.42, 0.55];
+      const lensed = await draw(page, { mode, center: c });
+      expect(meanDiff(lensed, base, inside(c))).toBeGreaterThan(6);
+      expect(maxDiff(lensed, base, outside(c))).toBeLessThanOrEqual(2);
+    });
+  }
+
+  test('colour filter: the circle takes on the gel colour (red-orange)', async () => {
+    const lensed = await draw(page, { mode: 'gel' });
+    const idx = inside();
+    const warmth = (p: number[]) => idx.reduce((s, i) => s + p[i * 4] - (p[i * 4 + 1] + p[i * 4 + 2]) / 2, 0) / idx.length;
+    expect(warmth(lensed) - warmth(base)).toBeGreaterThan(15);
+  });
+
+  test('mirror fold: the circle is symmetric across the horizontal line through the pointer', async () => {
+    const pairs = inside().filter((i) => Math.floor(i / SIZE) < SIZE / 2);
+    const asym = (p: number[]) =>
+      pairs.reduce((s, i) => {
+        const j = (SIZE - 1 - Math.floor(i / SIZE)) * SIZE + (i % SIZE);
+        return s + Math.abs(luma(p, i) - luma(p, j));
+      }, 0) / pairs.length;
+    expect(asym(base)).toBeGreaterThan(10);
+    for (const segments of [2, 3, 6]) expect(asym(await draw(page, { mode: 'mirror', segments })), `${segments} segments`).toBeLessThan(3);
+  });
+
   test('the lens never changes the stored image (FR4)', async () => {
     const before = await checksum(page);
     for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) await draw(page, { mode });
     expect(await checksum(page)).toBe(before);
     expect(maxDiff(await draw(page, null), base, region(() => true))).toBe(0);
   });
+
+  for (const mode of ['gel', 'mirror'] as const) {
+    test(`${mode}: matches its reference picture in tests/visual/ (tolerance-based)`, async () => {
+      await draw(page, { mode, center: [0.45, 0.52], segments: 4, blur: [0.05, 0.02] });
+      await expect(page.locator('[data-lens-canvas]')).toHaveScreenshot(`lens-${mode}.png`, { maxDiffPixelRatio: 0.04, threshold: 0.25 });
+    });
+  }
 });
