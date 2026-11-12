@@ -8,6 +8,7 @@ import type { DeviceCapabilities } from '../../../src/world/core/DeviceProfile.j
 import { sampleManifest } from '../fixtures.js';
 import { SoundPreference } from '../../../src/sound/core/SoundPreference.js';
 import type { SoundEngine, SoundEngineModule } from '../../../src/sound/SoundEngine.js';
+import { KIOSK } from '../../../src/kiosk/KioskState.js';
 
 const capable: DeviceCapabilities = { webgl2: true, reducedMotion: false, saveData: false, deviceMemory: 8, hardwareConcurrency: 8, coarsePointer: false };
 const now = (_host: unknown, cb: () => void) => cb();
@@ -15,15 +16,16 @@ const now = (_host: unknown, cb: () => void) => cb();
 /** A world module that records mounts and unmounts. */
 function fakeWorld(fail = false) {
   const mounts: MountOptions[] = [];
+  const calls: string[] = [];
   let unmounts = 0;
   const module: WorldModule = {
     mountWorld: async (_root, options) => {
       if (fail) throw new Error('shader did not compile');
       mounts.push(options);
-      return { unmount: () => unmounts++ };
+      return { unmount: () => unmounts++, advance: () => calls.push('advance'), restart: () => calls.push('restart') };
     },
   };
-  return { load: vi.fn(async () => module), mounts, unmounts: () => unmounts };
+  return { load: vi.fn(async () => module), mounts, calls, unmounts: () => unmounts };
 }
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
@@ -440,5 +442,91 @@ describe('bootDrift — the sound (docs/adr/0011)', () => {
     await flush();
     expect(boot?.sound).toBeNull();
     expect(world.mounts[0].sound).toBeNull();
+  });
+});
+
+describe('bootDrift — exhibition mode (?kiosk=1, FR5)', () => {
+  const withToggle = () =>
+    document.querySelector('.drift-top')?.insertAdjacentHTML('beforeend', '<button data-sound-toggle data-label-mute="Mute sound" data-label-unmute="Unmute sound">Mute sound</button>');
+  function fakeSound() {
+    const engine: SoundEngine = { start: async () => undefined, stop: async () => undefined, setMix: () => undefined, setCues: () => undefined, setMuted: () => undefined, dispose: async () => undefined };
+    return { load: vi.fn(async (): Promise<SoundEngineModule> => ({ createSoundEngine: async () => engine })) };
+  }
+  beforeEach(() => {
+    history.replaceState(null, '', '/en/?kiosk=1');
+    document.querySelector('main')?.insertAdjacentHTML('beforeend', '<a href="https://www.instagram.com/x">Instagram</a><a href="/en/about/">About</a>');
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    history.replaceState(null, '', '/');
+    document.documentElement.className = '';
+  });
+
+  it('opens straight into the world, without the threshold and without a gesture, even after a stored "Wake up"', async () => {
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    const seen = enteredEvents();
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(boot?.decision.mode).toBe('world');
+    expect($('[data-threshold]').hidden).toBe(true);
+    expect(seen).toEqual([{ gesture: false, returning: false }]);
+    expect(world.mounts[0].kiosk).toBe(true);
+    expect(world.mounts[0].threshold.holding).toBe(false);
+  });
+
+  it('takes the links out of the page', () => {
+    bootDrift(document, win, fakeWorld().load, () => capable, now);
+    expect(document.querySelectorAll('main a[href]')).toHaveLength(0);
+    expect(document.documentElement.classList.contains('kiosk')).toBe(true);
+  });
+
+  it('the first tap starts the sound (it is the gesture)', async () => {
+    withToggle();
+    const sound = fakeSound();
+    const boot = bootDrift(document, win, fakeWorld().load, () => capable, now, sound.load);
+    await flush();
+    expect(sound.load).not.toHaveBeenCalled();
+    document.dispatchEvent(new Event('pointerdown'));
+    await flush();
+    expect(sound.load).toHaveBeenCalledTimes(1);
+    expect(boot?.sound?.state).toBe('playing');
+  });
+
+  it('drifts on by itself and resets the world 90 s after the last input', async () => {
+    vi.useFakeTimers();
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(KIOSK.autoDriftAfterMs);
+    expect(world.calls).toEqual(['advance']);
+    document.dispatchEvent(new Event('keydown'));
+    await vi.advanceTimersByTimeAsync(KIOSK.idleResetMs);
+    expect(world.calls).toContain('restart');
+  });
+
+  it('"Wake up" shows the awake page without remembering it, and the reset brings the world back', async () => {
+    vi.useFakeTimers();
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await vi.advanceTimersByTimeAsync(0);
+    // A real press: pointerdown, then click.
+    $('[data-drift-wake]').dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    $('[data-drift-wake]').click();
+    expect($('[data-drift]').hidden).toBe(true);
+    expect(localStorage.getItem(ModePreference.KEY)).toBeNull();
+    await vi.advanceTimersByTimeAsync(KIOSK.idleResetMs);
+    expect($('[data-drift]').hidden).toBe(false);
+    expect(world.mounts).toHaveLength(2);
+  });
+
+  it('ignores the timers while the world is still loading', async () => {
+    vi.useFakeTimers();
+    let release: (m: WorldModule) => void = () => undefined;
+    const pending = new Promise<WorldModule>((r) => (release = r));
+    bootDrift(document, win, () => pending, () => capable, now);
+    document.dispatchEvent(new Event('keydown'));
+    expect(() => vi.advanceTimersByTime(KIOSK.idleResetMs)).not.toThrow();
+    release(await fakeWorld().load());
   });
 });

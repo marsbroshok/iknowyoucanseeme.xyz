@@ -96,9 +96,14 @@ export class ThresholdOverlay implements ThresholdView {
     if (auto !== null) this.autoTimer = this.later(auto, () => this.enter(false));
   }
 
-  /** Enters at once without showing the threshold ("Drift" on the awake page is itself the gesture). */
-  skip(): void {
-    this.state.skip();
+  /**
+   * Enters at once without showing the threshold ("Drift" on the awake page
+   * is itself the gesture; the exhibition mode enters without one).
+   *
+   * @param gesture - Whether a user gesture caused it (default `true`).
+   */
+  skip(gesture = true): void {
+    this.state.skip(gesture);
     this.close();
   }
 

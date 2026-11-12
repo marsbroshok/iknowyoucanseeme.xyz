@@ -59,6 +59,15 @@ describe('KioskState — auto-drift', () => {
     expect(k.tick(T0 + KIOSK.autoDriftAfterMs + KIOSK.autoDriftEveryMs).advance).toBe(true);
   });
 
+  it('after a reset, shows the start for 10 s before drifting on', () => {
+    const k = new KioskState(T0);
+    k.input(T0);
+    const t = k.tick(T0 + KIOSK.idleResetMs);
+    expect(t).toMatchObject({ reset: true, advance: false });
+    expect(k.tick(T0 + KIOSK.idleResetMs + KIOSK.autoDriftAfterMs - 1).advance).toBe(false);
+    expect(k.tick(T0 + KIOSK.idleResetMs + KIOSK.autoDriftAfterMs).advance).toBe(true);
+  });
+
   it('pauses while someone uses the screen and resumes 10 s after them', () => {
     const k = new KioskState(T0);
     expect(k.tick(T0 + 10_000).advance).toBe(true);

@@ -261,7 +261,19 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     }
   });
 
+  /** Last work the exhibition mode drifted to. */
+  let kioskStop: string | null = null;
   return {
+    advance() {
+      if (overlay.isOpen) return;
+      kioskStop = session.nextStop(kioskStop);
+      if (kioskStop) session.focus(kioskStop);
+    },
+    restart() {
+      overlay.close();
+      kioskStop = null;
+      session.restart();
+    },
     unmount() {
       leak?.dispose();
       whisper.fragment(null, false);

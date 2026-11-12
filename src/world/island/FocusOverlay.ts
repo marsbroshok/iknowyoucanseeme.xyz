@@ -93,6 +93,11 @@ export class FocusOverlay {
     this.dialog.showModal();
   }
 
+  /** Closes the dialog if it is open (the exhibition mode's reset). */
+  close(): void {
+    if (this.dialog.open) this.dialog.close();
+  }
+
   /** Closes the overlay and stops listening. */
   detach(): void {
     this.closeButton.removeEventListener('click', this.onCloseClick);

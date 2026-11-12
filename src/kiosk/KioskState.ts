@@ -61,7 +61,11 @@ export class KioskState {
   tick(now: number): KioskTick {
     const idle = Math.max(now - this.lastInput, 0);
     const reset = this.attended && idle >= KIOSK.idleResetMs;
-    if (reset) this.attended = false;
+    if (reset) {
+      this.attended = false;
+      // The start view stays a moment before the drift moves on.
+      this.nextAdvanceAt = now + KIOSK.autoDriftAfterMs;
+    }
     const advance = idle >= KIOSK.autoDriftAfterMs && now >= this.nextAdvanceAt;
     if (advance) this.nextAdvanceAt = now + KIOSK.autoDriftEveryMs;
     return { cursorHidden: idle >= KIOSK.cursorHideMs, reset, advance };

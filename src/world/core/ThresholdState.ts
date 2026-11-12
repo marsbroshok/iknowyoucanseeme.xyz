@@ -111,11 +111,16 @@ export class ThresholdState {
     if (this.current === 'leaving') this.current = 'gone';
   }
 
-  /** Enters without showing the screen ("Drift" pressed on the awake page is itself the gesture). */
-  skip(): void {
+  /**
+   * Enters without showing the screen: "Drift" pressed on the awake page is
+   * itself the gesture; the exhibition mode enters unattended (no gesture).
+   *
+   * @param gesture - Whether a user gesture caused it (default `true`).
+   */
+  skip(gesture = true): void {
     if (this.current === 'leaving' || this.current === 'gone') return;
     this.current = 'gone';
-    this.emit(true);
+    this.emit(gesture);
   }
 
   /**

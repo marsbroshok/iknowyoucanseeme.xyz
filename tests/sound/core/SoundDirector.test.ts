@@ -102,6 +102,27 @@ describe('SoundDirector', () => {
     expect(director.state).toBe('playing');
   });
 
+  it('exhibition mode: an automatic entry stays silent until the first tap, which is the gesture', async () => {
+    const { director, load, engine } = setup();
+    director.entered(automatic);
+    director.setHidden(false);
+    await flush();
+    expect(load).not.toHaveBeenCalled();
+    director.gesture();
+    await flush();
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(engine.calls.at(-1)).toBe('start');
+    expect(director.state).toBe('playing');
+  });
+
+  it('a gesture does not override mute', async () => {
+    const { director, load } = setup('off');
+    director.entered(automatic);
+    director.gesture();
+    await flush();
+    expect(load).not.toHaveBeenCalled();
+  });
+
   it('mute fades the engine to silence and stops it, and is remembered', async () => {
     const { director, engine, storage } = setup();
     director.entered(gesture);

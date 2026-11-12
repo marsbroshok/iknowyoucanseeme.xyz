@@ -12,6 +12,8 @@ import { SoundDirector, type SoundFeed } from '../../sound/core/SoundDirector.js
 import { SoundPreference } from '../../sound/core/SoundPreference.js';
 import { SoundControls } from '../../sound/island/SoundControls.js';
 import type { SoundEngineModule, SoundWindow } from '../../sound/SoundEngine.js';
+import { KioskMode } from '../../kiosk/KioskMode.js';
+import { isKiosk } from '../../kiosk/KioskParam.js';
 
 /** What the world module receives when mounted. */
 export interface MountOptions {
@@ -32,6 +34,10 @@ export interface MountOptions {
 export interface WorldHandle {
   /** Stops rendering, removes listeners and frees GPU memory. */
   unmount(): void;
+  /** Exhibition mode: glide to the next work along the zone path. */
+  advance(): void;
+  /** Exhibition mode: close the focus dialog and go back to the start of the path. */
+  restart(): void;
 }
 
 /** The lazily loaded world module (`src/world/gl/DriftWorld.ts`). */
@@ -67,6 +73,12 @@ export interface DriftBootHandle {
  * through `loadSound` only then, and is fed by the world each frame. While
  * sound is on (not muted) the short threshold also waits for a click.
  *
+ * With `?kiosk=1` (exhibition mode, FR5) the world opens without the
+ * threshold and without a gesture, whatever was stored; a {@link KioskMode}
+ * takes the links out of the page, hands the first tap to the sound as its
+ * gesture, drifts on by itself and resets after 90 s without input (back
+ * into the world from the awake page too); "Wake up" is not remembered.
+ *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
  *
@@ -94,7 +106,8 @@ export function bootDrift(
   const preference = new ModePreference(storage);
   const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
-  const decision = DeviceProfile.decide(caps, preference.read());
+  const kiosk = isKiosk(win.location.search);
+  const decision = DeviceProfile.decide(caps, kiosk ? 'world' : preference.read());
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
   let state: 'awake' | 'loading' | 'world' = 'awake';
   let handle: WorldHandle | null = null;
@@ -134,14 +147,15 @@ export function bootDrift(
     threshold = overlay;
     layer.show();
     showStarts(false);
-    if (manual) overlay.skip();
+    if (kiosk) overlay.skip(false);
+    else if (manual) overlay.skip();
     else overlay.show();
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
       .then((module) => {
         const manifest = readManifest(doc);
         const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
-        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk: false });
+        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk });
       })
       .then(
         (mounted) => {
@@ -158,7 +172,7 @@ export function bootDrift(
   };
 
   root.querySelector('[data-drift-wake]')?.addEventListener('click', () => {
-    preference.write('awake');
+    if (!kiosk) preference.write('awake');
     leave();
   });
   starts.forEach((b) =>
@@ -167,6 +181,14 @@ export function bootDrift(
       enter(true);
     }),
   );
+
+  if (kiosk) {
+    new KioskMode(doc, win, () => Date.now(), {
+      gesture: () => sound?.gesture(),
+      advance: () => handle?.advance(),
+      reset: () => (state === 'awake' ? enter() : handle?.restart()),
+    });
+  }
 
   showStarts(caps.webgl2 && decision.mode === 'awake');
   if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter());

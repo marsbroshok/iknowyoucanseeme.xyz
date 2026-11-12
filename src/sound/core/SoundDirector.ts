@@ -113,6 +113,15 @@ export class SoundDirector implements SoundFeed {
   }
 
   /**
+   * A user gesture outside the threshold (the exhibition mode's first tap
+   * or key press, FR5): it may unlock audio. Mute still wins.
+   */
+  gesture(): void {
+    this.unlocked = true;
+    this.sync();
+  }
+
+  /**
    * The tab was hidden or shown again.
    *
    * @param hidden - `document.visibilityState === 'hidden'`.

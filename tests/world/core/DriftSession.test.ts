@@ -103,6 +103,23 @@ describe('DriftSession', () => {
     expect(s.isLast('arrivee', 1)).toBe(false);
   });
 
+  it('exhibition mode: walks the stops along the zone path and starts over after the last (auto-drift)', () => {
+    const s = new DriftSession(sampleManifest, 'high', null);
+    expect(s.nextStop(null)).toBe('arrivee');
+    expect(s.nextStop('arrivee')).toBe('cygne-icm-1');
+    expect(s.nextStop('cygne-icm-1')).toBe('arrivee');
+    expect(s.nextStop('nope')).toBe('arrivee');
+  });
+
+  it('exhibition mode: restart() goes back to the start of the path, still', () => {
+    const s = new DriftSession(sampleManifest, 'high', 'cygne-icm-1');
+    const start = new DriftSession(sampleManifest, 'high', null).state;
+    s.focus('arrivee');
+    s.frame({ thrust: 1, turn: 0.5 }, 0.2);
+    s.restart();
+    expect(s.state).toEqual(start);
+  });
+
   it('finds a work by slug', () => {
     const s = new DriftSession(sampleManifest, 'high', null);
     expect(s.work('arrivee')?.title).toBe('Arrivée');
@@ -124,6 +141,10 @@ describe('DriftSession with crowded and empty fields', () => {
   it('faces the nearest of several works in view', () => {
     const s = new DriftSession(crowded, 'high', 'arrivee-2');
     expect(s.frame(still, 1 / 60).facing).toBe('arrivee-2');
+  });
+
+  it('has no next stop without works', () => {
+    expect(new DriftSession({ ...sampleManifest, works: [] }, 'high', null).nextStop(null)).toBeNull();
   });
 
   it('runs with no works at all (night blue, nothing to face)', () => {

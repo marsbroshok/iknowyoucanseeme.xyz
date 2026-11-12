@@ -143,3 +143,12 @@ describe('ThresholdState — sound changes while it is up', () => {
     expect(state.needsClick).toBe(true);
   });
 });
+
+describe('ThresholdState — exhibition mode', () => {
+  it('skip(false) enters without the screen and without a gesture (an unattended screen)', () => {
+    const { state, entered } = machine();
+    state.skip(false);
+    expect(state.phase).toBe('gone');
+    expect(entered).toEqual([{ gesture: false, returning: false }]);
+  });
+});

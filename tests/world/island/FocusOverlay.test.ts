@@ -83,6 +83,17 @@ describe('FocusOverlay', () => {
     expect(($('[data-focus-work-row]') as HTMLElement).hidden).toBe(true);
   });
 
+  it('close() closes an open dialog (exhibition reset) and does nothing when closed', () => {
+    const onClose = vi.fn();
+    const overlay = new FocusOverlay(dialog, onClose);
+    overlay.close();
+    expect(onClose).not.toHaveBeenCalled();
+    overlay.open(sampleManifest.works[0]);
+    overlay.close();
+    expect(overlay.isOpen).toBe(false);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('closes with its button and tells the world', () => {
     const onClose = vi.fn();
     const overlay = new FocusOverlay(dialog, onClose);
