@@ -199,6 +199,21 @@ test.describe('Lens shaders (fixed test texture)', () => {
     expect(meanDiff(half, avg, idx)).toBeLessThan(0.5 * Math.min(meanDiff(half, a, idx), meanDiff(half, b, idx)));
   });
 
+  test('low tier: cheaper variants of every lens, and no fracture at all', async () => {
+    const idx = inside();
+    const lowBase = await draw(page, null, 'low');
+    expect(maxDiff(await draw(page, { mode: 'fracture' }, 'low'), lowBase, idx)).toBeLessThanOrEqual(1);
+    const blur = { mode: 'icm', blur: [0.08, 0] } as const;
+    const lowBlur = await draw(page, blur, 'low');
+    expect(steps(lowBlur, idx).dx).toBeLessThan(steps(lowBase, idx).dx * 0.8);
+    // Fewer samples along the streak: visibly not the high-tier picture.
+    expect(meanDiff(lowBlur, await draw(page, blur, 'high'), idx)).toBeGreaterThan(0.5);
+    const flare = { mode: 'flare', center: [0.3, 0.6] } as const;
+    expect(meanDiff(await draw(page, flare, 'low'), await draw(page, flare, 'high'), idx)).toBeGreaterThan(0.5);
+    for (const mode of ['gel', 'mirror', 'exposure', 'flare'] as const) expect(meanDiff(await draw(page, { mode }, 'low'), lowBase, idx), mode).toBeGreaterThan(6);
+    expect(await shaderErrors(page)).toEqual([]);
+  });
+
   test('the lens never changes the stored image (FR4)', async () => {
     const before = await checksum(page);
     for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) await draw(page, { mode });
