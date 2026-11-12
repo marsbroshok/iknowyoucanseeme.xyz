@@ -13,7 +13,7 @@ Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 - [x] Task: Shared GLSL chunk (pointer mask, tier defines) + shader compile test harness (headless WebGL in Playwright) `05a2893`
 - [x] Task: Colour filter + Mirror fold shaders with visual snapshots `9c0e820`
 - [x] Task: Multiple exposure + Fracture shaders with visual snapshots `93163ff`
-- [ ] Task: Light leak + ICM shaders with visual snapshots
+- [x] Task: Light leak + ICM shaders with visual snapshots `e4888e2`
 - [ ] Task: Low-tier variants
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
