@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import ExhibitionsPage from '../../src/components/pages/ExhibitionsPage.astro';
 import AboutPage from '../../src/components/pages/AboutPage.astro';
@@ -7,6 +7,7 @@ import { buildExhibitionViews } from '../../src/domain/ExhibitionQueries.js';
 import { requireBlock } from '../../src/content/PageBlocks.js';
 import { buildPersonJsonLd } from '../../src/domain/JsonLd.js';
 import { tb } from './fixtures.js';
+import { readAnalyticsConfig } from '../../src/analytics/AnalyticsConfig.js';
 
 const exhibitions = [
   { slug: 'mpaa-2019', title: { fr: "L'Emprunt, la Citation" }, year: 2019, venue: 'MPAA', dates: { en: 'Dec 2019', fr: 'déc. 2019' } },
@@ -82,6 +83,7 @@ describe('static pages', () => {
         imageUse: 'Ask first.',
         privacy: 'Cookieless analytics.',
         publisher: 'Published by Alexander Usoltsev.',
+        analytics: readAnalyticsConfig('iknowyoucanseeme'),
       },
     });
     expect(html).toMatch(/<h1[^>]*>Legal notice<\/h1>/);
@@ -90,5 +92,40 @@ describe('static pages', () => {
     }
     expect(html).toContain('href="mailto:marsbroshok+iknowyoucanseeme@gmail.com"');
     expect(html).toContain('hreflang="fr" href="https://www.iknowyoucanseeme.xyz/fr/mentions-legales/"');
+  });
+
+  it('LegalPage: no analytics sentence when analytics is disabled (the page never claims a counter that is not there)', async () => {
+    const html = await container.renderToString(LegalPage, {
+      props: {
+        lang: 'fr',
+        copyright: '© tous droits réservés.',
+        imageUse: 'Demandez avant.',
+        privacy: 'Des analyses sans cookies.',
+        publisher: 'Publié par Alexander Usoltsev.',
+        analytics: readAnalyticsConfig(undefined),
+      },
+    });
+    expect(html).not.toContain('Des analyses sans cookies.');
+    for (const text of ['© tous droits réservés.', 'Demandez avant.', 'Publié par Alexander Usoltsev.']) {
+      expect(html).toContain(text);
+    }
+  });
+
+  describe('LegalPage reads PUBLIC_GOATCOUNTER_CODE by default', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+    const renderDefault = () =>
+      container.renderToString(LegalPage, {
+        props: { lang: 'en', copyright: 'c', imageUse: 'i', privacy: 'Cookieless analytics.', publisher: 'p' },
+      });
+    it('shows the sentence when the code is set', async () => {
+      vi.stubEnv('PUBLIC_GOATCOUNTER_CODE', 'iknowyoucanseeme');
+      expect(await renderDefault()).toContain('Cookieless analytics.');
+    });
+    it('hides it when the code is blank', async () => {
+      vi.stubEnv('PUBLIC_GOATCOUNTER_CODE', '');
+      expect(await renderDefault()).not.toContain('Cookieless analytics.');
+    });
   });
 });

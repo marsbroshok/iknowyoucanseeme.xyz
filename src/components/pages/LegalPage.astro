@@ -2,22 +2,28 @@
 /**
  * Legal notice `/{lang}/legal|mentions-legales/`: copyright, image use,
  * cookieless analytics note and publisher identity (name + contact email;
- * no postal address is published).
+ * no postal address is published). The analytics note is shown only when
+ * analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`), so the page never
+ * mentions a counter the build does not load.
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import { CONTACT_EMAIL } from '../../content/Publisher.js';
+import { readAnalyticsConfig, type AnalyticsConfig } from '../../analytics/AnalyticsConfig.js';
 import BaseLayout from '../BaseLayout.astro';
 
 interface Props {
   lang: Locale;
   copyright: string;
   imageUse: string;
+  /** Cookieless analytics sentence, rendered only when analytics is enabled. */
   privacy: string;
   publisher: string;
+  /** Analytics settings; defaults to `PUBLIC_GOATCOUNTER_CODE` of the build. */
+  analytics?: AnalyticsConfig;
 }
 
-const { lang, copyright, imageUse, privacy, publisher } = Astro.props;
+const { lang, copyright, imageUse, privacy, publisher, analytics = readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE) } = Astro.props;
 const ui = uiText(lang);
 ---
 <BaseLayout lang={lang} routeKey="legal" title={`${ui.t('nav_legal')} · iknowyoucanseeme`} description={ui.t('desc_legal')}>
@@ -28,7 +34,7 @@ const ui = uiText(lang);
       <p>{ui.t('legal_contact_label')} · <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
       <p>{copyright}</p>
       <p>{imageUse}</p>
-      <p>{privacy}</p>
+      {analytics.enabled && <p>{privacy}</p>}
     </div>
   </article>
 </BaseLayout>
