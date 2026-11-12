@@ -5,7 +5,8 @@ import {
   TerritorySchema,
   ZoneSchema,
   ExhibitionSchema,
-  PageSchema
+  PageSchema,
+  TextBlockSchema
 } from './content/schema/index.js';
 
 export const collections = {
@@ -26,8 +27,20 @@ export const collections = {
     schema: ExhibitionSchema
   }),
   pages: defineCollection({
-    loader: glob({ pattern: "**/*.yaml", base: "./src/content/pages" }),
+    loader: glob({ pattern: "**/*.yaml", base: "./src/content/copy/pages" }),
     schema: PageSchema
+  }),
+  copyWorks: defineCollection({
+    loader: glob({ pattern: "**/*.yaml", base: "./src/content/copy/works" }),
+    schema: z.object({ fragment: TextBlockSchema.optional() }).passthrough()
+  }),
+  copyTerritories: defineCollection({
+    loader: glob({ pattern: "**/*.yaml", base: "./src/content/copy/territories" }),
+    schema: z.object({ statement: TextBlockSchema.optional() }).passthrough()
+  }),
+  copyZones: defineCollection({
+    loader: glob({ pattern: "**/*.yaml", base: "./src/content/copy/zones" }),
+    schema: z.object({ statement: TextBlockSchema.optional() }).passthrough()
   }),
   sources: defineCollection({
     loader: glob({ pattern: "**/*.yaml", base: "./src/content/sources" }),
