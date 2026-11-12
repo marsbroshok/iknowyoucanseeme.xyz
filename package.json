@@ -7,7 +7,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit && tsc -p tests/e2e/tsconfig.json --noEmit",
+    "typecheck": "astro sync && tsc --noEmit && tsc -p tests/e2e/tsconfig.json --noEmit",
     "check": "npm run typecheck && astro check && npm run lint && npm run test:coverage && astro build",
     "intake": "npx tsx tools/intake/cli.ts",
     "copy:review": "npx tsx tools/copy/review.ts",
