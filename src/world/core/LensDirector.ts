@@ -44,6 +44,9 @@ export class LensDirector {
   readonly modes: readonly LensMode[];
   private readonly works: Map<string, LensWork>;
   private readonly chosen = new Map<string, LensMode>();
+  /** Per-slug results that never change (asked for every frame). */
+  private readonly gels = new Map<string, string>();
+  private readonly partnerLists = new Map<string, string[]>();
 
   /**
    * @param works - Works of the page.
@@ -120,6 +123,15 @@ export class LensDirector {
    * @returns A CSS hex colour; {@link LensDirector.DEFAULT_GEL} when no other work has a colour.
    */
   gel(slug: string): string {
+    const known = this.gels.get(slug);
+    if (known) return known;
+    const gel = this.pickGel(slug);
+    this.gels.set(slug, gel);
+    return gel;
+  }
+
+  /** The gel of {@link LensDirector.gel}, computed. */
+  private pickGel(slug: string): string {
     for (const other of this.seededOthers(slug, [...this.works.values()], 'gel')) {
       const best = [...other.palette].sort((a, b) => chroma(b) - chroma(a))[0];
       if (best !== undefined && chroma(best) >= MIN_CHROMA) return best.toLowerCase();
@@ -135,6 +147,16 @@ export class LensDirector {
    * @returns Slugs in an order seeded by the slug; empty for unknown slugs.
    */
   partners(slug: string): string[] {
+    let list = this.partnerLists.get(slug);
+    if (!list) {
+      list = this.pickPartners(slug);
+      this.partnerLists.set(slug, list);
+    }
+    return [...list];
+  }
+
+  /** The partners of {@link LensDirector.partners}, computed. */
+  private pickPartners(slug: string): string[] {
     const self = this.works.get(slug);
     if (!self) return [];
     const same = [...this.works.values()].filter((w) => (self.zone === null ? w.zone === null && w.territory === self.territory : w.zone === self.zone));

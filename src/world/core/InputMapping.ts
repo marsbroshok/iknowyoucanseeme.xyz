@@ -87,6 +87,16 @@ export class InputMapping {
   }
 
   /**
+   * Whether a key changes the lens (the lens's keyboard path).
+   *
+   * @param key - `KeyboardEvent.key`.
+   * @returns `true` for L (either case).
+   */
+  static isLensKey(key: string): boolean {
+    return key === 'l' || key === 'L';
+  }
+
+  /**
    * Phone tilt during one frame: tilting left turns left; tilting the top
    * away from the start position drifts forward.
    *

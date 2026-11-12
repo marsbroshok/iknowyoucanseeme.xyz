@@ -157,6 +157,14 @@ describe('LensDirector — per-work parameters', () => {
     expect(d.partners('unknown')).toEqual([]);
   });
 
+  it('answers the same gel and partners every time (computed once), and partner lists cannot be changed from outside', () => {
+    const d = new LensDirector(WORKS, 'high');
+    expect(d.gel('nd')).toBe(d.gel('nd'));
+    const first = d.partners('nd');
+    first.length = 0;
+    expect(d.partners('nd')).toHaveLength(3);
+  });
+
   it('picks the first partner that already has a texture, or none', () => {
     const d = new LensDirector(WORKS, 'high');
     const order = d.partners('nd');

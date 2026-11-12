@@ -114,6 +114,21 @@ describe('HomePage', () => {
       expect(html).not.toContain('<script>alert(1)');
     });
 
+    it('names the six lenses in the page language and explains the lens controls (live caption)', async () => {
+      for (const [lang, names, help] of [
+        ['en', ['Colour filter', 'Mirror fold', 'Multiple exposure', 'Fracture and collage', 'Light leak', 'Motion blur'], 'Hold Shift or tap with two fingers'],
+        ['fr', ['Filtre coloré', 'Pli de miroir', 'Exposition multiple', 'Fracture et collage', 'Fuite de lumière', 'Flou de mouvement'], 'Maintenez Maj ou touchez avec deux doigts'],
+      ] as const) {
+        const html = await renderWorld(lang);
+        const caption = /<p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names="([^"]*)"[^>]*><\/p>/.exec(html);
+        expect(caption, lang).not.toBeNull();
+        const parsed = JSON.parse((caption?.[1] ?? '').replace(/&#(\d+);/g, (_m, n: string) => String.fromCharCode(Number(n))).replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+        expect(Object.keys(parsed)).toEqual(['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm']);
+        expect(Object.values(parsed)).toEqual(names);
+        expect(html).toContain(help);
+      }
+    });
+
     it('renders no world without a manifest', async () => {
       const html = await render('en');
       expect(html).not.toContain('data-drift');

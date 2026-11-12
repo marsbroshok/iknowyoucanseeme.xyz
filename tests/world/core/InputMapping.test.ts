@@ -33,6 +33,12 @@ describe('InputMapping', () => {
     expect(InputMapping.isDriftKey('ArrowRight')).toBe(true);
     expect(InputMapping.isDriftKey('W')).toBe(true);
     expect(InputMapping.isDriftKey('Tab')).toBe(false);
+    // L changes the lens; it never drifts, and drift keys never change the lens.
+    expect(InputMapping.isLensKey('l')).toBe(true);
+    expect(InputMapping.isLensKey('L')).toBe(true);
+    expect(InputMapping.isLensKey('k')).toBe(false);
+    expect(InputMapping.isDriftKey('l')).toBe(false);
+    for (const k of ['w', 'a', 's', 'd', 'ArrowUp']) expect(InputMapping.isLensKey(k)).toBe(false);
   });
 
   it('tilting the phone: left/right turns, forward from where it started drifts forward', () => {

@@ -15,6 +15,12 @@ import { TiltControl } from '../island/TiltControl.js';
 import { WheelInput } from '../island/input/WheelInput.js';
 import { PointerDragInput } from '../island/input/PointerDragInput.js';
 import { KeyboardInput } from '../island/input/KeyboardInput.js';
+import { LensInput } from '../island/input/LensInput.js';
+import { LensAnnouncer } from '../island/LensAnnouncer.js';
+import { LensDirector } from '../core/LensDirector.js';
+import { LensCrossfade, type LensBlend } from '../core/LensCrossfade.js';
+import { LensUniforms, type LensAim } from '../core/LensUniforms.js';
+import { modeIndex, type LensMode } from '../core/LensMode.js';
 import type { MountOptions, WorldHandle } from '../island/DriftBoot.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
 import { WorkTextureLoader } from './WorkTextureLoader.js';
@@ -28,6 +34,7 @@ export interface DriftDebugState {
   facing: string | null;
   nearest: string | null;
   loaded: Record<string, string>;
+  lens: { slug: string | null; mode: LensMode | null; strength: number; unaltered: boolean; blend: LensBlend | null; modes: readonly LensMode[] };
 }
 
 /**
@@ -46,8 +53,10 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
 
 /**
  * Mounts the Three.js world in the home page's world layer: stage, one
- * apparition per work, texture streaming, inputs, compass and the keyboard
- * work list, all driven frame by frame by a {@link DriftSession}.
+ * apparition per work, texture streaming, inputs, compass, the keyboard
+ * work list and the lens (camera-technique shaders over the work under the
+ * pointer; decisions by LensDirector, LensUniforms and LensCrossfade), all
+ * driven frame by frame by a {@link DriftSession}.
  *
  * Verified in the browser (ADR 0006).
  *
@@ -107,17 +116,43 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     isLast: (slug, direction) => session.isLast(slug, direction),
   });
 
+  // The lens (FR1-FR4): decisions in src/world/core, input in src/world/island.
+  const director = new LensDirector(
+    manifest.works.map((w) => ({ slug: w.slug, territory: w.territory, zone: w.zone, techniques: w.techniques, palette: w.palette })),
+    tier,
+  );
+  const lens = new LensUniforms();
+  const fade = new LensCrossfade(director.modes[0]);
+  const announcer = new LensAnnouncer(part<HTMLElement>(root, '[data-drift-lens]'));
+  let lensSlug: string | null = null;
+  const lensInput = new LensInput(canvas, root, () => {
+    if (!lensSlug) return;
+    const mode = director.cycle(lensSlug);
+    fade.to(mode);
+    announcer.announce(mode);
+  });
+
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
 
   const raycaster = new Raycaster();
   const pointer = new Vector2();
+  const visibleMeshes = () => [...meshes.values()].filter((m) => m.mesh.visible).map((m) => m.mesh);
   const onCanvasClick = (event: MouseEvent) => {
-    if (drag.wasDrag()) return;
+    if (drag.wasDrag() || lensInput.claimedPress()) return;
     const rect = canvas.getBoundingClientRect();
     pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, stage.camera);
-    const hit = raycaster.intersectObjects([...meshes.values()].filter((m) => m.mesh.visible).map((m) => m.mesh))[0];
+    const hit = raycaster.intersectObjects(visibleMeshes())[0];
     if (hit) open(hit.object.userData.slug as string);
+  };
+
+  /** The work under the pointer and where on it, or `null`. */
+  const lensPointer = (ndc: { x: number; y: number } | null): LensAim | null => {
+    if (!ndc) return null;
+    pointer.set(ndc.x, ndc.y);
+    raycaster.setFromCamera(pointer, stage.camera);
+    const hit = raycaster.intersectObjects(visibleMeshes())[0];
+    return hit?.uv ? { slug: hit.object.userData.slug as string, uv: { x: hit.uv.x, y: hit.uv.y } } : null;
   };
   canvas.addEventListener('click', onCanvasClick);
 
@@ -137,6 +172,34 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       mesh.setOpacity(w.opacity);
       if (mesh.mesh.visible) mesh.face(f.state.x, f.state.z);
     }
+    const li = lensInput.state();
+    const aim = overlay.isOpen ? null : LensUniforms.aimFrom(lensPointer(li.ndc), li.keyboard, f.facing);
+    const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt);
+    if (lf.slug !== lensSlug) {
+      if (lensSlug) meshes.get(lensSlug)?.setLens(null);
+      lensSlug = lf.slug;
+      if (lensSlug) {
+        fade.jump(director.mode(lensSlug));
+        announcer.announce(fade.target);
+      } else announcer.clear();
+    }
+    fade.advance(dt);
+    const blend = fade.blend();
+    if (lensSlug) {
+      const partner = director.partnerFor(lensSlug, (s) => meshes.get(s)?.texture != null);
+      (meshes.get(lensSlug) as ApparitionMesh).setLens({
+        strength: lf.strength,
+        center: lf.center,
+        blur: lf.blur,
+        modeA: modeIndex(blend.a),
+        modeB: modeIndex(blend.b),
+        mix: blend.mix,
+        gel: director.gel(lensSlug),
+        segments: director.segments(lensSlug),
+        seed: director.seed(lensSlug),
+        partner: partner ? (meshes.get(partner)?.texture ?? null) : null,
+      });
+    }
     metrics.frame(f.nearest, f.nearestDistance, dt);
     if (f.plan) streamer.update(f.plan);
     if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
@@ -152,6 +215,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         facing: f.facing,
         nearest: f.nearest,
         loaded: streamer.loaded,
+        lens: { slug: lensSlug, mode: lensSlug ? fade.target : null, strength: lf.strength, unaltered: li.unaltered, blend: lensSlug ? blend : null, modes: director.modes },
       };
     }
   });
@@ -166,6 +230,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       wheel.detach();
       drag.detach();
       keys.detach();
+      lensInput.detach();
       tilt.detach();
       list.detach();
       overlay.detach();

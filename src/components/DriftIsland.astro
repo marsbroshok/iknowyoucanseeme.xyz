@@ -1,7 +1,8 @@
 ---
 /**
  * The drift world layer of the home page (progressive enhancement): the
- * canvas, the always-visible "Wake up" control, help text, the horizon
+ * canvas, the always-visible "Wake up" control, help text (and the lens
+ * caption, a live region naming the lens in use), the horizon
  * compass, the keyboard work list, the focus dialog and the build-time world
  * manifest. It is
  * rendered hidden; `bootDrift` shows it on capable devices after first
@@ -15,6 +16,7 @@ import type { Locale } from '../i18n/RouteMap.js';
 import type { WorldManifest } from '../world/core/WorldManifest.js';
 import { uiText } from '../i18n/UiCatalog.js';
 import { inlineJson } from '../domain/InlineJson.js';
+import { LENS_MODES } from '../world/core/LensMode.js';
 
 interface Props {
   lang: Locale;
@@ -23,6 +25,8 @@ interface Props {
 
 const { lang, manifest } = Astro.props;
 const ui = uiText(lang);
+/** Lens names in the page language, for the live caption (LensAnnouncer). */
+const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui.t(`lens_${m}`)])));
 ---
 <section class="drift" data-drift hidden tabindex="-1" aria-label={ui.t('drift_layer_label')}>
   <canvas class="drift-canvas" data-drift-canvas aria-hidden="true"></canvas>
@@ -30,7 +34,11 @@ const ui = uiText(lang);
     <button type="button" class="drift-wake" data-drift-wake>{ui.t('wakeup')}</button>
     <button type="button" class="drift-tilt" data-drift-tilt hidden>{ui.t('drift_tilt')}</button>
   </div>
-  <p class="drift-help">{ui.t('drift_help')}</p>
+  <div class="drift-help">
+    <p>{ui.t('drift_help')}</p>
+    <p>{ui.t('drift_lens_help')}</p>
+    <p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names={lensNames}></p>
+  </div>
   <div class="drift-compass" data-drift-compass></div>
   <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
   <dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title">
@@ -112,6 +120,18 @@ const ui = uiText(lang);
     background: rgb(11 16 48 / 0.72);
     color: var(--text-secondary);
     font-size: var(--text-xs);
+  }
+  .drift-help p {
+    margin: 0;
+  }
+  .drift-help p + p {
+    margin-top: var(--space-1);
+  }
+  .drift-lens {
+    color: var(--text-primary);
+  }
+  .drift-lens:empty {
+    display: none;
   }
   .drift-compass {
     position: absolute;
