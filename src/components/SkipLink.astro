@@ -1,8 +1,16 @@
 ---
+/**
+ * "Skip to content" link, first focusable element of every page. The label is
+ * passed in already localized (ui.yaml `skip_content`) so the link is in the
+ * page language.
+ */
 interface Props {
+  /** Id of the main landmark to jump to. */
   targetId: string;
+  /** Localized link text. */
+  label: string;
 }
 
-const { targetId } = Astro.props;
+const { targetId, label } = Astro.props;
 ---
-<a href={`#${targetId}`} class="skip-link">Skip to main content</a>
+<a href={`#${targetId}`} class="skip-link">{label}</a>

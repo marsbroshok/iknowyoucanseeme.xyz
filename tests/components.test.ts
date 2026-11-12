@@ -62,7 +62,17 @@ describe('Astro Components Container', () => {
           lang: 'fr'
         }
       });
-      expect(result).toContain('Alexander Usoltsev, all rights reserved');
+      expect(result).toContain('© ' + new Date().getFullYear() + ' Alexander Usoltsev, tous droits réservés.');
+      expect(result).toMatch(/<a href="\/fr\/mentions-legales\/"[^>]*>Mentions légales<\/a>/);
+      expect(result).not.toContain('all rights reserved');
+      expect(result).not.toContain('Légales');
+    });
+
+    it('renders English footer text from ui.yaml on EN pages', async () => {
+      const result = await container.renderToString(Footer, { props: { lang: 'en' } });
+      expect(result).toContain('Alexander Usoltsev, all rights reserved.');
+      expect(result).toContain('>Legal notice</a>');
+      expect(result).not.toContain('tous droits réservés');
     });
   });
 
@@ -70,10 +80,23 @@ describe('Astro Components Container', () => {
     it('renders skiplink', async () => {
       const result = await container.renderToString(SkipLink, {
         props: {
-          targetId: 'main-content'
+          targetId: 'main-content',
+          label: 'Passer au contenu'
         }
       });
       expect(result).toContain('href="#main-content"');
+      expect(result).toMatch(/<a[^>]*>Passer au contenu<\/a>/);
+    });
+  });
+
+  describe('Header skip link', () => {
+    it('is French on FR pages and English on EN pages (ui.yaml skip_content)', async () => {
+      const fr = await container.renderToString(Header, { props: { lang: 'fr', currentRouteKey: 'works' } });
+      expect(fr).toMatch(/class="skip-link"[^>]*>Passer au contenu<\/a>/);
+      expect(fr).not.toContain('Skip to');
+      const en = await container.renderToString(Header, { props: { lang: 'en', currentRouteKey: 'works' } });
+      expect(en).toMatch(/class="skip-link"[^>]*>Skip to content<\/a>/);
+      expect(en).not.toContain('Passer au contenu');
     });
   });
 

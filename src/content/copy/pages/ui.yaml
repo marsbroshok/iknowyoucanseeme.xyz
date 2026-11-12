@@ -180,6 +180,12 @@ blocks:
     fr: Mentions légales
     sources:
       - spec
+  footer_rights:
+    status: draft
+    en: all rights reserved
+    fr: tous droits réservés
+    sources:
+      - spec
   territories_heading:
     status: draft
     en: Territories

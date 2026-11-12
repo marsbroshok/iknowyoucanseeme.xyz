@@ -42,6 +42,7 @@
 | pages/ui.yaml | blocks.nav_exhibitions | draft | Exhibitions | Expositions | spec |
 | pages/ui.yaml | blocks.nav_contact | draft | Contact | Contact | spec |
 | pages/ui.yaml | blocks.nav_legal | draft | Legal notice | Mentions légales | spec |
+| pages/ui.yaml | blocks.footer_rights | draft | all rights reserved | tous droits réservés | spec |
 | pages/ui.yaml | blocks.territories_heading | draft | Territories | Territoires | spec |
 | pages/ui.yaml | blocks.territory_link | draft | See the territory | Voir le territoire | spec |
 | pages/ui.yaml | blocks.works_all_link | draft | See all works | Voir toutes les œuvres | spec |
