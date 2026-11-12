@@ -118,7 +118,7 @@ test.describe('Lens shaders (fixed test texture)', () => {
     expect(maxDiff(await draw(page, { mode: 'flare', strength: 0 }), base, region(() => true))).toBeLessThanOrEqual(1);
   });
 
-  for (const mode of ['gel', 'mirror'] as const) {
+  for (const mode of ['gel', 'mirror', 'exposure', 'fracture'] as const) {
     test(`${mode}: changes the soft circle around the pointer and nothing outside it`, async () => {
       const c: [number, number] = [0.42, 0.55];
       const lensed = await draw(page, { mode, center: c });
@@ -145,6 +145,24 @@ test.describe('Lens shaders (fixed test texture)', () => {
     for (const segments of [2, 3, 6]) expect(asym(await draw(page, { mode: 'mirror', segments })), `${segments} segments`).toBeLessThan(3);
   });
 
+  test('multiple exposure: a screen blend only ever brightens', async () => {
+    const lensed = await draw(page, { mode: 'exposure' });
+    const idx = inside();
+    expect(meanLuma(lensed, idx) - meanLuma(base, idx)).toBeGreaterThan(10);
+    expect(idx.every((i) => luma(lensed, i) >= luma(base, i) - 2)).toBe(true);
+    // Until a second work is loaded, the work's own picture turned around is the second exposure.
+    const alone = await draw(page, { mode: 'exposure', partner: false });
+    expect(meanDiff(alone, base, idx)).toBeGreaterThan(6);
+    expect(meanDiff(alone, lensed, idx)).toBeGreaterThan(3);
+  });
+
+  test("fracture: shards keep the picture's colours but break its lines", async () => {
+    const lensed = await draw(page, { mode: 'fracture' });
+    const idx = inside();
+    expect(Math.abs(meanLuma(lensed, idx) - meanLuma(base, idx))).toBeLessThan(25);
+    expect(meanDiff(lensed, base, idx)).toBeGreaterThan(6);
+  });
+
   test('the lens never changes the stored image (FR4)', async () => {
     const before = await checksum(page);
     for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) await draw(page, { mode });
@@ -152,10 +170,10 @@ test.describe('Lens shaders (fixed test texture)', () => {
     expect(maxDiff(await draw(page, null), base, region(() => true))).toBe(0);
   });
 
-  for (const mode of ['gel', 'mirror'] as const) {
+  for (const mode of ['gel', 'mirror', 'exposure', 'fracture'] as const) {
     test(`${mode}: matches its reference picture in tests/visual/ (tolerance-based)`, async () => {
       await draw(page, { mode, center: [0.45, 0.52], segments: 4, blur: [0.05, 0.02] });
-      await expect(page.locator('[data-lens-canvas]')).toHaveScreenshot(`lens-${mode}.png`, { maxDiffPixelRatio: 0.04, threshold: 0.25 });
+      await expect(page.locator('[data-lens-canvas]')).toHaveScreenshot(`lens-${mode}.png`, { maxDiffPixelRatio: 0.015, threshold: 0.2 });
     });
   }
 });

@@ -57,9 +57,51 @@ vec3 lensMirror(vec2 uv) {
   return lensSample(lensFromLocal(length(p) * vec2(cos(a), sin(a))));
 }
 
+// 2. Multiple exposure: screen blend with a second work of the same zone
+// (or, until one is loaded, the work itself turned around).
+vec3 lensExposure(vec2 uv, vec3 base) {
+  vec3 second = lensHasPartner > 0.5 ? texture2D(lensPartner, uv).rgb : lensSample(vec2(1.0) - uv);
+  return 1.0 - (1.0 - base) * (1.0 - second * 0.85);
+}
+
+#ifdef LENS_FRACTURE
+// Hash without sine (stable across GPUs).
+vec2 lensHash(vec2 p) {
+  vec3 q = fract(vec3(p.xyx + lensSeed * 13.7) * vec3(0.1031, 0.1030, 0.0973));
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.xx + q.yz) * q.zy);
+}
+
+// 3. Fracture & re-collage: Voronoi shards, each shifted and turned a little.
+vec3 lensFracture(vec2 uv) {
+  vec2 p = lensToLocal(uv) / lensRadius * 3.0;
+  vec2 cell = floor(p);
+  float best = 1e9;
+  vec2 bestId = cell;
+  vec2 bestPt = cell;
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec2 id = cell + vec2(float(i), float(j));
+      vec2 pt = id + lensHash(id);
+      float d = dot(p - pt, p - pt);
+      if (d < best) { best = d; bestId = id; bestPt = pt; }
+    }
+  }
+  vec2 h = lensHash(bestId + 7.0) - 0.5;
+  float ang = h.x * 0.35;
+  vec2 q = mat2(cos(ang), sin(ang), -sin(ang), cos(ang)) * (p - bestPt);
+  vec2 moved = bestPt + q + h * 0.45;
+  return lensSample(lensFromLocal(moved / 3.0 * lensRadius)) * (0.9 + 0.2 * fract(h.y * 7.0 + 0.5));
+}
+#endif
+
 vec3 lensMode(int mode, vec2 uv, vec3 base) {
   if (mode == 0) return lensGelFilter(base);
   if (mode == 1) return lensMirror(uv);
+  if (mode == 2) return lensExposure(uv, base);
+#ifdef LENS_FRACTURE
+  if (mode == 3) return lensFracture(uv);
+#endif
   return base;
 }
 
