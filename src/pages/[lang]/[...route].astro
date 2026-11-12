@@ -81,7 +81,7 @@ const labels =
 const workImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/works/**/*.{jpeg,jpg,png,gif,avif,webp}');
 
 /** One WebP size of a work image, never larger than the source; throws when the file is missing. */
-const resolveImage = assetImageResolver(workImages, (src, width) => getImage({ src, width, format: 'webp' }));
+const resolveImage = assetImageResolver<ImageMetadata>(workImages, (src, width) => getImage({ src, width, format: 'webp' }));
 
 /** The drift world's manifest (home page only). */
 const world = page.kind === 'home' ? await buildWorldManifest({ works, territories, zones, ui, resolve: resolveImage }) : undefined;
