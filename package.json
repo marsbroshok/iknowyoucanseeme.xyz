@@ -1,7 +1,8 @@
 {
-  "name": "intake_20261111",
+  "name": "iknowyoucanseeme",
   "version": "1.0.0",
-  "description": "[![Screenshot](./.github/preview.png)](https://hugoblox.com/templates/)",
+  "private": true,
+  "description": "Bilingual portfolio of the photographer and ceramicist Alexander Usoltsev (iknowyoucanseeme.xyz), built with Astro.",
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
