@@ -14,7 +14,7 @@ Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 - [x] Task: Colour filter + Mirror fold shaders with visual snapshots `9c0e820`
 - [x] Task: Multiple exposure + Fracture shaders with visual snapshots `93163ff`
 - [x] Task: Light leak + ICM shaders with visual snapshots `e4888e2`
-- [ ] Task: Low-tier variants
+- [x] Task: Low-tier variants `8d71f14`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Integration
