@@ -10,7 +10,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "jsx": "preserve",
+    "jsxImportSource": "astro"
   },
-  "include": ["src/**/*", "tools/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tools/**/*", "tests/components.test.ts", "tests/design.test.ts", ".astro/types.d.ts"]
 }

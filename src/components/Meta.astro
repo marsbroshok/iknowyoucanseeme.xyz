@@ -1,0 +1,25 @@
+---
+interface Props {
+  width?: number;
+  height?: number;
+  year: number;
+}
+
+const { width, height, year } = Astro.props;
+let dims = '';
+if (width && height) {
+  dims = `${width} × ${height} · `;
+}
+---
+<div class="work-meta">
+  {dims}{year}
+</div>
+
+<style>
+  .work-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+  }
+</style>

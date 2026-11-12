@@ -40,3 +40,7 @@ The intake pipeline processes raw content from the artist's Instagram export and
 ### Privacy & Secrets
 - Never commit the raw `intake/instagram` export directory, which contains private messages and PI.
 - Do not check in `.env` files or prices. `src/content` is checked by automated tests to forbid the `€` symbol and `price:` keys.
+
+### Testing
+- Run `npm run check` for static analysis, unit tests, and the Astro build check.
+- End-to-end tests (`npm run test:e2e`) run Playwright and require a built application. Run `npm run check` (or `npm run build`) before running them.

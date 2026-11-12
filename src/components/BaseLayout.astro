@@ -1,0 +1,72 @@
+---
+import type { Locale, RouteKey } from '../i18n/RouteMap.js';
+import { alternateLinks } from '../i18n/Alternates.js';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import '../styles/base.css';
+
+interface Props {
+  lang: Locale;
+  routeKey: RouteKey;
+  routeParams?: { en?: string[], fr?: string[] };
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { lang, routeKey, routeParams, title, description, ogImage } = Astro.props;
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
+const currentPath = Astro.url.pathname;
+const canonicalUrl = `${siteUrl}${currentPath}`;
+const alternates = alternateLinks(routeKey, siteUrl, routeParams);
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  
+  <link rel="canonical" href={canonicalUrl} />
+  {alternates.map(alt => (
+    <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+  ))}
+
+  {/* Open Graph & Twitter */}
+  <meta property="og:title" content={title} />
+  {description && <meta property="og:description" content={description} />}
+  <meta property="og:url" content={canonicalUrl} />
+  {ogImage && <meta property="og:image" content={new URL(ogImage, siteUrl).toString()} />}
+  <meta name="twitter:card" content="summary_large_image" />
+
+  {/* Preload Fonts */}
+  <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/JetBrainsMono.woff2" as="font" type="font/woff2" crossorigin />
+
+  <style is:inline>
+    @font-face {
+      font-family: 'Fraunces';
+      src: url('/fonts/Fraunces.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/fonts/JetBrainsMono.woff2') format('woff2');
+      font-weight: 100 800;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+</head>
+<body>
+  <Header lang={lang} currentRouteKey={routeKey} />
+  <main id="main-content">
+    <slot />
+  </main>
+  <Footer lang={lang} />
+</body>
+</html>

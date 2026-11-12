@@ -1,0 +1,41 @@
+---
+import { Picture } from 'astro:assets';
+
+interface Props {
+  src: string; // The relative path, e.g. "works/slug/0.jpg"
+  alt: string;
+  palette?: string[]; // hex array
+  sizes?: string;
+  className?: string;
+}
+
+const { src, alt, palette, sizes = "(max-width: 2400px) 100vw, 2400px", className = "" } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/works/**/*.{jpeg,jpg,png,gif,avif,webp}');
+const imagePath = `/src/assets/${src}`;
+if (!images[imagePath]) {
+  throw new Error(`[WorkImage] Image "${imagePath}" does not exist in glob.`);
+}
+
+const bgColor = palette && palette.length > 0 ? palette[0] : 'transparent';
+---
+
+<div class={`work-image-wrapper ${className}`} style={`background-color: ${bgColor};`}>
+  <Picture
+    src={images[imagePath]()}
+    alt={alt}
+    widths={[600, 1200, 2400]}
+    sizes={sizes}
+    formats={['avif', 'webp']}
+    fallbackFormat="jpg"
+    style="width: 100%; height: auto;"
+  />
+</div>
+
+<style>
+  .work-image-wrapper {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+  }
+</style>
