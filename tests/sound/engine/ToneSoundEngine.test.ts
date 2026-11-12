@@ -80,13 +80,24 @@ describe('ToneSoundEngine, rendered offline (Tone.Offline)', () => {
     expect(peak(x, 0, 2)).toBe(0);
   }, 30_000);
 
-  it('stop fades out to silence (and dispose keeps it silent)', async () => {
+  it('a disposed engine is silent (its nodes are freed; disconnections apply to the whole offline render)', async () => {
+    const x = await render(
+      2,
+      async (engine) => {
+        await engine.start();
+        await engine.dispose();
+      },
+      null,
+    );
+    expect(peak(x, 0, 2)).toBe(0);
+  }, 30_000);
+
+  it('stop fades out to silence', async () => {
     const x = await render(
       SETTLED + 2,
       async (engine, context) => {
         await engine.start();
         context.setTimeout(() => void engine.stop(), SETTLED);
-        context.setTimeout(() => void engine.dispose(), SETTLED + 1);
       },
       null,
     );
