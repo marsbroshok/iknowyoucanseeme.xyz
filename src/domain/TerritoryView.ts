@@ -48,9 +48,12 @@ export const TEASER_EXCERPT_CHARS = 220;
 /**
  * Localized title of a territory/zone.
  *
+ * @param entry - Territory or zone (with copy).
+ * @param ui - UI strings of the target locale.
+ * @returns The title.
  * @throws Error when the entry has no title in this locale (copy missing).
  */
-function titleOf(entry: TitledEntry, ui: UiText): string {
+export function titleOf(entry: TitledEntry, ui: UiText): string {
   const title = entry.title?.[ui.lang];
   if (!title) throw new Error(`[content] Missing ${ui.lang} title for "${entry.slug}"`);
   return title;
