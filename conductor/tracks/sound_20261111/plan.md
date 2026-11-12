@@ -7,7 +7,7 @@ Track: `sound_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workfl
 - [x] Task: `SoundEngine` interface + `ZoneMixer` — Red: property tests (sum to 1, smooth ramps) — Green (2e04254; with `SoundZones` and `ZoneField`, weights from the camera)
 - [x] Task: `AudioManifest` parser (empty manifest valid; bad entries rejected loudly) — Red/Green (5c58c25)
 - [x] Task: `SoundRecipes` parameter mapping per zone — Red/Green (b29ea7d; with `CueReader`, `SoundScene`, `SoundLevel`)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run test:e2e` exit 0 (200 passed) with `CI=true` and with `env -u CI` at e10d28d; `npm run check` exited 1 under both settings there (v8 counted the never-loaded, type-only `SoundEngine.ts` as uncovered), fixed in 242805a, then `npm run check` exit 0 (827 unit tests, 100% coverage) with `CI=true` and with `env -u CI` at 242805a
 
 ## Phase 2: Tone adapter
 
