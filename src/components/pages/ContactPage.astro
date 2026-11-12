@@ -1,0 +1,46 @@
+---
+/**
+ * Contact `/{lang}/contact/`. With a Web3Forms access key the form is shown
+ * (plus the email as a fallback). Without a key the form is NOT rendered and
+ * only the email is shown: an explicit, documented mode, not a silent
+ * fallback (see README, "Contact form").
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import { CONTACT_EMAIL } from '../../content/Publisher.js';
+import BaseLayout from '../BaseLayout.astro';
+import ContactForm from '../ContactForm.astro';
+
+interface Props {
+  lang: Locale;
+  /** Web3Forms key; absent or empty → email-only mode. */
+  accessKey?: string;
+  workTitles: Readonly<Record<string, string>>;
+}
+
+const { lang, accessKey, workTitles } = Astro.props;
+const ui = uiText(lang);
+const mailto = `mailto:${CONTACT_EMAIL}`;
+---
+<BaseLayout lang={lang} routeKey="contact" title={`${ui.t('nav_contact')} · Alexander Usoltsev`} description={ui.t('desc_contact')}>
+  <div class="page">
+    <h1>{ui.t('nav_contact')}</h1>
+    <p class="prose">{ui.t('contact_intro')}</p>
+    {accessKey ? (
+      <>
+        <ContactForm lang={lang} accessKey={accessKey} workTitles={workTitles} />
+        <p class="prose email-fallback">{ui.t('contact_email_fallback')} <a href={mailto}>{CONTACT_EMAIL}</a></p>
+      </>
+    ) : (
+      <p class="prose email-only">{ui.t('contact_email_only')} <a href={mailto}>{CONTACT_EMAIL}</a></p>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .email-fallback,
+  .email-only {
+    margin-top: var(--space-4);
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -18,6 +18,7 @@ import WorksIndexPage from '../../components/pages/WorksIndexPage.astro';
 import ExhibitionsPage from '../../components/pages/ExhibitionsPage.astro';
 import AboutPage from '../../components/pages/AboutPage.astro';
 import LegalPage from '../../components/pages/LegalPage.astro';
+import ContactPage from '../../components/pages/ContactPage.astro';
 import { buildExhibitionViews } from '../../domain/ExhibitionQueries.js';
 import { buildPersonJsonLd } from '../../domain/JsonLd.js';
 import { requireBlock } from '../../content/PageBlocks.js';
@@ -31,11 +32,10 @@ import { localizedPath } from '../../i18n/LocalizedPath.js';
 export async function getStaticPaths() {
   const works = await getCollection('works');
   const territories = await getCollection('territories');
-  const implemented = new Set<PageRef['kind']>(['home', 'territory', 'work', 'works', 'exhibitions', 'about', 'legal']);
   return buildSiteRoutes({
     works: works.map((w) => w.data.slug),
     territories: territories.map((t) => t.data.slug),
-  }).filter((r) => implemented.has(r.props.page.kind));
+  });
 }
 
 interface Props {
@@ -114,5 +114,12 @@ function territoryFor(slug: string) {
     imageUse={requireBlock(legal, 'image_use', lang)}
     privacy={requireBlock(legal, 'privacy', lang)}
     publisher={requireBlock(legal, 'publisher', lang)}
+  />
+)}
+{page.kind === 'contact' && (
+  <ContactPage
+    lang={lang}
+    accessKey={import.meta.env.PUBLIC_WEB3FORMS_KEY}
+    workTitles={Object.fromEntries(works.map((w) => [w.slug, buildWorkView(w, ui).displayTitle]))}
   />
 )}
