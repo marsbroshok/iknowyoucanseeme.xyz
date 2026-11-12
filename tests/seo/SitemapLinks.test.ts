@@ -37,8 +37,11 @@ describe('sitemapLinks', () => {
 });
 
 describe('isLocalizedPage', () => {
-  it('excludes the root language chooser only', () => {
+  it('excludes the root language chooser and the non-indexed labels sheets', () => {
     expect(isLocalizedPage(`${SITE}/`)).toBe(false);
+    expect(isLocalizedPage(`${SITE}/en/labels/`)).toBe(false);
+    expect(isLocalizedPage(`${SITE}/fr/labels/`)).toBe(false);
+    expect(isLocalizedPage(`${SITE}/dreamland/`)).toBe(false);
     expect(isLocalizedPage(`${SITE}/en/`)).toBe(true);
     expect(isLocalizedPage(`${SITE}/fr/oeuvres/arrivee/`)).toBe(true);
   });

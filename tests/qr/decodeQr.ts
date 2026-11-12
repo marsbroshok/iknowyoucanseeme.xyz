@@ -1,5 +1,13 @@
 import sharp from 'sharp';
-import jsQR from 'jsqr';
+import { createRequire } from 'node:module';
+
+/** jsQR's decoder signature (the parts used here). */
+type JsQr = (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null;
+/**
+ * jsQR is a CommonJS bundle whose typings only resolve as a default import
+ * under the bundler; `require` behaves the same under Vitest and Playwright.
+ */
+const jsQR = (createRequire(import.meta.url)('jsqr') as { default: JsQr }).default;
 
 /**
  * Test helper: rasterizes an SVG QR code (as a phone camera would see the

@@ -23,6 +23,8 @@ interface Props {
   ogImage?: string;
   /** JSON-LD objects to embed in the head. */
   jsonLd?: readonly object[];
+  /** Keep the page out of search engines (`<meta name="robots" content="noindex">`). */
+  noindex?: boolean;
   /** Analytics settings; defaults to `PUBLIC_GOATCOUNTER_CODE` of the build. */
   analytics?: AnalyticsConfig;
 }
@@ -35,6 +37,7 @@ const {
   description,
   ogImage,
   jsonLd = [],
+  noindex = false,
   analytics = readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE),
 } = Astro.props;
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
@@ -49,6 +52,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
+  {noindex && <meta name="robots" content="noindex" />}
 
   <link rel="canonical" href={canonical} />
   {alternates.map(alt => (

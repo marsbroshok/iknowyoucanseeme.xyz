@@ -1,0 +1,112 @@
+---
+/**
+ * Printable A4 sheet of exhibition labels: one label per work with the
+ * French title, size/year/medium, a QR code to the work page and the
+ * readable address. Not indexed; header, footer and the intro are hidden
+ * in print. Ships no JavaScript (QR codes are SVG made at build time).
+ */
+import BaseLayout from '../BaseLayout.astro';
+import type { Locale } from '../../i18n/RouteMap.js';
+import type { LabelView } from '../../domain/LabelView.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+
+interface Props {
+  lang: Locale;
+  labels: readonly (LabelView & { qrSvg: string })[];
+}
+
+const { lang, labels } = Astro.props;
+const ui = uiText(lang);
+const title = ui.t('labels_title');
+---
+<BaseLayout lang={lang} routeKey="labels" title={title} noindex>
+  <section class="labels-sheet">
+    <h1 class="labels-heading">{title}</h1>
+    <p class="labels-intro">{ui.t('labels_intro')}</p>
+    <ul class="labels">
+      {labels.map((label) => (
+        <li class="label">
+          <div class="label-text">
+            <p class="label-title" lang="fr">{label.title}</p>
+            <p class="label-meta">{label.meta}</p>
+            <p class="label-url">{label.displayUrl}</p>
+          </div>
+          <div class="label-qr" role="img" aria-label={ui.t('labels_qr')} set:html={label.qrSvg} />
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .labels {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--space-3);
+  }
+  .label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid currentColor;
+    background: #fff;
+    color: #111;
+    break-inside: avoid;
+  }
+  .label-title {
+    font-family: var(--font-serif, serif);
+    font-size: 1.25rem;
+    margin: 0 0 var(--space-2);
+  }
+  .label-meta,
+  .label-url {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+  .label-url {
+    margin-top: var(--space-2);
+    word-break: break-all;
+  }
+  .label-qr {
+    flex: 0 0 auto;
+    width: 30mm;
+    height: 30mm;
+  }
+  .label-qr :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<style is:global>
+  @media print {
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
+    body {
+      background: #fff;
+      color: #111;
+    }
+    .site-header,
+    footer,
+    .skip-link,
+    .labels-heading,
+    .labels-intro {
+      display: none !important;
+    }
+    .labels {
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+    }
+    .label {
+      height: 62mm;
+      border: 0.3mm solid #999;
+    }
+  }
+</style>

@@ -29,8 +29,8 @@ test.describe('Crawl: every route is accessible', () => {
   test('the build contains exactly the expected routes', () => {
     const built = listBuiltPages(path.resolve('dist')).map(pageUrlPath).sort();
     expect(built).toEqual([...routes, ...LEGACY_REDIRECTS.map((r) => r.from)].sort());
-    expect(routes.filter((r) => r.startsWith('/en/'))).toHaveLength(48);
-    expect(routes.filter((r) => r.startsWith('/fr/'))).toHaveLength(48);
+    expect(routes.filter((r) => r.startsWith('/en/'))).toHaveLength(49);
+    expect(routes.filter((r) => r.startsWith('/fr/'))).toHaveLength(49);
   });
 
   for (const route of routes) {

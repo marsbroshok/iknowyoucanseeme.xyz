@@ -31,7 +31,7 @@ test.describe('Built site guard (dist/)', () => {
   test('no page shows UI text in the other language (FR pages: no EN UI strings; EN pages: no FR ones)', () => {
     const guard = new LanguageGuard(loadUiBlocks());
     const localized = pages.filter((p) => /^(en|fr)\//.test(p));
-    expect(localized.length).toBe(2 * (6 + 40 + 2));
+    expect(localized.length).toBe(2 * (7 + 40 + 2));
     const violations = localized.flatMap((file) => guard.inspect(file, fs.readFileSync(path.join(DIST, file), 'utf8')));
     expect(violations).toEqual([]);
   });
@@ -66,7 +66,7 @@ test.describe('Built site guard (dist/)', () => {
     const en = pages.filter((p) => p.startsWith('en/'));
     const fr = pages.filter((p) => p.startsWith('fr/'));
     expect(en.length).toBe(fr.length);
-    expect(en.length).toBe(6 + 40 + 2);
+    expect(en.length).toBe(7 + 40 + 2);
   });
 });
 

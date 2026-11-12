@@ -51,6 +51,7 @@ always with a trailing slash.
 | About | `/en/about/` | `/fr/a-propos/` |
 | Contact | `/en/contact/` | `/fr/contact/` |
 | Legal | `/en/legal/` | `/fr/mentions-legales/` |
+| Exhibition labels (print, not indexed) | `/en/labels/` | `/fr/labels/` |
 
 All routes come from `src/i18n/SiteRoutes.ts` (one Astro route,
 `src/pages/[lang]/[...route].astro`). UI strings live in
@@ -123,6 +124,13 @@ metrics, `Analytics.track(event, data)` sends custom events such as
 `drift-time` or `work-approached`. It does nothing **only** when analytics is
 disabled by configuration; when enabled it sends right away, or queues the
 event until the GoatCounter script has loaded.
+
+### Exhibition labels
+
+`/{lang}/labels/` is a printable A4 sheet with one label per work: French
+title, size, year, medium and a QR code to the work's page. Print it from the
+browser (A4, margins "none" or "default"). The page is not indexed and not in
+the sitemap.
 
 ## Deploy
 

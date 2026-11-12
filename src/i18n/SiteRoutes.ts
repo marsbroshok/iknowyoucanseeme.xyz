@@ -2,7 +2,7 @@ import { LOCALES, type Locale } from './RouteMap.js';
 import { localizedPath } from './LocalizedPath.js';
 
 /** Static (non-parameterised) page kinds; each equals its route key. */
-export type StaticPageKind = 'home' | 'works' | 'exhibitions' | 'about' | 'legal' | 'contact';
+export type StaticPageKind = 'home' | 'works' | 'exhibitions' | 'about' | 'legal' | 'contact' | 'labels';
 
 /** Which page a generated route renders. */
 export type PageRef = { kind: StaticPageKind } | { kind: 'work'; slug: string } | { kind: 'territory'; slug: string };
@@ -19,7 +19,7 @@ export interface SiteSlugs {
   territories: readonly string[];
 }
 
-const STATIC_PAGES: readonly StaticPageKind[] = ['home', 'works', 'exhibitions', 'about', 'legal', 'contact'];
+const STATIC_PAGES: readonly StaticPageKind[] = ['home', 'works', 'exhibitions', 'about', 'legal', 'contact', 'labels'];
 
 /**
  * Site path of a route (e.g. `/fr/oeuvres/arrivee/`).
@@ -35,7 +35,8 @@ function pagePath(page: PageRef, lang: Locale): string {
 }
 
 /**
- * Builds every awake-layer route in both locales: the six static pages plus
+ * Builds every awake-layer route in both locales: the seven static pages
+ * (including the printable labels sheet) plus
  * one page per work and per territory.
  *
  * @param slugs - Work and territory slugs.
