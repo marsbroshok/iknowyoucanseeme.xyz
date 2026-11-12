@@ -66,7 +66,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const meshes = new Map<string, ApparitionMesh>();
   for (const p of session.layout.placements) {
     const w = work(p.slug);
-    const mesh = new ApparitionMesh(p.slug, p, w.images.low.width / w.images.low.height, w.color);
+    const mesh = new ApparitionMesh(p.slug, p, w.images.low.width / w.images.low.height, w.color, tier);
     meshes.set(p.slug, mesh);
     stage.scene.add(mesh.mesh);
   }
