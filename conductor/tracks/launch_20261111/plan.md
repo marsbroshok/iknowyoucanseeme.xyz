@@ -9,12 +9,12 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 - [x] Task: Rewrite `README.md`; update `LICENSE.md` holder/year (all rights reserved notice for images documented) `2b3b3e0`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — at `2b3b3e0`: `npm run check` exit 0 (CI=true) / 0 (CI unset); `npm run test:e2e` exit 0 (CI=true, 116 passed) / 0 (CI unset)
 
-## Phase 2: Deploy & analytics
+## Phase 2: Deploy & analytics [checkpoint: 6bbb5a3]
 
 - [x] Task: `deploy.yml` + `public/CNAME`; test: workflow YAML schema/`actionlint` script check `70431ee` (local actionlint 1.7.12: exit 0; CI runs the pinned release)
 - [x] Task: `Analytics` module (`track()` + script injection when code set) — Red: tests for enabled/disabled config — Green `0753499`
 - [x] Task: Old-URL redirect pages — Red: build test that each legacy path exists with meta-refresh + canonical — Green `99e4914`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — at `6bbb5a3`: `npm run check` exit 0 (CI=true) / 0 (CI unset); `npm run test:e2e` exit 0 (CI=true) / 0 (CI unset)
 
 ## Phase 3: Exhibition labels & docs
 
