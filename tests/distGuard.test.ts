@@ -42,6 +42,23 @@ describe('inspectPage', () => {
   });
 });
 
+describe('inspectPage: analytics script', () => {
+  const goatcounter = '<script async data-goatcounter="https://site.goatcounter.com/count" src="https://gc.zgo.at/count.js"></script>';
+
+  it('allows GoatCounter\'s external script on any page, on top of the inline budget', () => {
+    expect(inspectPage('en/a/index.html', page(goatcounter))).toEqual([]);
+    expect(inspectPage('index.html', `<html lang="en"><body>${goatcounter}<script>${'x'.repeat(10)}</script></body></html>`)).toEqual([]);
+  });
+
+  it('still flags any other external script, and inline code next to GoatCounter', () => {
+    const other = '<script async src="https://cdn.example.com/count.js"></script>';
+    expect(inspectPage('en/a/index.html', page(goatcounter + other)).map((x) => x.detail)).toEqual([
+      'inline 0 B (budget 0 B), external https://cdn.example.com/count.js',
+    ]);
+    expect(inspectPage('en/a/index.html', page(`${goatcounter}<script>track()</script>`)).map((x) => x.rule)).toEqual(['js-budget']);
+  });
+});
+
 describe('scriptBytes', () => {
   it('counts executable scripts and ignores JSON data blocks', () => {
     const html =

@@ -3,8 +3,9 @@ import AxeBuilder from '@axe-core/playwright';
 
 /**
  * Contact flows. Port 4325 serves the build without a Web3Forms key
- * (email-only mode); port 4326 serves the build with a test key. The
- * Web3Forms endpoint is mocked here, in the test harness only.
+ * (email-only mode); port 4326 serves the build with a test key (and a
+ * test GoatCounter code). The Web3Forms endpoint and GoatCounter are mocked
+ * here, in the test harness only, so no test ever reaches either service.
  */
 const KEYED = 'http://localhost:4326';
 const ENDPOINT = 'https://api.web3forms.com/submit';
@@ -29,6 +30,22 @@ test.describe('Contact without a key: email-only mode', () => {
 });
 
 test.describe('Contact with a key: Web3Forms form', () => {
+  const analyticsLoads: string[] = [];
+  test.beforeEach(async ({ page }) => {
+    await page.route('https://gc.zgo.at/**', async (route) => {
+      analyticsLoads.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: 'text/javascript', body: 'window.goatcounter = { count() {} };' });
+    });
+    await page.route('https://*.goatcounter.com/**', (route) => route.abort());
+  });
+
+  test('the keyed build loads the (mocked) GoatCounter script', async ({ page }) => {
+    analyticsLoads.length = 0;
+    await page.goto(`${KEYED}/en/about/`);
+    await expect.poll(() => analyticsLoads).toEqual(['https://gc.zgo.at/count.js']);
+    expect(await page.evaluate(() => typeof (window as unknown as { goatcounter?: { count?: unknown } }).goatcounter?.count)).toBe('function');
+  });
+
   for (const route of ['/en/contact/', '/fr/contact/?work=arrivee']) {
     test(`axe on the keyed form ${route}`, async ({ page }) => {
       await page.goto(`${KEYED}${route}`);

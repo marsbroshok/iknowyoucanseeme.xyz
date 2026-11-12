@@ -89,16 +89,17 @@ Prerequisites: `ffmpeg` (videos) and `poppler` (`pdfimages`), via Homebrew.
 
 ## Configuration
 
-The value is public (they end up in the HTML) and are read at build time.
-Locally it is usually unset; on GitHub it comes from a repository
-variable (see `docs/deploy.md`).
+Both values are public (they end up in the HTML) and are read at build time.
+Locally they are usually unset; on GitHub they come from repository
+variables (see `docs/deploy.md`).
 
 | Variable | Set | Not set |
 |---|---|---|
 | `PUBLIC_WEB3FORMS_KEY` | The contact form is rendered and posts to [Web3Forms](https://web3forms.com) | No form; the contact page shows only the email address |
+| `PUBLIC_GOATCOUNTER_CODE` | The [GoatCounter](https://www.goatcounter.com) script (cookieless) is added to every page | No analytics script at all; `track()` does nothing |
 
 ```bash
-PUBLIC_WEB3FORMS_KEY=<key> npm run build
+PUBLIC_WEB3FORMS_KEY=<key> PUBLIC_GOATCOUNTER_CODE=<code> npm run build
 ```
 
 ### Contact form
@@ -108,6 +109,16 @@ honeypot) works as a plain POST without JavaScript; a small script (under
 3 KB) fills `work` from `?work=<slug>` and sends in place. Without a key the
 form is deliberately not rendered, so a build without the key never ships a
 broken form. The email address is always visible.
+
+### Analytics
+
+`src/analytics/` holds the GoatCounter setup. The script is only added when
+`PUBLIC_GOATCOUNTER_CODE` is a valid GoatCounter code (lowercase letters,
+digits, dashes); any other non-empty value fails the build. For later drift
+metrics, `Analytics.track(event, data)` sends custom events such as
+`drift-time` or `work-approached`. It does nothing **only** when analytics is
+disabled by configuration; when enabled it sends right away, or queues the
+event until the GoatCounter script has loaded.
 
 ## Deploy
 

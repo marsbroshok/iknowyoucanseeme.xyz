@@ -1,3 +1,5 @@
+import { GOATCOUNTER_SCRIPT_SRC } from '../analytics/AnalyticsConfig.js';
+
 /** One rule broken by a built page. */
 export interface GuardViolation {
   /** Path relative to the build directory. */
@@ -10,6 +12,13 @@ export interface GuardViolation {
 export const CONTACT_JS_BUDGET = 3072;
 /** Maximum inline JavaScript (bytes) on the root language chooser. */
 export const ROOT_CHOOSER_JS_BUDGET = 512;
+
+/**
+ * External scripts allowed on any page: only GoatCounter's cookieless
+ * counter (present when analytics is enabled). Everything else is inline
+ * and within the page budget.
+ */
+export const ALLOWED_EXTERNAL_SCRIPTS: readonly string[] = [GOATCOUNTER_SCRIPT_SRC];
 
 /** Price-like content: a currency sign/code, or the words price/prix/tarif. */
 const PRICE_PATTERNS: readonly RegExp[] = [/€/, /\bEUR\b/, /\$\s?\d/, /\bprices?\b/i, /\bprix\b/i, /\btarifs?\b/i];
@@ -50,7 +59,8 @@ export function jsBudgetFor(file: string): number {
 /**
  * Checks one built HTML page: no price content, `<html lang>`, and (for
  * localized pages) exactly one canonical plus EN/FR/x-default alternates;
- * JavaScript within the page's budget, never as external files.
+ * JavaScript within the page's budget, never as external files except
+ * {@link ALLOWED_EXTERNAL_SCRIPTS}.
  *
  * @param file - Path relative to the build directory (e.g. `fr/oeuvres/x/index.html`).
  * @param html - Page HTML.
@@ -76,7 +86,8 @@ export function inspectPage(file: string, html: string): GuardViolation[] {
     }
   }
 
-  const { inlineBytes, external } = scriptBytes(html);
+  const { inlineBytes, external: allExternal } = scriptBytes(html);
+  const external = allExternal.filter((src) => !ALLOWED_EXTERNAL_SCRIPTS.includes(src));
   const budget = jsBudgetFor(file);
   if (external.length > 0 || inlineBytes > budget) {
     add('js-budget', `inline ${inlineBytes} B (budget ${budget} B), external ${external.join(', ') || 'none'}`);
