@@ -12,7 +12,14 @@ The script `download-fonts.ts` performs network calls to download Google Fonts d
 
 ## Decision
 
-We moved `download-fonts.ts` out of the `tools/` directory (which is strictly covered by 100% threshold gates in `vitest.config.ts`) and into `scripts/`. We will document it as an untracked, network-dependent utility and explicitly exclude it from the 100% coverage constraints. 
+We moved `download-fonts.ts` out of the `tools/` directory (which is strictly covered by 100% threshold gates in `vitest.config.ts`) and into `scripts/`. We document it as a one-off, network-dependent maintenance utility that is outside the 100% coverage constraints on purpose (coverage only includes `src/**`, `tools/**` and `tests/**`).
+
+## Considered & Rejected Alternatives
+
+- **Unit-test it with a mocked Google Fonts API.** Rejected: the tests would only check the mock (canned CSS and font payloads), not the real service, and the script would still break silently when Google changes its CSS or URLs. It is run by hand, and a broken download is seen right away.
+- **Inject the fetch function and test the pure parts (URL list, subset ranges) in `tools/`.** Rejected for now: it adds an injection seam to a script nobody runs in the build or CI, only to meet the coverage gate. If the script ever joins a pipeline, this is the way to bring it back under coverage (see Consequences).
+- **Keep it in `tools/` with a coverage-ignore comment or a per-file exclude.** Rejected: the project forbids coverage-ignore comments, and a per-file exclude under a 100% gate hides untested code in a directory where everything is expected to be tested.
+- **Download fonts during the build.** Rejected: builds would need network access to Google, and the site would depend on a third-party service at build time. Fonts are committed as self-hosted subsets instead.
 
 ## Consequences
 
