@@ -84,7 +84,7 @@ The name is a reversal of the gaze: the dream watches back. The world quietly *n
 - Works index (title FR/EN, year, size, medium, series/zone), per-work pages.
 - Series statements, exhibitions & CV (e.g. Atelier 51, 16–30 Oct 2025), about/portrait, contact.
 - **The Leak:** the longer someone drifts, the more dream colour and stray apparitions stain the awake pages, without ever hurting legibility.
-- Automatic fallback for weak devices, `prefers-reduced-motion`, and bots.
+- Automatic fallback for weak devices, save-data and bots. `prefers-reduced-motion` does **not** switch to the awake layer (artist decision, 2026-11-12): the always-visible **Wake up / Se réveiller** control is the way out for anyone who does not want movement.
 
 ### Cross-cutting
 - Bilingual FR + EN with per-work URLs (`/fr/oeuvres/<slug>`, `/en/works/<slug>`) and share images.

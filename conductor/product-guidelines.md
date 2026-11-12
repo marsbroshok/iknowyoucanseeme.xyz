@@ -36,7 +36,7 @@
 2. **Never truly lost.** A horizon/compass and the "Wake up" exit are always reachable.
 3. **The border is permeable.** Dream and awake layers bleed into each other (the Leak), but awake pages stay perfectly legible.
 4. **Consent for the senses.** Sound and heavy motion start only after a deliberate threshold click; mute is always visible.
-5. **Respect the visitor's device.** `prefers-reduced-motion`, weak GPUs, and save-data get the awake layer automatically.
+5. **Respect the visitor's device.** Weak GPUs and save-data get the awake layer automatically. `prefers-reduced-motion` is intentionally not used for routing (artist decision, 2026-11-12): the world is the artwork, and **Wake up / Se réveiller** is always visible and one click away for anyone who wants a still page.
 6. **Every work is addressable.** Each work has a shareable URL that opens the world focused on it and has an awake-layer equivalent.
 7. **The photo is sacred.** Lens effects are reversible overlays; the original work is always viewable unaltered.
 
