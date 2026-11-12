@@ -4,6 +4,7 @@ import type { QualityTier } from './DeviceProfile.js';
 import { DRIFT, DriftController, type CycleStop, type DriftInput, type DriftState } from './DriftController.js';
 import { FieldLayout, type FieldLayoutResult, type Placement } from './FieldLayout.js';
 import { PaletteSky } from './PaletteSky.js';
+import { SettleDetector } from './SettleDetector.js';
 import { TIER_BUDGETS, TextureBudget, type Lod, type TextureCandidate } from './TextureBudget.js';
 import type { ManifestWork, WorldManifest } from './WorldManifest.js';
 
@@ -42,6 +43,8 @@ export interface FrameResult {
   facing: string | null;
   /** Closest work (the keyboard entry point), or `null` without works. */
   nearest: string | null;
+  /** Work the visitor has just settled in front of (once per settling), or `null`. */
+  settled: string | null;
 }
 
 /**
@@ -57,6 +60,7 @@ export class DriftSession {
   private readonly controller = new DriftController();
   private readonly curve: ApparitionCurve;
   private readonly sky = new PaletteSky();
+  private readonly settle = new SettleDetector();
   private readonly works: Map<string, ManifestWork>;
   private sincePlan = Number.POSITIVE_INFINITY;
   private sinceCompass = Number.POSITIVE_INFINITY;
@@ -157,7 +161,9 @@ export class DriftSession {
       this.sinceCompass = 0;
       compass = CompassBearing.read(this.state, this.layout.regions);
     }
-    return { state: this.state, works, sky, plan, compass, facing: this.facing(works), nearest: nearest.slug || null };
+    const facing = this.facing(works);
+    const settled = this.settle.update(facing, Math.hypot(this.state.vx, this.state.vz), dt);
+    return { state: this.state, works, sky, plan, compass, facing, nearest: nearest.slug || null, settled };
   }
 
   /**

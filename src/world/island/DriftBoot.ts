@@ -1,6 +1,7 @@
 import { DeviceProfile, type DeviceCapabilities, type DeviceDecision, type QualityTier } from '../core/DeviceProfile.js';
 import { ModePreference, type PreferenceStorage } from '../core/ModePreference.js';
 import { parseManifest, type WorldManifest } from '../core/WorldManifest.js';
+import { DeepLink } from '../core/DeepLink.js';
 import { probeCapabilities, type ProbeHost } from './CapabilityProbe.js';
 import { afterFirstPaint, type PaintHost } from './FirstPaint.js';
 import { DriftLayer } from './DriftLayer.js';
@@ -86,7 +87,11 @@ export function bootDrift(
     showStarts(false);
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
-      .then((module) => module.mountWorld(root, { manifest: readManifest(doc), tier, startSlug: null, win }))
+      .then((module) => {
+        const manifest = readManifest(doc);
+        const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
+        return module.mountWorld(root, { manifest, tier, startSlug, win });
+      })
       .then(
         (mounted) => {
           if (state !== 'loading') return mounted.unmount();

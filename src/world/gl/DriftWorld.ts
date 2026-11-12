@@ -1,5 +1,6 @@
 import { Raycaster, Vector2, type Texture } from 'three';
 import { DriftSession } from '../core/DriftSession.js';
+import { DeepLink } from '../core/DeepLink.js';
 import { InputAccumulator } from '../core/InputAccumulator.js';
 import { TIER_BUDGETS } from '../core/TextureBudget.js';
 import { CAMERA } from '../core/StageSettings.js';
@@ -128,6 +129,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       if (mesh.mesh.visible) mesh.face(f.state.x, f.state.z);
     }
     if (f.plan) streamer.update(f.plan);
+    if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
     if (f.compass) {
       compass.update(f.compass);
       if (f.nearest) list.setEntry(f.nearest);

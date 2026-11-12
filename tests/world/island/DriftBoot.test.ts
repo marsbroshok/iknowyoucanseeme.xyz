@@ -84,6 +84,20 @@ describe('bootDrift', () => {
     expect($('[data-drift-start]').hidden).toBe(true);
   });
 
+  it('passes the deep-linked work (?w=) to the world, ignoring unknown ones', async () => {
+    const world = fakeWorld();
+    history.replaceState(null, '', '/fr/?w=cygne-icm-1');
+    bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(world.mounts[0].startSlug).toBe('cygne-icm-1');
+    history.replaceState(null, '', '/fr/?w=nope');
+    const other = fakeWorld();
+    bootDrift(document, win, other.load, () => capable, now);
+    await flush();
+    expect(other.mounts[0].startSlug).toBeNull();
+    history.replaceState(null, '', '/');
+  });
+
   it('keeps the awake layer for reduced motion, and offers "Drift"', async () => {
     const world = fakeWorld();
     bootDrift(document, win, world.load, () => ({ ...capable, reducedMotion: true }), now);

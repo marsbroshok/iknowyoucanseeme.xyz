@@ -19,6 +19,16 @@ describe('DriftSession', () => {
     expect(s.frame(still, 1 / 60).facing).toBe('cygne-icm-1');
   });
 
+  it('reports once when the visitor settles in front of a work (the address follows)', () => {
+    const s = new DriftSession(sampleManifest, 'high', 'arrivee');
+    const settled: string[] = [];
+    for (let i = 0; i < 180; i++) {
+      const f = s.frame(still, 1 / 60);
+      if (f.settled) settled.push(f.settled);
+    }
+    expect(settled).toEqual(['arrivee']);
+  });
+
   it('ignores an unknown deep link (normal start)', () => {
     expect(new DriftSession(sampleManifest, 'high', 'nope').state).toEqual(new DriftSession(sampleManifest, 'high', null).state);
   });

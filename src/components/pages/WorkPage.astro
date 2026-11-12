@@ -3,13 +3,15 @@
  * Work page `/{lang}/works|oeuvres/<slug>/`: large image(s), FR title (+ EN
  * subtitle on the EN site), fragment, metadata line, availability (never a
  * price), contact link pre-filled with the work, prev/next within the
- * territory, and the hidden "see it in the drift" placeholder that the
- * drift-world track enables.
+ * territory, and the "See it in the drift" link (`/{lang}/?w=<slug>`: the
+ * home page opens the world in front of this work; plain link, no script).
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { WorkView } from '../../domain/WorkView.js';
 import type { VisualArtworkJsonLd } from '../../domain/JsonLd.js';
 import { uiText } from '../../i18n/UiCatalog.js';
+import { localizedPath } from '../../i18n/LocalizedPath.js';
+import { DeepLink } from '../../world/core/DeepLink.js';
 import BaseLayout from '../BaseLayout.astro';
 import WorkImage from '../WorkImage.astro';
 
@@ -57,7 +59,7 @@ const description = work.fragment ? `${work.displayTitle}. ${work.fragment}` : `
     <p class="meta-line">{work.metaLine}</p>
     <p class="availability">{work.availabilityLabel}</p>
     {work.enquirable && <p><a href={work.contactHref}>{ui.t('work_contact_link')}</a></p>}
-    <p class="drift-link" data-drift-link hidden>{ui.t('drift_link')}</p>
+    <p class="drift-link"><a href={DeepLink.href(localizedPath('home', lang), work.slug)} data-drift-link>{ui.t('drift_link')}</a></p>
     <p class="territory-link"><a href={territory.href}>{territory.title}</a></p>
     <nav class="prev-next" aria-label={territory.title}>
       {prev && <a rel="prev" href={prev.href}><span class="meta-line">{ui.t('work_prev')}</span> {prev.title}</a>}
