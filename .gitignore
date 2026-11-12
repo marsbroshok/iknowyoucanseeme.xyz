@@ -11,3 +11,4 @@ coverage/
 dist/
 dist-e2e-keyed/
 test-results/
+.lighthouseci/
