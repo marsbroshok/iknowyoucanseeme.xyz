@@ -16,13 +16,13 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 - [x] Task: Old-URL redirect pages — Red: build test that each legacy path exists with meta-refresh + canonical — Green `99e4914`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — at `6bbb5a3`: `npm run check` exit 0 (CI=true) / 0 (CI unset); `npm run test:e2e` exit 0 (CI=true) / 0 (CI unset)
 
-## Phase 3: Exhibition labels & docs
+## Phase 3: Exhibition labels & docs [checkpoint: 98a2dcf]
 
 - [x] Task: `QrCode` wrapper (SVG) — Red: decode round-trip test — Green `28711ee`
 - [x] Task: Labels page `/{lang}/labels/` (noindex, print CSS, excluded from sitemap) `1d7176a`
 - [x] Task: `docs/deploy.md` cutover + rollback runbook `22030cd`
 - [x] Task: Clean-clone build test `ac8398f` — `npm run verify:clean-clone` at `ac8398f`: exit 0 (fresh clone, `npm ci` from registry.npmjs.org with empty cache: 654 packages; `npm run check` 62 files passed; `astro build` 104 pages)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — at `98a2dcf`: `npm run check` exit 0 (CI=true, 344 tests, 100% coverage) / 0 (CI unset); `npm run test:e2e` exit 0 (CI=true, 138 passed) / 0 (CI unset, 138 passed)
 
 ## Inherited Findings
 
@@ -45,3 +45,8 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 - Labels: FR sheet keeps the spec's `/fr/labels/` address; labels sorted by French title; each sheet's QR codes point to that language's work pages.
 - The clean-clone rehearsal (done before `docs/deploy.md`) runs `npm run check` + `astro build` with placeholder deploy variables, like the CI job.
 - Code license stays MIT (holder → Alexander Usoltsev, 2026); works, images and texts are all rights reserved (matches `legal.yaml` `image_use`).
+
+## Out-of-scope findings
+
+- `tests/catalogueReader.test.ts` creates empty `out_dir4/`, `out_dir5/`, `out_dir7/` folders in the working directory on every run (git ignores empty folders, so `git status` stays clean). It should use `os.tmpdir()`.
+- `qrcode` is two minor versions behind (mirror-limited, see Assumptions); upgrade to 1.5.x when the mirror serves it.
