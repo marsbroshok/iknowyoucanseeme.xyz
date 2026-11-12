@@ -14,7 +14,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 3: Astro foundation, i18n & design system**
+- [x] **Track 3: Astro foundation, i18n & design system**
   *Link: [./tracks/astro-foundation_20261111/index.md](./tracks/astro-foundation_20261111/index.md)*
 
 ---
