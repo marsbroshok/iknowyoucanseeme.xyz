@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // The frame-rate trace has its own config (playwright.perf.config.ts).
+  testIgnore: '**/perf/**',
   fullyParallel: true,
   retries: 0,
   workers: 1,

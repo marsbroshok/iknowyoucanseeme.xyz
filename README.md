@@ -5,9 +5,11 @@ The website of Alexander Usoltsev, photographer and ceramicist, signing as
 built with [Astro](https://astro.build) and hosted on GitHub Pages at
 <https://www.iknowyoucanseeme.xyz>.
 
-Today the site is the **awake layer**: plain, fast HTML pages for every work,
-territory and exhibition. The immersive world (Three.js) comes in later
-tracks; see `conductor/product.md` and `conductor/tracks.md`.
+The site has two layers. The **awake layer** is plain, fast HTML for every
+work, territory and exhibition. **The drift** is a Three.js world mounted
+on the home pages `/en/` and `/fr/` on capable devices (see "The drift"
+below); everything else (lens, threshold, sound, leak) comes in later
+tracks, see `conductor/product.md` and `conductor/tracks.md`.
 
 The former Hugo site is preserved under the git tag `legacy-hugo`.
 
@@ -35,6 +37,7 @@ Useful extras:
 | `npm run intake <step>` | Content intake from the Instagram export (see below) |
 | `npm run copy:review` | Writes `docs/copy/REVIEW.md`, the copy review sheet |
 | `npm run lockfile:normalize` | Rewrites `package-lock.json` to public registry URLs (run after `npm install <pkg>`) |
+| `npm run perf:trace` | Frame-rate trace of the drift world in Chromium on this machine's GPU (desktop + emulated phone); not a gate, numbers go to `docs/perf.md` |
 | `npm run verify:clean-clone` | Clones the current commit into a temp folder, installs from the public npm registry, runs the check and builds (rehearsal of the deploy job) |
 
 ## Pages
@@ -63,6 +66,32 @@ sur demande" unless a work is marked sold or not for sale.
 Old addresses of the Hugo site (`/dreamland/`, `/blog/`,
 `/blog/colors-and-shapes/`, `/uses/`, `/tags/`) are small redirect pages
 (`src/i18n/LegacyRedirects.ts`, see `docs/adr/0005-legacy-redirect-pages.md`).
+
+## The drift
+
+On `/en/` and `/fr/` a small boot script (`src/world/island/DriftBoot.ts`)
+decides between the world and the awake page: the world needs WebGL2, no
+`prefers-reduced-motion`, Save-Data off and, where the browser says, at
+least 4 GB of memory and 4 cores. The visitor's "Wake up / Se réveiller"
+and "Drift / Dériver" choice is remembered in `localStorage`. Three.js is
+loaded only after the first paint and only when the world is shown
+(≤ 250 KB gzipped, checked by `tests/e2e/bundle.spec.ts`). The awake HTML is
+never removed; while the world is shown it is made `inert`.
+
+- Move: scroll or drag; arrow keys; tilt on phones (after a tap, with the
+  iOS permission prompt). Tab goes to the nearest work, then along the
+  path; Enter opens it in a dialog with its links.
+- Deep links: `/{lang}/?w=<slug>` opens the world in front of a work; every
+  work page has a "See it in the drift" link. The address follows the work
+  the visitor stops at.
+- Code: pure logic in `src/world/core/`, DOM in `src/world/island/`, GPU code
+  only in `src/world/gl/` (verified by Playwright, see
+  `docs/adr/0006-webgl-code-verified-in-browser.md`; module scripts on the
+  home pages: `docs/adr/0007-home-pages-load-world-modules.md`).
+- Test-only flag: building with `PUBLIC_DRIFT_DEBUG=true` exposes read-only
+  state as `window.__driftDebug` for the e2e suite (only the e2e "keyed"
+  build sets it; production builds do not contain the code).
+- Performance numbers: `docs/perf.md`.
 
 ## Content
 

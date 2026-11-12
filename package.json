@@ -16,7 +16,8 @@
     "lockfile:normalize": "npx tsx tools/lockfile/normalize.ts",
     "verify:clean-clone": "npx tsx tools/release/clean-clone.ts",
     "build": "astro build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "perf:trace": "playwright test -c playwright.perf.config.ts"
   },
   "keywords": [],
   "author": "",
