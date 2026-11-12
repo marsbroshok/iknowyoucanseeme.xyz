@@ -73,8 +73,8 @@ test.describe('Sound', () => {
     await expect.poll(() => open(page)).toEqual(['running']);
     const weights = (await sound(page))?.weights as Record<string, number>;
     expect(Object.values(weights).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
-    // The world starts at the head of the first territory's path (the border is thin, in the manifest's order).
-    expect(weights.border).toBeGreaterThan(0.9);
+    // The world starts at the head of Dreamland's Arrival zone (TERRITORY_ORDER puts Dreamland first).
+    expect(weights.arrival).toBeGreaterThan(0.9);
   });
 
   test('"Drift" on the awake page is the gesture: it enters and starts the sound', async ({ page }) => {

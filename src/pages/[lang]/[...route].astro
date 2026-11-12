@@ -5,6 +5,7 @@
  * parameter covers them all; `buildSiteRoutes` is the tested source of truth
  * for which paths exist. This file only loads content and picks the page.
  */
+import { sortTerritories } from '../../domain/TerritoryOrder.js';
 import { getCollection, getEntry } from 'astro:content';
 import { withCopy } from '../../content/helpers.js';
 import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
@@ -54,7 +55,7 @@ const lang = Astro.params.lang as Locale;
 const ui = uiText(lang);
 
 const works = (await Promise.all((await getCollection('works')).map(withCopy))).map((e) => e.data);
-const territories = (await Promise.all((await getCollection('territories')).map(withCopy))).map((e) => e.data);
+const territories = sortTerritories((await Promise.all((await getCollection('territories')).map(withCopy))).map((e) => e.data));
 const zones = (await Promise.all((await getCollection('zones')).map(withCopy))).map((e) => e.data);
 
 const exhibitions = (await getCollection('exhibitions')).map((e) => e.data);
