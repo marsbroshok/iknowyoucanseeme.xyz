@@ -32,6 +32,29 @@ export class AudioManifest {
   static readonly URL = '/audio/manifest.json';
 
   /**
+   * Fetches and validates the manifest. The site works without recordings,
+   * so a missing manifest (HTTP error) gives none with a warning, and a
+   * manifest that cannot be read or is malformed gives none with an error
+   * naming the problem (the generative sound carries on).
+   *
+   * @param fetcher - `fetch` (only called after the visitor entered).
+   * @returns The loops, possibly none.
+   */
+  static async load(fetcher: (url: string) => Promise<Pick<Response, 'ok' | 'status' | 'json'>>): Promise<RecordingLoop[]> {
+    try {
+      const response = await fetcher(AudioManifest.URL);
+      if (!response.ok) {
+        console.warn(`[audio manifest] ${AudioManifest.URL} answered ${response.status}; no field recordings.`);
+        return [];
+      }
+      return AudioManifest.parse(await response.json());
+    } catch (error) {
+      console.error(`[audio manifest] ${AudioManifest.URL} could not be used; no field recordings, the generative sound carries on.`, error);
+      return [];
+    }
+  }
+
+  /**
    * Validates a parsed manifest.
    *
    * @param input - Parsed JSON.

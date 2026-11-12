@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { AudioManifest } from '../../../src/sound/core/AudioManifest.js';
@@ -54,5 +54,37 @@ describe('AudioManifest', () => {
     for (const gain of [0, -0.5, 1.5, Number.NaN, '0.5']) {
       expect(() => AudioManifest.parse({ zones: { lens: [{ src: '/audio/a.ogg', gain }] } }), String(gain)).toThrow('[audio manifest] zones.lens[0].gain must be a number in (0, 1]');
     }
+  });
+});
+
+describe('AudioManifest.load', () => {
+  const response = (status: number, body: () => unknown) => async (url: string) => {
+    expect(url).toBe('/audio/manifest.json');
+    return { ok: status >= 200 && status < 300, status, json: async () => body() };
+  };
+
+  it('fetches and validates the manifest', async () => {
+    expect(await AudioManifest.load(response(200, () => ({ zones: { lens: [{ src: '/audio/a.ogg' }] } })))).toEqual([{ zone: 'lens', src: '/audio/a.ogg', gain: 1 }]);
+  });
+
+  it('gives no recordings, with a warning, when the manifest is missing', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    expect(await AudioManifest.load(response(404, () => null))).toEqual([]);
+    expect(warn).toHaveBeenCalledWith('[audio manifest] /audio/manifest.json answered 404; no field recordings.');
+    warn.mockRestore();
+  });
+
+  it('gives no recordings, with an error naming the problem, when the manifest is malformed, unreadable or the fetch fails', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(await AudioManifest.load(response(200, () => ({ zones: { sea: [] } })))).toEqual([]);
+    expect(await AudioManifest.load(response(200, () => {
+      throw new SyntaxError('Unexpected token');
+    }))).toEqual([]);
+    expect(await AudioManifest.load(async () => {
+      throw new TypeError('offline');
+    })).toEqual([]);
+    expect(error).toHaveBeenCalledTimes(3);
+    expect(String(error.mock.calls[0][1])).toContain('zones.sea: unknown zone');
+    error.mockRestore();
   });
 });
