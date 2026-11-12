@@ -30,6 +30,8 @@ import { WorldWhisper } from '../island/WorldWhisper.js';
 import { ThresholdLeak } from './ThresholdLeak.js';
 import { modeIndex, type LensMode } from '../core/LensMode.js';
 import type { MountOptions, WorldHandle } from '../island/DriftBoot.js';
+import { SoundScene } from '../../sound/core/SoundScene.js';
+import type { SoundFeed } from '../../sound/core/SoundDirector.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
 import { WorkTextureLoader } from './WorkTextureLoader.js';
 import { WorldStage } from './WorldStage.js';
@@ -46,6 +48,7 @@ export interface DriftDebugState {
   threshold: { holding: boolean; visible: boolean; leak: boolean };
   gaze: { turns: GazeTurn[]; lineOpacity: number };
   fragment: { id: string; opacity: number } | null;
+  sound: SoundFeed['debug'] | null;
 }
 
 /**
@@ -66,8 +69,9 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
  * Mounts the Three.js world in the home page's world layer: stage, one
  * apparition per work, texture streaming, inputs, compass, the keyboard
  * work list and the lens (camera-technique shaders over the work under the
- * pointer; decisions by LensDirector, LensUniforms and LensCrossfade), all
- * driven frame by frame by a {@link DriftSession}.
+ * pointer; decisions by LensDirector, LensUniforms and LensCrossfade) and
+ * the sound's view of the camera (`SoundScene`, handed to the boot's sound
+ * director), all driven frame by frame by a {@link DriftSession}.
  *
  * Verified in the browser (ADR 0006).
  *
@@ -77,7 +81,7 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
  * @throws Error when the page lacks a part of the layer or WebGL2 fails.
  */
 export async function mountWorld(root: HTMLElement, options: MountOptions): Promise<WorldHandle> {
-  const { manifest, tier, startSlug, win, threshold } = options;
+  const { manifest, tier, startSlug, win, threshold, sound } = options;
   const canvas = part<HTMLCanvasElement>(root, '[data-drift-canvas]');
   const stage = new WorldStage(canvas, tier, win.devicePixelRatio);
   const session = new DriftSession(manifest, tier, startSlug);
@@ -150,6 +154,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     new FragmentProgress(webStorage(win, 'localStorage')),
   );
   const whisper = new WorldWhisper(root);
+  // The sound hears the camera's zone and what is near (decisions in src/sound/core).
+  const soundScene = SoundScene.of(session.layout, manifest.works);
   const above = new Vector3();
   /** Screen position (NDC) just above a work, or `null` when it is behind the camera. */
   const screenAbove = (slug: string): { x: number; y: number } | null => {
@@ -217,6 +223,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       const { modeA, modeB, partner, ...rest } = lf.settings;
       (meshes.get(lf.slug) as ApparitionMesh).setLens({ ...rest, modeA: modeIndex(modeA), modeB: modeIndex(modeB), partner: partner ? (meshes.get(partner)?.texture ?? null) : null });
     }
+    sound?.frame(soundScene.read(f.state), dt);
     metrics.frame(f.nearest, f.nearestDistance, dt);
     if (f.plan) streamer.update(f.plan);
     if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
@@ -236,6 +243,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         threshold: { holding: threshold.holding, visible: threshold.visible, leak: leak !== null },
         gaze: { turns: g.turns, lineOpacity: g.lineOpacity },
         fragment: fr.current && { id: fr.current.id, opacity: fr.current.opacity },
+        sound: sound?.debug ?? null,
       };
     }
   });

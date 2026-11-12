@@ -6,6 +6,8 @@ import { VisitMemory } from '../../../src/world/core/VisitMemory.js';
 import type { EnteredDetail } from '../../../src/world/core/ThresholdState.js';
 import type { DeviceCapabilities } from '../../../src/world/core/DeviceProfile.js';
 import { sampleManifest } from '../fixtures.js';
+import { SoundPreference } from '../../../src/sound/core/SoundPreference.js';
+import type { SoundEngine, SoundEngineModule } from '../../../src/sound/SoundEngine.js';
 
 const capable: DeviceCapabilities = { webgl2: true, reducedMotion: false, saveData: false, deviceMemory: 8, hardwareConcurrency: 8, coarsePointer: false };
 const now = (_host: unknown, cb: () => void) => cb();
@@ -295,5 +297,105 @@ describe('bootDrift', () => {
     expect(world.mounts).toHaveLength(1);
     $('[data-drift-wake]').click();
     expect(localStorage.getItem(ModePreference.KEY)).toBeNull();
+  });
+});
+
+describe('bootDrift — the sound (docs/adr/0011)', () => {
+  /** A sound module whose engine logs calls (test double), loaded through a spy. */
+  function fakeSound() {
+    const calls: string[] = [];
+    const engine: SoundEngine = {
+      start: async () => void calls.push('start'),
+      stop: async () => void calls.push('stop'),
+      setMix: () => undefined,
+      setCues: () => undefined,
+      setMuted: (m) => void calls.push(`muted:${m}`),
+      dispose: async () => undefined,
+    };
+    const wins: unknown[] = [];
+    const module: SoundEngineModule = {
+      createSoundEngine: async (w) => {
+        wins.push(w);
+        return engine;
+      },
+    };
+    return { load: vi.fn(async () => module), calls, wins };
+  }
+  const withToggle = () =>
+    document.querySelector('.drift-top')?.insertAdjacentHTML('beforeend', '<button data-sound-toggle data-label-mute="Mute sound" data-label-unmute="Unmute sound">Mute sound</button>');
+
+  it('loads nothing before the gesture; Enter on the threshold (gesture) loads the engine and starts it, fed to the world', async () => {
+    withToggle();
+    const sound = fakeSound();
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => capable, now, sound.load);
+    await flush();
+    expect(sound.load).not.toHaveBeenCalled();
+    expect(world.mounts[0].sound).toBe(boot?.sound);
+    expect($('[data-sound-toggle]').textContent).toBe('Mute sound');
+    $('[data-threshold-enter]').click();
+    await flush();
+    expect(sound.load).toHaveBeenCalledTimes(1);
+    expect(sound.wins).toEqual([win]);
+    expect(sound.calls).toEqual(['muted:false', 'start']);
+    expect(boot?.sound?.state).toBe('playing');
+  });
+
+  it('"Drift" on the awake page (gesture) starts the sound too; "Wake up" stops it', async () => {
+    withToggle();
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    const sound = fakeSound();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, sound.load);
+    $('[data-drift-start]').click();
+    await flush();
+    expect(sound.calls).toEqual(['muted:false', 'start']);
+    $('[data-drift-wake]').click();
+    expect(sound.calls.at(-1)).toBe('stop');
+  });
+
+  it('with sound on, a returning visitor\'s short threshold waits for the Enter click (it unlocks audio)', async () => {
+    vi.useFakeTimers();
+    withToggle();
+    localStorage.setItem(VisitMemory.KEY, '1');
+    const seen = enteredEvents();
+    const sound = fakeSound();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, sound.load);
+    expect($('[data-threshold]').dataset.kind).toBe('short');
+    expect($('[data-threshold-enter]').hidden).toBe(false);
+    vi.advanceTimersByTime(5000);
+    expect(seen).toEqual([]);
+    vi.useRealTimers();
+  });
+
+  it('muted, the short threshold enters by itself without a gesture and no audio is loaded; unmuting (a click) loads it', async () => {
+    vi.useFakeTimers();
+    withToggle();
+    localStorage.setItem(VisitMemory.KEY, '1');
+    localStorage.setItem(SoundPreference.KEY, 'off');
+    const seen = enteredEvents();
+    const sound = fakeSound();
+    bootDrift(document, win, fakeWorld().load, () => capable, now, sound.load);
+    expect($('[data-sound-toggle]').textContent).toBe('Unmute sound');
+    vi.advanceTimersByTime(0);
+    expect(seen).toEqual([{ gesture: false, returning: true }]);
+    vi.useRealTimers();
+    await flush();
+    expect(sound.load).not.toHaveBeenCalled();
+    $('[data-sound-toggle]').click();
+    await flush();
+    expect(sound.load).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(SoundPreference.KEY)).toBe('on');
+  });
+
+  it('reports a world layer without the mute toggle when sound is wired', () => {
+    expect(() => bootDrift(document, win, fakeWorld().load, () => capable, now, fakeSound().load)).toThrow('[drift] Missing [data-sound-toggle] in the world layer');
+  });
+
+  it('without a sound module the world is silent and the threshold behaves as before', async () => {
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(boot?.sound).toBeNull();
+    expect(world.mounts[0].sound).toBeNull();
   });
 });

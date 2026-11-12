@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { soundOff } from './soundOff.js';
 
 /**
  * The threshold, the gaze and the fragments in Chromium (keyed build with
@@ -33,6 +34,9 @@ async function recordEntered(page: Page): Promise<void> {
 async function worldReady(page: Page): Promise<void> {
   await page.waitForFunction(() => ((window as unknown as { __driftDebug?: { frames: number } }).__driftDebug?.frames ?? 0) > 5, null, { timeout: 15_000 });
 }
+
+// The sound is muted here (returning and deep-linked visits fade by themselves); sound.spec.ts covers sound on.
+test.beforeEach(({ page }) => soundOff(page));
 
 test.describe('Threshold', () => {
   test('first visit: the line, Enter focused, Wake up visible, the world holding still behind a breathing leak', async ({ page }) => {

@@ -8,6 +8,10 @@ import { DriftLayer } from './DriftLayer.js';
 import { ThresholdState, type EnteredDetail } from '../core/ThresholdState.js';
 import { VisitMemory } from '../core/VisitMemory.js';
 import { ThresholdOverlay, type ThresholdView } from './ThresholdOverlay.js';
+import { SoundDirector, type SoundFeed } from '../../sound/core/SoundDirector.js';
+import { SoundPreference } from '../../sound/core/SoundPreference.js';
+import { SoundControls } from '../../sound/island/SoundControls.js';
+import type { SoundEngineModule, SoundWindow } from '../../sound/SoundEngine.js';
 
 /** What the world module receives when mounted. */
 export interface MountOptions {
@@ -18,6 +22,8 @@ export interface MountOptions {
   win: Window;
   /** The threshold over the world (the world holds still while it is up). */
   threshold: ThresholdView;
+  /** The sound, fed the camera's surroundings each frame, or `null` without sound. */
+  sound: SoundFeed | null;
 }
 
 /** A mounted world. */
@@ -40,6 +46,8 @@ export interface DriftBootHandle {
   enter(): void;
   /** Back to the awake page. */
   leave(): void;
+  /** The sound's decisions, or `null` for a silent world. */
+  readonly sound: SoundDirector | null;
 }
 
 /**
@@ -48,8 +56,14 @@ export interface DriftBootHandle {
  * "Drift" controls, opens the world on the threshold (full on a first
  * visit, short for a returning or deep-linked one; "Drift" skips it, being
  * itself the gesture) and emits `entered` on the world layer (bubbling,
- * detail {@link EnteredDetail}) for the sound track, and loads the
- * Three.js world only after first paint and only when it is shown.
+ * detail {@link EnteredDetail}), and loads the Three.js world only after
+ * first paint and only when it is shown.
+ *
+ * With `loadSound`, the sound is wired too (docs/adr/0011): a
+ * {@link SoundDirector} hears `entered` (only a gesture may unlock audio),
+ * the mute toggle and the tab's visibility, loads the Tone.js engine
+ * through `loadSound` only then, and is fed by the world each frame. While
+ * sound is on (not muted) the short threshold also waits for a click.
  *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
@@ -59,7 +73,9 @@ export interface DriftBootHandle {
  * @param load - Dynamic import of the world module.
  * @param probe - Capability probe (default: real browser).
  * @param afterPaint - First-paint scheduler (default: load + frame + idle).
+ * @param loadSound - Dynamic import of the sound engine module, or `null` for a silent world.
  * @returns The boot handle, or `null` on pages without the world.
+ * @throws Error when `loadSound` is given and the layer has no `[data-sound-toggle]`.
  */
 export function bootDrift(
   doc: Document,
@@ -67,6 +83,7 @@ export function bootDrift(
   load: () => Promise<WorldModule>,
   probe: (host: ProbeHost) => DeviceCapabilities = probeCapabilities,
   afterPaint: (host: PaintHost, cb: () => void) => void = afterFirstPaint,
+  loadSound: (() => Promise<SoundEngineModule>) | null = null,
 ): DriftBootHandle | null {
   const root = doc.querySelector<HTMLElement>('[data-drift]');
   if (!root) return null;
@@ -81,12 +98,19 @@ export function bootDrift(
   let handle: WorldHandle | null = null;
   let failed = false;
   let threshold: ThresholdOverlay | null = null;
+  const sound = loadSound ? new SoundDirector(new SoundPreference(storage), () => loadSound().then((m) => m.createSoundEngine(win as unknown as SoundWindow))) : null;
+  if (sound) {
+    const toggle = root.querySelector<HTMLButtonElement>('[data-sound-toggle]');
+    if (!toggle) throw new Error('[drift] Missing [data-sound-toggle] in the world layer');
+    new SoundControls(toggle, sound, doc);
+  }
 
   const showStarts = (visible: boolean) => starts.forEach((b) => (b.hidden = !visible));
 
   const leave = (): void => {
     state = 'awake';
     threshold?.dismiss();
+    sound?.leave();
     handle?.unmount();
     handle = null;
     layer.hide();
@@ -99,10 +123,11 @@ export function bootDrift(
     state = 'loading';
     const entered = (detail: EnteredDetail) => {
       visits.mark();
+      sound?.entered(detail);
       root.dispatchEvent(new CustomEvent<EnteredDetail>('entered', { bubbles: true, detail }));
     };
     const deepLink = (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
-    const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: false }, entered), win);
+    const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: sound !== null && !sound.muted }, entered), win);
     threshold = overlay;
     layer.show();
     showStarts(false);
@@ -113,7 +138,7 @@ export function bootDrift(
       .then((module) => {
         const manifest = readManifest(doc);
         const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
-        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay });
+        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound });
       })
       .then(
         (mounted) => {
@@ -149,6 +174,7 @@ export function bootDrift(
     },
     enter: () => enter(),
     leave,
+    sound,
   };
 }
 
