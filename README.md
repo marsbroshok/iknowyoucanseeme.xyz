@@ -8,9 +8,10 @@ built with [Astro](https://astro.build) and hosted on GitHub Pages at
 The site has two layers. The **awake layer** is plain, fast HTML for every
 work, territory and exhibition. **The drift** is a Three.js world mounted
 on the home pages `/en/` and `/fr/` on capable devices (see "The drift"
-below), with **the lens** over the work under the pointer; everything else
-(threshold, sound, leak) comes in later tracks, see `conductor/product.md`
-and `conductor/tracks.md`.
+below), opening on **the threshold**, with **the lens** over the work under
+the pointer, **the gaze** and **fragments** of text near the works; sound
+and the leak come in later tracks, see `conductor/product.md` and
+`conductor/tracks.md`.
 
 The former Hugo site is preserved under the git tag `legacy-hugo`.
 
@@ -81,6 +82,24 @@ loaded only after the first paint and only when the world is shown
 (≤ 250 KB gzipped, checked by `tests/e2e/bundle.spec.ts`). The awake HTML is
 never removed; while the world is shown it is made `inert`.
 
+- Threshold: a first visit opens on a night-blue void with the line "I know
+  you can see me / Je sais que tu me vois", one slowly breathing colour
+  leak (from an Arrival work) and **Enter / Entrer** (focused; Enter or Space
+  works). "Wake up / Se réveiller" stays visible above it. Returning
+  visitors (`localStorage`) and deep links get a short threshold that fades
+  in 1 s by itself; "Drift" on the awake page skips it. Entering dispatches
+  a bubbling `entered` event (`detail: { gesture, returning }`) on the world
+  layer for the sound track. Without JavaScript the awake page shows as
+  before.
+- Gaze: after the pointer stays on a work for more than 2 s, it turns
+  slightly toward it. After 3 minutes of drifting, the line may surface once
+  in the fog (at most once per tab session, `sessionStorage`).
+- Fragments: when the camera settles near a work, its fragment (or a
+  sentence of the territory's statement, spread along the path) fades in
+  above it and is read out through a polite live region. Read fragments are
+  stored in `localStorage`; each territory page then shows "Fragments found:
+  n / N" (JavaScript only). Design notes:
+  `docs/adr/0010-threshold-gaze-fragments.md`.
 - Move: scroll or drag; arrow keys; tilt on phones (after a tap, with the
   iOS permission prompt). Tab goes to the nearest work, then along the
   path; Enter opens it in a dialog with its links.
