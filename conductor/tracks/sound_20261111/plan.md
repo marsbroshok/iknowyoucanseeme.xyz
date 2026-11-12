@@ -11,9 +11,9 @@ Track: `sound_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workfl
 
 ## Phase 2: Tone adapter
 
-- [ ] Task: Install `tone`; `ToneSoundEngine` with lazy import after `entered`
-- [ ] Task: Offline render tests per recipe (non-silent, muted = silent, no discontinuities on crossfade)
-- [ ] Task: Field-recording layer player (streamed loops from manifest)
+- [x] Task: Install `tone`; `ToneSoundEngine` with lazy import after `entered` (46a9126; tone 15.2.6, node-web-audio-api 2.1.0 dev; `createSoundEngine` is the lazy chunk's entry, wired to `entered` in phase 3)
+- [x] Task: Offline render tests per recipe (non-silent, muted = silent, no discontinuities on crossfade) (afbb0e5, 78fc44e; `ImpulseReverb` replaces `Tone.Reverb`)
+- [x] Task: Field-recording layer player (streamed loops from manifest) (da520df; CI installs ALSA for the Node Web Audio tests, 06f3e90)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Integration
@@ -39,4 +39,8 @@ Ledger of reasonable assumptions made while the artist was away (also in commit 
 - A1 (2e04254): works without a zone (and any territory other than the border) sound like the arrival; the border territory (`the-border-is-thin`) is one sound zone whatever the zones of its works. Zone weights are a softmax of the distances to the `FieldLayout` regions (falloff 8 m).
 - A2 (2e04254): FR1's interface gains `setCues(cues)` for FR2's closeness cues (glints near works, swell near eclipse works). The full zone crossfade lasts 2 s (never below 1.5 s).
 - A3 (5c58c25): manifest shape `{ "zones": { <zone>: [ { "src", "gain"? } ] } }`; files only under `/audio/`, gain in (0, 1] (default 1).
+- A5 (46a9126): `tone` ^15.2.6, the registry's `latest` tag (the proxy also lists untagged 15.5.x pre-releases, not used). The engine is unit-tested in Node with `node-web-audio-api` (silent sink, `Tone.Offline`), so `src/sound/engine/` needs no coverage exclusion.
+- A6 (afbb0e5): voices balanced to about −30 dBFS each after the master (lens sparser, about −40 dBFS); mix ramps 0.08 s under the 0.1 s update cadence.
+- A7 (da520df): recordings share the master (ceiling, mute, fades); a recording streams from the first time its zone weighs over 0.05 and pauses below 0.01.
+- A8 (06f3e90): CI installs `libasound2t64` (ubuntu 24.04+) for node-web-audio-api's Linux binary.
 - A4 (b29ea7d): eclipse works are those whose slug has the word `eclipse` or whose title has "éclipse"/"eclipse"; closeness is 1 within 4 m, 0 beyond 24 m; master ceiling −12 dBFS with a limiter at −6 dBFS.
