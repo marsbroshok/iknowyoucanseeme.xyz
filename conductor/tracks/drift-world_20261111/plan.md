@@ -2,13 +2,13 @@
 
 Track: `drift-world_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflow.md](../../workflow.md)
 
-## Phase 1: Pure core
+## Phase 1: Pure core [checkpoint: 9ed231e]
 
 - [x] Task: `DeviceProfile` — Red: table + property tests over capability inputs — Green `9d03a35` (+ `ModePreference` localStorage override)
 - [x] Task: `FieldLayout` — Red: determinism, min spacing, zone ordering along path (property tests) — Green `979afc4`
 - [x] Task: `DriftController` — Red: inertia decay, speed clamp, keyboard nearest-work cycling — Green `06dce91`
 - [x] Task: `ApparitionCurve` + `TextureBudget` — Red: monotonic opacity by distance; budget cap never exceeded — Green `9ed231e`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — `npm run check` exit 0 / `npm run test:e2e` exit 0 with `CI=true`; check 0 / e2e 0 with `CI` unset (423 unit tests, 100% coverage; 140 e2e).
 
 ## Phase 2: Rendering
 
