@@ -8,6 +8,8 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: 'list',
+  // Reference pictures of the lens shaders (tests/e2e/lens.visual.spec.ts), one set for every platform.
+  snapshotPathTemplate: '{testDir}/../visual/{arg}{ext}',
   use: {
     baseURL: 'http://localhost:4325',
     trace: 'on-first-retry',

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ZONE_ORDER } from '../../domain/ZoneOrder.js';
 
 
 export const TextBlockSchema = z.object({
@@ -39,7 +40,7 @@ export const WorkSchema = z.object({
     en: z.string().optional()
   }),
   territory: z.string(),
-  zone: z.enum(['arrival', 'lens', 'leak']).optional(),
+  zone: z.enum(ZONE_ORDER).optional(),
   year: z.number(),
   medium: z.enum(['photo', 'ceramic']),
   techniques: z.array(z.string()).optional(),

@@ -73,7 +73,7 @@ export class DriftSession {
    * @param startSlug - Deep-linked work (`?w=`), or `null`.
    */
   constructor(
-    private readonly manifest: WorldManifest,
+    manifest: WorldManifest,
     private readonly tier: QualityTier,
     startSlug: string | null,
   ) {

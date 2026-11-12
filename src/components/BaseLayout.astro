@@ -12,6 +12,7 @@ import Header from './Header.astro';
 import Footer from './Footer.astro';
 import AnalyticsScript from './AnalyticsScript.astro';
 import { readAnalyticsConfig, type AnalyticsConfig } from '../analytics/AnalyticsConfig.js';
+import { inlineJson } from '../domain/InlineJson.js';
 import '../styles/base.css';
 
 interface Props {
@@ -69,7 +70,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   {ogImage && <meta property="og:image:width" content="1200" />}
   {ogImage && <meta property="og:image:height" content="630" />}
   <meta name="twitter:card" content="summary_large_image" />
-  {jsonLd.map((ld) => <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />)}
+  {jsonLd.map((ld) => <script type="application/ld+json" is:inline set:html={inlineJson(ld)} />)}
 
   <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
 

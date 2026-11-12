@@ -1,6 +1,7 @@
 import fs from 'fs';
 import yaml from 'yaml';
 import { z } from 'zod';
+import { ZONE_ORDER } from '../domain/ZoneOrder.js';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 const execFileAsync = promisify(execFile);
@@ -9,7 +10,7 @@ export const CatalogueConfigSchema = z.object({
   works: z.array(z.object({
     slug: z.string().regex(/^[a-z0-9-]+$/),
     title_fr: z.string(),
-    zone: z.enum(['arrival', 'lens', 'leak']),
+    zone: z.enum(ZONE_ORDER),
     size: z.object({ w: z.number(), h: z.number() }).optional(),
     pdf_index: z.number()
   }))

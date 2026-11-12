@@ -6,6 +6,12 @@ import { sampleManifest } from '../fixtures.js';
 const still = { thrust: 0, turn: 0 };
 
 describe('DriftSession', () => {
+  it('keeps no unused copy of the manifest (only its works, by slug)', () => {
+    const s = new DriftSession(sampleManifest, 'high', null);
+    expect(Object.keys(s)).not.toContain('manifest');
+    expect(s.work('arrivee')).toBe(sampleManifest.works[0]);
+  });
+
   it('starts at the beginning of the first territory, looking down the path', () => {
     const s = new DriftSession(sampleManifest, 'high', null);
     expect(s.state.yaw).toBe(0);

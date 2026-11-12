@@ -102,6 +102,33 @@ describe('HomePage', () => {
       expect(scriptBytes(html).inlineBytes).toBe(0);
     });
 
+    it('keeps the manifest inside its script element even when a fragment holds </script>', async () => {
+      const fragment = 'Avant </script><script>alert(1)</script> & après <!-- fin';
+      const world = { ...sampleManifest, works: sampleManifest.works.map((w, i) => (i === 0 ? { ...w, fragment } : w)) };
+      const html = await container.renderToString(HomePage, {
+        props: { lang: 'fr', territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText('fr'))), world },
+        request: new Request('https://www.iknowyoucanseeme.xyz/fr/'),
+      });
+      const json = /<script type="application\/json" id="drift-manifest">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+      expect(JSON.parse(json).works[0].fragment).toBe(fragment);
+      expect(html).not.toContain('<script>alert(1)');
+    });
+
+    it('names the six lenses in the page language and explains the lens controls (live caption)', async () => {
+      for (const [lang, names, help] of [
+        ['en', ['Colour filter', 'Mirror fold', 'Multiple exposure', 'Fracture and collage', 'Light leak', 'Motion blur'], 'Hold Shift or tap with two fingers'],
+        ['fr', ['Filtre coloré', 'Pli de miroir', 'Exposition multiple', 'Fracture et collage', 'Fuite de lumière', 'Flou de mouvement'], 'Maintenez Maj ou touchez avec deux doigts'],
+      ] as const) {
+        const html = await renderWorld(lang);
+        const caption = /<p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names="([^"]*)"[^>]*><\/p>/.exec(html);
+        expect(caption, lang).not.toBeNull();
+        const parsed = JSON.parse((caption?.[1] ?? '').replace(/&#(\d+);/g, (_m, n: string) => String.fromCharCode(Number(n))).replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+        expect(Object.keys(parsed)).toEqual(['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm']);
+        expect(Object.values(parsed)).toEqual(names);
+        expect(html).toContain(help);
+      }
+    });
+
     it('renders no world without a manifest', async () => {
       const html = await render('en');
       expect(html).not.toContain('data-drift');

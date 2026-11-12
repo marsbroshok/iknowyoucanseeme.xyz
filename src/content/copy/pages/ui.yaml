@@ -390,3 +390,45 @@ blocks:
     fr: Voir la page de l'œuvre
     sources:
       - spec
+  drift_lens_help:
+    status: draft
+    en: Point at a work to see it through a lens. L or a long press changes the lens. Hold Shift or tap with two fingers to see the photo as it is.
+    fr: Pointez une œuvre pour la voir à travers une loupe. L ou un appui long change de loupe. Maintenez Maj ou touchez avec deux doigts pour voir la photo telle quelle.
+    sources:
+      - spec
+  lens_gel:
+    status: draft
+    en: Colour filter
+    fr: Filtre coloré
+    sources:
+      - spec
+  lens_mirror:
+    status: draft
+    en: Mirror fold
+    fr: Pli de miroir
+    sources:
+      - spec
+  lens_exposure:
+    status: draft
+    en: Multiple exposure
+    fr: Exposition multiple
+    sources:
+      - spec
+  lens_fracture:
+    status: draft
+    en: Fracture and collage
+    fr: Fracture et collage
+    sources:
+      - spec
+  lens_flare:
+    status: draft
+    en: Light leak
+    fr: Fuite de lumière
+    sources:
+      - spec
+  lens_icm:
+    status: draft
+    en: Motion blur
+    fr: Flou de mouvement
+    sources:
+      - spec

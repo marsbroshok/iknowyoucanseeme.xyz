@@ -23,6 +23,8 @@ export const sampleManifest: WorldManifest = {
       href: '/fr/oeuvres/arrivee/',
       contactHref: '/fr/contact/?work=arrivee',
       color: '#8299fa',
+      palette: ['#8299fa', '#0b1030'],
+      techniques: [],
       images: { low: image(384, 480), mid: image(960, 1200), high: image(1440, 1800) },
     },
     {
@@ -34,6 +36,8 @@ export const sampleManifest: WorldManifest = {
       href: '/fr/oeuvres/cygne-icm-1/',
       contactHref: null,
       color: '#203040',
+      palette: ['#203040'],
+      techniques: ['icm'],
       images: { low: image(480, 320), mid: image(1200, 800), high: image(1440, 960) },
     },
   ],

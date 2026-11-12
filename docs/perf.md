@@ -8,8 +8,12 @@ Budgets (`conductor/product-guidelines.md`, track `drift-world_20261111`):
 
 | Part | Gzipped | Budget | When it loads |
 |---|---|---|---|
-| Boot module (home pages only) | 3.7 KB | 8 KB | with the page (module script) |
-| World chunk (Three.js + scene code) | 124.2 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
+| Boot module (home pages only) | 3.0 KB | 8 KB | with the page (module script) |
+| World chunk (Three.js + scene code + lens) | 129.7 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
+
+Re-measured 2026-11-12 after track `lens_20261111`: the lens (six shaders,
+its pure logic and input) adds about 5.5 KB gzipped to the world chunk and
+nothing to the boot module (before: 3.7 KB / 124.2 KB).
 
 Other pages load no JavaScript file. Devices that get the awake layer
 (reduced motion, Save-Data, no WebGL2, < 4 GB or < 4 cores) never request
@@ -27,6 +31,20 @@ frames in the page; a Chrome trace is saved to
 |---|---|---|---|---|---|
 | Desktop | 1440 × 900, DPR 1 | high | 60.0 | 16.8 ms | 16.8 ms |
 | Emulated phone (Pixel 7 profile) | 412 × 839, DPR 2.6 → capped 1.25 | low | 59.9 | 16.8 ms | 50.1 ms |
+
+### With the lens active (measured 2026-11-12, track `lens_20261111`)
+
+Same machine and command. The visitor stands in front of *Arrivée*; for
+10 s the pointer (mouse, or a held finger on the emulated phone) circles
+over the work and L goes through the lenses, so every lens of the tier is
+drawn. The lens was on the work in every measured frame.
+
+| Run | Tier | fps (mean) | p95 frame | worst frame |
+|---|---|---|---|---|
+| Desktop, lens on (mouse) | high (12 blur samples, 3 ghosts, fracture) | 60.0 | 16.7 ms | 16.8 ms |
+| Emulated phone, lens on (finger) | low (5 samples, 1 ghost, no fracture) | 60.0 | 16.7 ms | 16.8 ms |
+| Desktop, drift only (same run) | high | 60.0 | 16.7 ms | 16.8 ms |
+| Emulated phone, drift only (same run) | low | 60.1 | 16.7 ms | 16.8 ms |
 
 The display refresh caps the rate at 60 fps, so both runs are at the cap.
 The emulated phone uses the same laptop GPU: it checks the `low` tier code
@@ -56,3 +74,7 @@ in at the next release review.
 - Fully faded works are not drawn; one shared plane geometry.
 - Pixel ratio capped (2 / 1.25), MSAA only in the high tier, no
   post-processing.
+- The lens runs on one work only, inside a soft circle (other pixels and
+  works return early); the `low` tier compiles a cheaper variant (5 blur
+  samples instead of 12, 1 flare ghost instead of 3, no fracture). One
+  shader program per tier is shared by all works.

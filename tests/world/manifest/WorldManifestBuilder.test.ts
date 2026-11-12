@@ -44,6 +44,8 @@ describe('buildWorldManifest', () => {
       href: '/en/works/arrivee/',
       contactHref: '/en/contact/?work=arrivee',
       color: '#8299fa',
+      palette: ['#8299fa'],
+      techniques: [],
       images: {
         low: { url: '/_astro/arrivee-480.webp', width: 384, height: 480 },
         mid: { url: '/_astro/arrivee-1200.webp', width: 960, height: 1200 },
@@ -60,7 +62,21 @@ describe('buildWorldManifest', () => {
     expect(cygne.fragment).toBeNull();
     expect(cygne.contactHref).toBeNull();
     expect(cygne.color).toBe('#0b1030');
+    expect(cygne.palette).toEqual([]);
     expect(m.zones.map((z) => z.title)).toEqual(['Arrivée', 'La Loupe', "L'Infiltration"]);
+  });
+
+  it('lists the techniques named in a work\'s declared techniques, titles and caption notes (keys only, no text)', async () => {
+    const named = [
+      fixtureWork({ slug: 'a', techniques: ['multiple-exposure'] }),
+      fixtureWork({ slug: 'b', title: { fr: 'Cygne (ICM) 7' } }),
+      fixtureWork({ slug: 'c', title: { fr: 'Éclipse', en: 'Mirror eclipse' } }),
+      fixtureWork({ slug: 'd', sourceNotes: 'Tech details: selective neutral density. Single exposure / in-camera.' }),
+      fixtureWork({ slug: 'e', title: { fr: 'Solitude' }, sourceNotes: 'A walk at night.' }),
+    ];
+    const m = await buildWorldManifest({ works: named, territories, zones, ui: uiText('en'), resolve });
+    expect(m.works.map((w) => w.techniques)).toEqual([['multiple-exposure'], ['icm'], ['mirror'], ['filter'], []]);
+    expect(JSON.stringify(m)).not.toContain('Tech details');
   });
 
   it('asks for the low, mid and high sizes', () => {
