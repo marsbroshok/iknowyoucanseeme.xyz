@@ -30,7 +30,7 @@
     "prettier": "^3.6.2",
     "subset-font": "^1.7.1",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.3",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.0",
     "vitest": "^3.2.4"
   },
@@ -39,5 +39,8 @@
     "sharp": "^0.34.2",
     "yaml": "^2.8.0",
     "zod": "^3.25.67"
+  },
+  "overrides": {
+    "@emnapi/runtime": "1.4.3"
   }
 }
