@@ -11,10 +11,10 @@ Track: `leak_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 
 ## Phase 2: Awake staining
 
-- [ ] Task: Inline leak script (size test ≤ 1.5 KB) + `@layer leak` CSS
-- [ ] Task: Stray apparition (margin-only placement, reduced-motion off)
-- [ ] Task: "Clear the leak" control on legal page
-- [ ] Task: e2e at levels 0/0.5/1 with axe + screenshots
+- [x] Task: Inline leak script (size test ≤ 1.5 KB) + `@layer leak` CSS `72fe86f`
+- [x] Task: Stray apparition (margin-only placement, reduced-motion off) `2d04cab`
+- [x] Task: "Clear the leak" control on legal page `ebb967c`
+- [x] Task: e2e at levels 0/0.5/1 with axe + screenshots `7b47b5e`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Specimens & kiosk
@@ -39,3 +39,5 @@ From `sound_20261111` and earlier reviews (do first):
 - Leak decay half-life 5 days; level curve (t / 15 min)², stored time bounded at 30 min (`a521c26`).
 - Max background mix 0.3, contrast guard 4.6:1 (AA is 4.5:1), apparition chance 0.5 × level from level 0.4 (`5950133`).
 - Kiosk auto-drift: after 10 s without input, then one work every 12 s (`2e196d1`).
+- The stray apparition is the right-hand swan of *Les Reflets II* (the picture has swans, not crows; its caption speaks of dreaming birds) (`2d04cab`).
+- The leak script trusts the cap the world stored (computed with `LeakStyle.cap`), clamped to 0.3; `DistGuard` counts only the exact leak script on its own 1.5 KB budget (`72fe86f`).
