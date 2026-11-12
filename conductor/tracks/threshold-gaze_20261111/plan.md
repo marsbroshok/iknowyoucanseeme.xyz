@@ -16,7 +16,7 @@ Track: `threshold-gaze_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../
 - [x] Task: Fragment text in the world + `aria-live` mirror (4497c91, 34f1a1e)
 - [x] Task: "Fragments found n / N" on awake territory pages (progressive, JS-only enhancement) (36d1b30)
 - [x] Task: e2e: first vs returning visit, keyboard entry, aria-live (bb61eae; docs 1c6a46f)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — gates at 07ae82b in a fresh clone: `npm run check` exit 0 (784 unit tests, 100% coverage) and `npm run test:e2e` exit 0 (200 passed) with `CI=true` and with `env -u CI`; boot 4.0 KB gz, world 132.7 KB gz
 
 ## Inherited Findings
 
