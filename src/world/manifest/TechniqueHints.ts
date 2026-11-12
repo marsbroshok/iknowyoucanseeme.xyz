@@ -7,13 +7,14 @@ export type TechniqueKey = (typeof TECHNIQUE_KEYS)[number];
 /**
  * Words that name each technique in the artist's captions, titles and
  * declared techniques (English and French). "Gel" is left out: in French
- * it means frost.
+ * it means frost. A key matches when any of its patterns does; "ND" is
+ * matched in capitals only, so a stray "nd" names nothing.
  */
-const PATTERNS: Readonly<Record<TechniqueKey, RegExp>> = {
-  mirror: /\b(mirrors?|mirrored|miroirs?|reflections?|reflets?)\b/i,
-  filter: /\bND\b|\bneutral density\b|\b(filters?|filtres?)\b/i,
-  icm: /\bicm\b|\bintentional camera movement\b/i,
-  'multiple-exposure': /\bmultiple-exposure\b|\b(multiple|double) exposures?\b|\bexpositions? multiples?\b|\bdouble exposition\b|\bsurimpressions?\b/i,
+const PATTERNS: Readonly<Record<TechniqueKey, readonly RegExp[]>> = {
+  mirror: [/\b(mirrors?|mirrored|miroirs?|reflections?|reflets?)\b/i],
+  filter: [/\bND\b/, /\bneutral density\b|\b(filters?|filtres?)\b/i],
+  icm: [/\bicm\b|\bintentional camera movement\b/i],
+  'multiple-exposure': [/\bmultiple-exposure\b|\b(multiple|double) exposures?\b|\bexpositions? multiples?\b|\bdouble exposition\b|\bsurimpressions?\b/i],
 };
 
 /**
@@ -26,5 +27,5 @@ const PATTERNS: Readonly<Record<TechniqueKey, RegExp>> = {
  */
 export function techniqueHints(texts: readonly string[]): TechniqueKey[] {
   const all = texts.join('\n');
-  return TECHNIQUE_KEYS.filter((key) => PATTERNS[key].test(all));
+  return TECHNIQUE_KEYS.filter((key) => PATTERNS[key].some((pattern) => pattern.test(all)));
 }

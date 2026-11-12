@@ -24,6 +24,12 @@ describe('techniqueHints', () => {
     expect(techniqueHints([])).toEqual([]);
   });
 
+  it('reads "ND" only in capitals: a standalone "nd" or "Nd" names nothing', () => {
+    expect(techniqueHints(['2nd print', 'the nd of it', 'Nd: magnet'])).toEqual([]);
+    expect(techniqueHints(['selective ND, handheld'])).toEqual(['filter']);
+    expect(techniqueHints(['Neutral Density'])).toEqual(['filter']);
+  });
+
   it('accepts declared technique keys as they are', () => {
     expect(techniqueHints(['multiple-exposure'])).toEqual(['multiple-exposure']);
   });
