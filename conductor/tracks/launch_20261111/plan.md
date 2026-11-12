@@ -2,12 +2,12 @@
 
 Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflow.md](../../workflow.md)
 
-## Phase 1: Retire Hugo
+## Phase 1: Retire Hugo [checkpoint: 2b3b3e0]
 
-- [ ] Task: Create annotated tag `legacy-hugo` on the base commit (local only)
-- [ ] Task: Remove Hugo files in one commit; verify `npm run check` still green
-- [ ] Task: Rewrite `README.md`; update `LICENSE.md` holder/year (all rights reserved notice for images documented)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Create annotated tag `legacy-hugo` on the base commit (local only) — tag on `d8c2ee8` (no commit; tags are repo-global)
+- [x] Task: Remove Hugo files in one commit; verify `npm run check` still green `8c8b021`
+- [x] Task: Rewrite `README.md`; update `LICENSE.md` holder/year (all rights reserved notice for images documented) `2b3b3e0`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — at `2b3b3e0`: `npm run check` exit 0 (CI=true) / 0 (CI unset); `npm run test:e2e` exit 0 (CI=true, 116 passed) / 0 (CI unset)
 
 ## Phase 2: Deploy & analytics
 
@@ -31,3 +31,9 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
     - Verify integrity hashes match public tarballs for a sample (and document any mismatch); if public access is blocked from this machine, document the verification step for the artist in `docs/deploy.md` (first GitHub Actions run).
     - Add a lockfile guard test (no `airlock-proxy`/private hosts) to the gates.
 - [ ] Task: Footer/skip-link localisation was fixed in awake-layer; keep the FR/EN UI-string regression test green when removing Hugo.
+
+## Assumptions ledger
+
+- `.github/FUNDING.yml` (gcushen / HugoBlox sponsor links) is template boilerplate and was removed with the template.
+- `package.json` name/description were leftovers (intake track, HugoBlox); renamed to `iknowyoucanseeme`, marked `private`.
+- Code license stays MIT (holder → Alexander Usoltsev, 2026); works, images and texts are all rights reserved (matches `legal.yaml` `image_use`).
