@@ -52,6 +52,7 @@
 | pages/ui.yaml | blocks.drift_link | draft | See it in the drift | Voir dans la dérive | spec |
 | pages/ui.yaml | blocks.medium_photo | draft | photograph | photographie | spec |
 | pages/ui.yaml | blocks.medium_ceramic | draft | ceramic | céramique | spec |
+| pages/ui.yaml | blocks.fragments_found | draft | Fragments found: {n} / {total} | Fragments trouvés : {n} / {total} | spec |
 | pages/ui.yaml | blocks.technique_colour_filter | draft | colour filter | filtre coloré | artist_decision_2026_11_12 |
 | pages/ui.yaml | blocks.technique_icm | draft | ICM | ICM | spec |
 | pages/ui.yaml | blocks.technique_multiple_exposure | draft | multiple exposure | exposition multiple | spec |

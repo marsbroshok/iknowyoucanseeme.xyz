@@ -10,6 +10,8 @@ export interface GuardViolation {
 
 /** Maximum inline JavaScript (bytes) on a contact page: the form enhancement. */
 export const CONTACT_JS_BUDGET = 3072;
+/** Maximum inline JavaScript (bytes) on a territory page: the "fragments found" count (FragmentCount). */
+export const TERRITORY_JS_BUDGET = 2048;
 /** Maximum inline JavaScript (bytes) on the root language chooser. */
 export const ROOT_CHOOSER_JS_BUDGET = 512;
 
@@ -64,13 +66,15 @@ export function scriptBytes(html: string): { inlineBytes: number; external: stri
 
 /**
  * JavaScript allowed on a page: the contact enhancement on contact pages,
- * the language redirect on the root chooser, nothing elsewhere.
+ * the "fragments found" count on territory pages, the language redirect on
+ * the root chooser, nothing elsewhere.
  *
  * @param file - Path relative to the build directory.
  * @returns Allowed inline bytes.
  */
 export function jsBudgetFor(file: string): number {
   if (/^(en|fr)\/contact\/index\.html$/.test(file)) return CONTACT_JS_BUDGET;
+  if (/^(en\/territories|fr\/territoires)\/[^/]+\/index\.html$/.test(file)) return TERRITORY_JS_BUDGET;
   if (file === 'index.html') return ROOT_CHOOSER_JS_BUDGET;
   return 0;
 }

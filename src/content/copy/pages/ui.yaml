@@ -240,6 +240,12 @@ blocks:
     fr: céramique
     sources:
       - spec
+  fragments_found:
+    status: draft
+    en: "Fragments found: {n} / {total}"
+    fr: "Fragments trouvés : {n} / {total}"
+    sources:
+      - spec
   technique_colour_filter:
     status: draft
     en: colour filter

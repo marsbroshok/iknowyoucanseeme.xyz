@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { inspectPage, scriptBytes, jsBudgetFor, isAllowedExternalScript, CONTACT_JS_BUDGET } from '../src/tools/DistGuard.js';
+import { inspectPage, scriptBytes, jsBudgetFor, isAllowedExternalScript, CONTACT_JS_BUDGET, TERRITORY_JS_BUDGET } from '../src/tools/DistGuard.js';
 
 const page = (body: string, head = '') => `<!DOCTYPE html><html lang="en"><head>
 <link rel="canonical" href="https://x/en/a/">
@@ -91,10 +91,20 @@ describe('scriptBytes', () => {
 });
 
 describe('jsBudgetFor', () => {
-  it('allows the contact enhancement and the root chooser only', () => {
+  it('allows the contact enhancement, the root chooser and the territory pages\' fragment count only', () => {
     expect(jsBudgetFor('en/contact/index.html')).toBe(CONTACT_JS_BUDGET);
     expect(jsBudgetFor('index.html')).toBeGreaterThan(0);
     expect(jsBudgetFor('fr/oeuvres/arrivee/index.html')).toBe(0);
+    expect(jsBudgetFor('en/territories/dreamland/index.html')).toBe(TERRITORY_JS_BUDGET);
+    expect(jsBudgetFor('fr/territoires/the-border-is-thin/index.html')).toBe(TERRITORY_JS_BUDGET);
+    expect(jsBudgetFor('en/territories/index.html')).toBe(0);
+    expect(jsBudgetFor('fr/territories/dreamland/index.html')).toBe(0);
+  });
+
+  it('keeps the territory budget small (a count, not an app)', () => {
+    expect(TERRITORY_JS_BUDGET).toBeLessThanOrEqual(2048);
+    const big = '<script type="module">' + 'x'.repeat(TERRITORY_JS_BUDGET + 1) + '</script>';
+    expect(inspectPage('en/territories/dreamland/index.html', page(big)).map((v) => v.rule)).toEqual(['js-budget']);
   });
 });
 

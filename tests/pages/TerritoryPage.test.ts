@@ -25,7 +25,7 @@ describe('TerritoryPage', () => {
 
   const render = (lang: 'en' | 'fr') =>
     container.renderToString(TerritoryPage, {
-      props: { lang, territory: buildTerritoryView(dreamland, zones, works, uiText(lang)) },
+      props: { lang, territory: buildTerritoryView(dreamland, zones, works, uiText(lang)), fragmentIds: ['work:arrivee', 'statement:dreamland:0'] },
       request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
     });
 
@@ -58,9 +58,19 @@ describe('TerritoryPage', () => {
       props: {
         lang: 'en',
         territory: buildTerritoryView(border, zones, [fixtureWork({ slug: 'cygne-icm-1', territory: 'the-border-is-thin', zone: undefined })], uiText('en')),
+        fragmentIds: [],
       },
     });
     expect(html).not.toMatch(/<h2/);
     expect(html).toContain('href="/en/works/cygne-icm-1/"');
+    expect(html).not.toContain('data-fragments-found');
+  });
+
+  it('renders the hidden "fragments found" counter with the territory\'s ids and the text in the page language', async () => {
+    const en = await render('en');
+    expect(en).toMatch(/<p class="fragments-found"[^>]*data-fragments-found[^>]*hidden/);
+    expect(en).toContain('data-ids="[&#34;work:arrivee&#34;,&#34;statement:dreamland:0&#34;]"');
+    expect(en).toContain('data-template="Fragments found: {n} / {total}"');
+    expect(await render('fr')).toContain('data-template="Fragments trouvés\u00a0: {n} / {total}"');
   });
 });
