@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { inspectPage } from '../../src/tools/DistGuard.js';
+import { LanguageGuard } from '../../src/tools/LanguageGuard.js';
 import { listBuiltPages } from './builtPages.js';
+import { loadUiBlocks } from './uiBlocks.js';
 
 /**
  * Static checks over the build the web server serves (`dist/`): no price
@@ -21,6 +23,14 @@ test.describe('Built site guard (dist/)', () => {
   test('every page passes the price, lang, canonical, hreflang and JS checks', () => {
     expect(pages.length).toBeGreaterThan(0);
     const violations = pages.flatMap((file) => inspectPage(file, fs.readFileSync(path.join(DIST, file), 'utf8')));
+    expect(violations).toEqual([]);
+  });
+
+  test('no page shows UI text in the other language (FR pages: no EN UI strings; EN pages: no FR ones)', () => {
+    const guard = new LanguageGuard(loadUiBlocks());
+    const localized = pages.filter((p) => /^(en|fr)\//.test(p));
+    expect(localized.length).toBe(2 * (6 + 40 + 2));
+    const violations = localized.flatMap((file) => guard.inspect(file, fs.readFileSync(path.join(DIST, file), 'utf8')));
     expect(violations).toEqual([]);
   });
 
