@@ -2,7 +2,8 @@
 /**
  * Territory page `/{lang}/territories|territoires/<slug>/`: the statement,
  * then the works grouped by zone (Dreamland: Arrival → Lens → Leak) with
- * each zone's statement. With JavaScript, "Fragments found: n / N" shows
+ * each zone's statement; the Leak zone's inhabitants are a specimen grid
+ * (framed cards with mono museum tags, FR4). With JavaScript, "Fragments found: n / N" shows
  * how many of the territory's fragments the visitor has read in the drift
  * (hidden without JavaScript; a small inline script, FragmentCount).
  */
@@ -41,13 +42,27 @@ const params = { en: [territory.slug], fr: [territory.slug] };
       <section class="zone" data-zone={group.slug ?? 'none'}>
         {group.title && <h2>{group.title}</h2>}
         {group.statement && <p class="prose zone-statement">{group.statement}</p>}
-        <ul class="work-grid">
-          {group.works.map((w) => <li><WorkCard work={w} /></li>)}
-        </ul>
+        {group.specimens ? (
+          <ul class="work-grid specimen-grid" aria-label={ui.t('specimens_label')}>
+            {group.works.map((w) => <li><WorkCard work={w} specimen={group.specimens?.[w.slug]} /></li>)}
+          </ul>
+        ) : (
+          <ul class="work-grid">
+            {group.works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
+        )}
       </section>
     ))}
   </article>
 </BaseLayout>
+
+<style>
+  /* Specimens: each card framed like a museum drawer, the tag in mono. */
+  .specimen-grid > li {
+    padding: var(--space-2);
+    border: 1px solid var(--text-secondary);
+  }
+</style>
 
 <script>
   import { showFragmentCount } from '../../scripts/FragmentCount.js';

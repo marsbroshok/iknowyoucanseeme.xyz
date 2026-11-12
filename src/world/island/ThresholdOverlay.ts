@@ -31,6 +31,7 @@ export class ThresholdOverlay implements ThresholdView {
   private readonly enterButton: HTMLButtonElement;
   private readonly timers: number[] = [];
   private closed = false;
+  private autoTimer: number | null = null;
   private readonly onEnter = () => this.enter(true);
 
   /**
@@ -69,18 +70,40 @@ export class ThresholdOverlay implements ThresholdView {
     this.el.hidden = false;
     this.el.dataset.kind = this.state.kind;
     this.sync();
-    this.enterButton.hidden = !this.state.needsClick;
-    if (this.state.needsClick) {
-      this.setInert(true);
-      this.enterButton.focus();
-    }
-    const auto = this.state.autoEnterSeconds;
-    if (auto !== null) this.later(auto, () => this.enter(false));
+    this.applyClickNeed();
+    if (this.state.needsClick) this.enterButton.focus();
   }
 
-  /** Enters at once without showing the threshold ("Drift" on the awake page is itself the gesture). */
-  skip(): void {
-    this.state.skip();
+  /**
+   * The visitor muted or unmuted the sound: a short threshold that is up
+   * then waits for Enter again (sound on) or fades by itself (muted).
+   *
+   * @param on - Sound is on (not muted).
+   */
+  soundChanged(on: boolean): void {
+    if (this.closed || !this.state.setSoundOn(on) || this.state.phase !== 'shown') return;
+    this.applyClickNeed();
+  }
+
+  /** Shows Enter (world inert) when a click is needed, otherwise schedules the automatic entry. */
+  private applyClickNeed(): void {
+    const needsClick = this.state.needsClick;
+    this.enterButton.hidden = !needsClick;
+    this.setInert(needsClick);
+    if (this.autoTimer !== null) this.timers$.clearTimeout(this.autoTimer);
+    this.autoTimer = null;
+    const auto = this.state.autoEnterSeconds;
+    if (auto !== null) this.autoTimer = this.later(auto, () => this.enter(false));
+  }
+
+  /**
+   * Enters at once without showing the threshold ("Drift" on the awake page
+   * is itself the gesture; the exhibition mode enters without one).
+   *
+   * @param gesture - Whether a user gesture caused it (default `true`).
+   */
+  skip(gesture = true): void {
+    this.state.skip(gesture);
     this.close();
   }
 
@@ -125,9 +148,12 @@ export class ThresholdOverlay implements ThresholdView {
    *
    * @param seconds - Delay.
    * @param callback - Work to run.
+   * @returns The timer id.
    */
-  private later(seconds: number, callback: () => void): void {
-    this.timers.push(this.timers$.setTimeout(callback, seconds * 1000));
+  private later(seconds: number, callback: () => void): number {
+    const id = this.timers$.setTimeout(callback, seconds * 1000);
+    this.timers.push(id);
+    return id;
   }
 
   /**

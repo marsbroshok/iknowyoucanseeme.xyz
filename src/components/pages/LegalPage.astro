@@ -4,7 +4,9 @@
  * cookieless analytics note and publisher identity (name + contact email;
  * no postal address is published). The analytics note is shown only when
  * analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`), so the page never
- * mentions a counter the build does not load.
+ * mentions a counter the build does not load. "Clear the leak" (FR6)
+ * removes the locally stored leak; it is shown and handled by the leak's
+ * inline script (`LeakScript`), so it stays hidden without JavaScript.
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import { uiText } from '../../i18n/UiCatalog.js';
@@ -36,5 +38,30 @@ const ui = uiText(lang);
       <p>{imageUse}</p>
       {analytics.enabled && <p>{privacy}</p>}
     </div>
+    <section class="prose leak-control" aria-labelledby="leak-heading">
+      <h2 id="leak-heading">{ui.t('leak_heading')}</h2>
+      <p>{ui.t('leak_note')}</p>
+      <p><button type="button" class="leak-clear" data-leak-clear hidden>{ui.t('leak_clear')}</button></p>
+      <p data-leak-cleared role="status" data-text={ui.t('leak_cleared')}></p>
+    </section>
   </article>
 </BaseLayout>
+
+<style>
+  .leak-clear {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    border-radius: 2px;
+    padding: var(--space-2) var(--space-3);
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .leak-clear:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+</style>

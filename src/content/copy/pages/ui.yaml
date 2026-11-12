@@ -456,3 +456,63 @@ blocks:
     fr: Flou de mouvement
     sources:
       - spec
+  leak_heading:
+    status: draft
+    en: "The leak"
+    fr: "L'infiltration"
+    sources:
+      - spec
+  leak_note:
+    status: draft
+    en: "The longer you drift, the more the colours of the dream stay on these pages. This is kept only in your browser."
+    fr: "Plus vous dérivez, plus les couleurs du rêve restent sur ces pages. Cela reste seulement dans votre navigateur."
+    sources:
+      - spec
+  leak_clear:
+    status: draft
+    en: "Clear the leak"
+    fr: "Effacer l'infiltration"
+    sources:
+      - spec
+  leak_cleared:
+    status: draft
+    en: "The leak is cleared."
+    fr: "L'infiltration est effacée."
+    sources:
+      - spec
+  specimens_label:
+    status: draft
+    en: "Specimens"
+    fr: "Spécimens"
+    sources:
+      - spec
+  kiosk_qr:
+    status: draft
+    en: "Scan to open this work on your phone"
+    fr: "Scannez pour ouvrir cette œuvre sur votre téléphone"
+    sources:
+      - spec
+  kiosk_qr_alt:
+    status: draft
+    en: "QR code of the work page"
+    fr: "Code QR de la page de l'œuvre"
+    sources:
+      - spec
+  specimen_tag:
+    status: draft
+    en: "specimen {n} · {year}"
+    fr: "spécimen {n} · {year}"
+    sources:
+      - spec
+  specimen_tag_venice:
+    status: draft
+    en: "specimen {n} · Venice · {year}"
+    fr: "spécimen {n} · Venise · {year}"
+    sources:
+      - spec
+  sketch_tag:
+    status: draft
+    en: "sketch {n} · clay · {year}"
+    fr: "esquisse {n} · argile · {year}"
+    sources:
+      - spec

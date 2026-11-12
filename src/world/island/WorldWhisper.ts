@@ -7,12 +7,19 @@ export interface WhisperFragment {
   at: { x: number; y: number } | null;
 }
 
+/** A specimen's museum tag to hang under its work this frame. */
+export interface WhisperSpecimen {
+  label: string;
+  /** Screen position just below the work (NDC, y up), or `null` to keep the last one. */
+  at: { x: number; y: number } | null;
+}
+
 /** Keeps fragments away from the screen edges (percent of the layer). */
 const EDGE = 15;
 
 /**
  * The world's text (FR2–FR4): the gaze line in the fog, the fragment near
- * its work, and a polite live region that mirrors each one when it starts
+ * its work, the museum tag under a Leak-zone specimen (leak track FR4), and a polite live region that mirrors each one when it starts
  * surfacing, so screen-reader visitors hear what others read. The visible
  * texts are `aria-hidden` (the live region is the accessible copy); the
  * fade itself comes from GazeDirector / FragmentSurfacer opacities.
@@ -20,6 +27,7 @@ const EDGE = 15;
 export class WorldWhisper {
   private readonly gazeEl: HTMLElement;
   private readonly fragmentEl: HTMLElement;
+  private readonly specimenEl: HTMLElement;
   private readonly saidEl: HTMLElement;
 
   /**
@@ -34,9 +42,11 @@ export class WorldWhisper {
     };
     this.gazeEl = part('[data-drift-gaze]');
     this.fragmentEl = part('[data-drift-fragment]');
+    this.specimenEl = part('[data-drift-specimen]');
     this.saidEl = part('[data-drift-said]');
     this.gazeEl.style.opacity = '0';
     this.fragmentEl.style.opacity = '0';
+    this.specimenEl.style.opacity = '0';
   }
 
   /**
@@ -70,6 +80,23 @@ export class WorldWhisper {
       el.style.setProperty('--y', `${WorldWhisper.percent(-fragment.at.y)}%`);
     }
     if (started) this.say(fragment.text);
+  }
+
+  /**
+   * Hangs (or takes down) the museum tag of the specimen in front of the
+   * visitor (FR4). It is `aria-hidden`: the focus dialog shows the same tag
+   * as text.
+   *
+   * @param specimen - Tag and position, or `null` for none.
+   */
+  specimen(specimen: WhisperSpecimen | null): void {
+    const el = this.specimenEl;
+    el.textContent = specimen?.label ?? '';
+    el.style.opacity = specimen ? '1' : '0';
+    if (specimen?.at) {
+      el.style.setProperty('--x', `${WorldWhisper.percent(specimen.at.x)}%`);
+      el.style.setProperty('--y', `${WorldWhisper.percent(-specimen.at.y)}%`);
+    }
   }
 
   /**

@@ -23,6 +23,14 @@ describe('README', () => {
     expect(readme).toContain('legacy-hugo');
     expect(readme).toContain('docs/deploy.md');
   });
+
+  it('describes the shipped leak, specimens and exhibition mode in the intro', () => {
+    const intro = readme.split(/^## /m)[0];
+    expect(intro).not.toMatch(/later track/i);
+    expect(intro).toContain('**the leak**');
+    expect(intro).toContain('**specimens**');
+    expect(intro).toContain('**exhibition mode**');
+  });
 });
 
 describe('LICENSE', () => {

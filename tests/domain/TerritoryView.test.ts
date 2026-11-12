@@ -46,6 +46,13 @@ describe('buildTerritoryView', () => {
     expect(v.statement).toBeUndefined();
   });
 
+  it('gives the Leak zone its specimen labels (and only that zone)', () => {
+    const v = buildTerritoryView(dreamland, zones, [...works, w('esquisse-argile-1', 'dreamland', 'leak', 2026)].map((x) => (x.slug === 'esquisse-argile-1' ? { ...x, medium: 'ceramic' as const } : x)), uiText('en'));
+    const leakGroup = v.groups.find((g) => g.slug === 'leak');
+    expect(leakGroup?.specimens).toEqual({ l1: 'specimen 01 · 2025', 'esquisse-argile-1': 'sketch 01 · clay · 2026' });
+    expect(v.groups.filter((g) => g.slug !== 'leak').every((g) => g.specimens === undefined)).toBe(true);
+  });
+
   it('fails loudly on a missing title or unknown zone', () => {
     expect(() => buildTerritoryView({ slug: 'x' }, zones, [], uiText('en'))).toThrow(/Missing en title for "x"/);
     expect(() => buildTerritoryView(dreamland, [], works, uiText('en'))).toThrow(/Unknown zone "arrival"/);

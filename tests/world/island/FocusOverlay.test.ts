@@ -21,8 +21,10 @@ const DIALOG = `
     <img data-focus-image alt="" />
     <h2 id="drift-focus-title" data-focus-title></h2>
     <p data-focus-fragment></p>
-    <p><a data-focus-work>See the work page</a></p>
+    <p data-focus-specimen hidden></p>
+    <p data-focus-work-row><a data-focus-work>See the work page</a></p>
     <p data-focus-contact-row><a data-focus-contact>Ask about this work</a></p>
+    <figure data-focus-qr-row hidden><img data-focus-qr alt="QR code of the work page" /><figcaption>Scan to open this work on your phone</figcaption></figure>
     <button type="button" data-focus-close>Close dialog</button>
   </dialog>`;
 
@@ -55,6 +57,41 @@ describe('FocusOverlay', () => {
     overlay.open(sampleManifest.works[1]);
     expect(($('[data-focus-fragment]') as HTMLElement).hidden).toBe(true);
     expect(($('[data-focus-contact-row]') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('shows a Leak-zone work\'s specimen tag, and hides it for other works', () => {
+    const overlay = new FocusOverlay(dialog);
+    overlay.open({ ...sampleManifest.works[0], specimen: 'spécimen 03 · Venise · 2025' });
+    expect($('[data-focus-specimen]').textContent).toBe('spécimen 03 · Venise · 2025');
+    expect(($('[data-focus-specimen]') as HTMLElement).hidden).toBe(false);
+    overlay.open(sampleManifest.works[1]);
+    expect(($('[data-focus-specimen]') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('keeps the QR code hidden outside the exhibition mode', () => {
+    new FocusOverlay(dialog).open(sampleManifest.works[0]);
+    expect(($('[data-focus-qr-row]') as HTMLElement).hidden).toBe(true);
+    expect(($('[data-focus-work-row]') as HTMLElement).hidden).toBe(false);
+  });
+
+  it('in the exhibition mode shows the work\'s QR code instead of the links (no contact form, no leaving the screen)', () => {
+    const overlay = new FocusOverlay(dialog, undefined, { kiosk: true });
+    overlay.open(sampleManifest.works[0]);
+    expect(($('[data-focus-qr-row]') as HTMLElement).hidden).toBe(false);
+    expect($('[data-focus-qr]').getAttribute('src')).toBe('/qr/fr/arrivee.svg');
+    expect(($('[data-focus-contact-row]') as HTMLElement).hidden).toBe(true);
+    expect(($('[data-focus-work-row]') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('close() closes an open dialog (exhibition reset) and does nothing when closed', () => {
+    const onClose = vi.fn();
+    const overlay = new FocusOverlay(dialog, onClose);
+    overlay.close();
+    expect(onClose).not.toHaveBeenCalled();
+    overlay.open(sampleManifest.works[0]);
+    overlay.close();
+    expect(overlay.isOpen).toBe(false);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('closes with its button and tells the world', () => {

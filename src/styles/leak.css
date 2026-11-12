@@ -1,0 +1,71 @@
+/*
+ * The leak (FR2, FR3): the inline script in the head (src/leak/LeakScript.ts)
+ * sets --leak-bg, --leak-color and --leak-level on <html> from the visitor's
+ * drift time; nothing here applies without them. Only colours and shadows
+ * change, so the layout never moves. Legibility is guaranteed by LeakStyle's
+ * contrast cap (≥ 4.5:1 for every awake text colour).
+ *
+ * The stray apparition (a cut-out of Les Reflets II, tools/leak/) only shows
+ * when the script marks <html data-leak-apparition>, and only in the margin
+ * beside the centred 72 rem column, inside <main>: never over text, never
+ * over the full-width header or footer. It moves with a transform only (no
+ * layout shift). Reduced motion is deliberately not used to change it
+ * (artist decision 2026-11-12, docs/adr/0009); it is slow and faint.
+ */
+@layer leak {
+  body {
+    background-color: var(--leak-bg, var(--ink));
+  }
+
+  .work-image-wrapper {
+    box-shadow: 0 0 calc(var(--leak-level, 0) * 18px)
+      color-mix(in srgb, var(--leak-color, transparent) calc(var(--leak-level, 0) * 60%), transparent);
+  }
+
+  .leak-margin {
+    display: none;
+  }
+
+  /* 72 rem column + 2 × (7 rem apparition + 1.5 rem gap). */
+  @media (min-width: 89rem) {
+    html[data-leak-apparition] main {
+      position: relative;
+    }
+
+    html[data-leak-apparition] .leak-margin {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(50% - 36rem - 8.5rem);
+      width: 7rem;
+      container-type: size;
+      pointer-events: none;
+    }
+
+    .leak-apparition {
+      display: block;
+      width: 7rem;
+      height: 7rem;
+      opacity: 0;
+      animation: leak-drift 90s linear 1.5s 1 both;
+    }
+  }
+}
+
+@keyframes leak-drift {
+  from {
+    transform: translate(0, 0) rotate(-4deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.4;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(0.75rem, calc(100cqh - 7rem)) rotate(4deg);
+    opacity: 0;
+  }
+}

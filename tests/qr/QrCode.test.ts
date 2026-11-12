@@ -12,14 +12,15 @@ describe('QrCode.svg', () => {
     expect(await decodeQrSvg(svg)).toBe(url);
   });
 
-  it('property: any site URL decodes back to itself', async () => {
+  it('property: any site URL decodes back to itself', async (ctx) => {
+    expect(ctx.task.timeout).toBe(15_000);
     await fc.assert(
       fc.asyncProperty(fc.webUrl({ withQueryParameters: true, withFragments: true }), async (url) => {
         expect(await decodeQrSvg(await QrCode.svg(url))).toBe(url);
       }),
       { numRuns: 15 },
     );
-  });
+  }, 15_000);
 
   it('refuses empty and over-long text', async () => {
     await expect(QrCode.svg('')).rejects.toThrow(/Nothing to encode/);

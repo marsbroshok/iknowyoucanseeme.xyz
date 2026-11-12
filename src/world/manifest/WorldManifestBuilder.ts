@@ -7,6 +7,8 @@ import type { ManifestImage, ManifestWork, WorldManifest } from '../core/WorldMa
 import type { ZoneSlug } from '../core/FieldLayout.js';
 import { lensTechniques } from './TechniqueHints.js';
 import { splitSentences } from './StatementSentences.js';
+import { specimenLabels } from '../../domain/SpecimenLabel.js';
+import { qrPath } from '../../kiosk/KioskQr.js';
 
 /** Long edge (px) of the three image sizes the world streams. */
 export const IMAGE_EDGES = { low: 480, mid: 1200, high: 2400 } as const;
@@ -36,7 +38,9 @@ export interface ManifestSources {
  * territories (with their statement split into sentences, for the
  * fragments) and zones, and for every work its title, fragment, links,
  * dominant colour and palette, the techniques it declares (or, without
- * declared ones, that its title and caption name; for the lens) and three image sizes (FR5 low/full levels).
+ * declared ones, that its title and caption name; for the lens), its
+ * specimen label (Leak zone), its QR code (exhibition mode) and three
+ * image sizes (FR5 low/full levels).
  *
  * @param sources - Content, UI strings and image builder.
  * @returns The manifest.
@@ -44,7 +48,9 @@ export interface ManifestSources {
  */
 export async function buildWorldManifest(sources: ManifestSources): Promise<WorldManifest> {
   const { ui } = sources;
-  const works = await Promise.all(sources.works.map((w) => manifestWork(w, sources)));
+  // Numbered per territory, exactly like the awake territory page.
+  const specimens = new Map(sources.territories.flatMap((t) => [...specimenLabels(sources.works.filter((w) => w.territory === t.slug), ui)]));
+  const works = await Promise.all(sources.works.map((w) => manifestWork(w, sources, specimens.get(w.slug) ?? null)));
   return {
     lang: ui.lang,
     territories: sources.territories.map((t) => ({ slug: t.slug, title: titleOf(t, ui), sentences: splitSentences(t.statement?.[ui.lang] ?? '') })),
@@ -58,10 +64,11 @@ export async function buildWorldManifest(sources: ManifestSources): Promise<Worl
  *
  * @param work - Work with copy.
  * @param sources - Shared inputs.
+ * @param specimen - Its specimen label, or `null`.
  * @returns The manifest entry.
  * @throws Error when the work has no image.
  */
-async function manifestWork(work: Work, sources: ManifestSources): Promise<ManifestWork> {
+async function manifestWork(work: Work, sources: ManifestSources, specimen: string | null): Promise<ManifestWork> {
   const first = work.images[0];
   if (!first) throw new Error(`[manifest] Work "${work.slug}" has no image`);
   const view = buildWorkView(work, sources.ui);
@@ -77,6 +84,8 @@ async function manifestWork(work: Work, sources: ManifestSources): Promise<Manif
     color: first.palette[0] ?? NIGHT_BLUE,
     palette: [...first.palette],
     techniques: lensTechniques(work.techniques ?? [], [work.title.fr, work.title.en ?? '', work.sourceNotes ?? '']),
+    specimen,
+    qr: qrPath(sources.ui.lang, work.slug),
     images: { low, mid, high },
   };
 }

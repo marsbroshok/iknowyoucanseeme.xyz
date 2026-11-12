@@ -88,6 +88,16 @@
 | pages/ui.yaml | blocks.lens_fracture | draft | Fracture and collage | Fracture et collage | spec |
 | pages/ui.yaml | blocks.lens_flare | draft | Light leak | Fuite de lumière | spec |
 | pages/ui.yaml | blocks.lens_icm | draft | Motion blur | Flou de mouvement | spec |
+| pages/ui.yaml | blocks.leak_heading | draft | The leak | L'infiltration | spec |
+| pages/ui.yaml | blocks.leak_note | draft | The longer you drift, the more the colours of the dream stay on these pages. This is kept only in your browser. | Plus vous dérivez, plus les couleurs du rêve restent sur ces pages. Cela reste seulement dans votre navigateur. | spec |
+| pages/ui.yaml | blocks.leak_clear | draft | Clear the leak | Effacer l'infiltration | spec |
+| pages/ui.yaml | blocks.leak_cleared | draft | The leak is cleared. | L'infiltration est effacée. | spec |
+| pages/ui.yaml | blocks.specimens_label | draft | Specimens | Spécimens | spec |
+| pages/ui.yaml | blocks.kiosk_qr | draft | Scan to open this work on your phone | Scannez pour ouvrir cette œuvre sur votre téléphone | spec |
+| pages/ui.yaml | blocks.kiosk_qr_alt | draft | QR code of the work page | Code QR de la page de l'œuvre | spec |
+| pages/ui.yaml | blocks.specimen_tag | draft | specimen {n} · {year} | spécimen {n} · {year} | spec |
+| pages/ui.yaml | blocks.specimen_tag_venice | draft | specimen {n} · Venice · {year} | spécimen {n} · Venise · {year} | spec |
+| pages/ui.yaml | blocks.sketch_tag | draft | sketch {n} · clay · {year} | esquisse {n} · argile · {year} | spec |
 | territories/dreamland.yaml | statement | draft | A journey is traditionally defined as a cycle whose final step is the return home. But as someone who has changed countries, I found myself adrift from the classic story of voyage and return. This work is born from that experience. It proposes that our most constant home is not a physical place, but the internal landscape of the dream. This inner world is a resonant space with a permeable boundary. As memory and present experience merge, the concept of 'home' evolves. The journey explored here is not of departure and return, but of this quiet, continuous transformation. | Un voyage est souvent vu comme un cycle dont l'étape finale est le retour chez soi. Mais ayant changé de pays, je me suis éloigné de cette histoire classique. Ce travail est né de cette expérience : notre véritable maison n'est pas un lieu physique, mais le paysage intérieur du rêve. Ce monde intérieur a une frontière perméable. Au fur et à mesure que la mémoire et le présent se mélangent, l'idée de maison évolue. Le voyage exploré ici n'est pas un départ ou un retour, mais une transformation silencieuse et continue. | exhibition_statement_2026 |
 | territories/the-border-is-thin.yaml | statement | draft | There is a border between these worlds. If you point the camera in the right direction and apply some pressure, it becomes thin and reveals what is out there. | Il y a une frontière entre ces mondes. Mais si vous dirigez l'appareil photo dans la bonne direction, elle s'affine et révèle ce qui se cache de l'autre côté. | cygne-icm-1, eclipse-miroir-9 |
 | works/arrivee.yaml | fragment | draft | The moment of return. | Le moment du retour. | arrivee, exhibition_statement_2025_p1 |

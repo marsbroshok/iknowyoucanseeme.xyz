@@ -15,7 +15,7 @@ describe('AnalyticsScript', () => {
     const html = await container.renderToString(AnalyticsScript, { props: { config: readAnalyticsConfig('iknowyoucanseeme') } });
     expect(html).toMatch(/<script[^>]*data-goatcounter="https:\/\/iknowyoucanseeme\.goatcounter\.com\/count"/);
     expect(html).toMatch(/<script[^>]*\basync\b/);
-    expect(scriptBytes(html)).toEqual({ inlineBytes: 0, external: ['https://gc.zgo.at/count.js'] });
+    expect(scriptBytes(html)).toEqual({ inlineBytes: 0, leakBytes: 0, external: ['https://gc.zgo.at/count.js'] });
   });
 
   it('renders nothing when disabled', async () => {

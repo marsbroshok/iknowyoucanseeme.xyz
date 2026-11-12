@@ -109,3 +109,46 @@ describe('ThresholdState — transitions', () => {
     );
   });
 });
+
+describe('ThresholdState — sound changes while it is up', () => {
+  it('muting a returning visitor\'s short threshold lets it enter by itself', () => {
+    const { state, entered } = machine({ ...first, returning: true, soundOn: true });
+    state.show();
+    expect(state.setSoundOn(false)).toBe(true);
+    expect(state.needsClick).toBe(false);
+    expect(state.autoEnterSeconds).toBe(0);
+    expect(state.enter(false)).toBe(true);
+    expect(entered).toEqual([{ gesture: false, returning: true }]);
+  });
+
+  it('unmuting it again asks for the click again', () => {
+    const { state } = machine({ ...first, deepLink: true, soundOn: false });
+    expect(state.setSoundOn(true)).toBe(true);
+    expect(state.needsClick).toBe(true);
+    expect(state.autoEnterSeconds).toBeNull();
+    expect(state.setSoundOn(true)).toBe(false);
+  });
+
+  it('never changes the full threshold: a first visit always needs Enter', () => {
+    const { state } = machine({ ...first, soundOn: true });
+    expect(state.setSoundOn(false)).toBe(false);
+    expect(state.needsClick).toBe(true);
+  });
+
+  it('ignores sound changes once entered', () => {
+    const { state } = machine({ ...first, returning: true, soundOn: true });
+    state.show();
+    state.enter(true);
+    expect(state.setSoundOn(false)).toBe(false);
+    expect(state.needsClick).toBe(true);
+  });
+});
+
+describe('ThresholdState — exhibition mode', () => {
+  it('skip(false) enters without the screen and without a gesture (an unattended screen)', () => {
+    const { state, entered } = machine();
+    state.skip(false);
+    expect(state.phase).toBe('gone');
+    expect(entered).toEqual([{ gesture: false, returning: false }]);
+  });
+});

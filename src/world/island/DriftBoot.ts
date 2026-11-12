@@ -12,6 +12,8 @@ import { SoundDirector, type SoundFeed } from '../../sound/core/SoundDirector.js
 import { SoundPreference } from '../../sound/core/SoundPreference.js';
 import { SoundControls } from '../../sound/island/SoundControls.js';
 import type { SoundEngineModule, SoundWindow } from '../../sound/SoundEngine.js';
+import { KioskMode } from '../../kiosk/KioskMode.js';
+import { isKiosk } from '../../kiosk/KioskParam.js';
 
 /** What the world module receives when mounted. */
 export interface MountOptions {
@@ -24,12 +26,18 @@ export interface MountOptions {
   threshold: ThresholdView;
   /** The sound, fed the camera's surroundings each frame, or `null` without sound. */
   sound: SoundFeed | null;
+  /** Exhibition mode (`?kiosk=1`, FR5): QR codes instead of links in the focus dialog. */
+  kiosk: boolean;
 }
 
 /** A mounted world. */
 export interface WorldHandle {
   /** Stops rendering, removes listeners and frees GPU memory. */
   unmount(): void;
+  /** Exhibition mode: glide to the next work along the zone path. */
+  advance(): void;
+  /** Exhibition mode: close the focus dialog and go back to the start of the path. */
+  restart(): void;
 }
 
 /** The lazily loaded world module (`src/world/gl/DriftWorld.ts`). */
@@ -65,6 +73,13 @@ export interface DriftBootHandle {
  * through `loadSound` only then, and is fed by the world each frame. While
  * sound is on (not muted) the short threshold also waits for a click.
  *
+ * With `?kiosk=1` (exhibition mode, FR5) the world opens at the start of
+ * the path (`?w=` is ignored), without the threshold and without a gesture,
+ * whatever was stored; a {@link KioskMode} takes the links out of the page,
+ * hands the first tap to the sound as its gesture, drifts on by itself and
+ * resets after 90 s without input (back into the world from the awake page
+ * too); neither "Wake up" nor "Drift" is remembered.
+ *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
  *
@@ -92,7 +107,8 @@ export function bootDrift(
   const preference = new ModePreference(storage);
   const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
-  const decision = DeviceProfile.decide(caps, preference.read());
+  const kiosk = isKiosk(win.location.search);
+  const decision = DeviceProfile.decide(caps, kiosk ? 'world' : preference.read());
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
   let state: 'awake' | 'loading' | 'world' = 'awake';
   let handle: WorldHandle | null = null;
@@ -102,7 +118,8 @@ export function bootDrift(
   if (sound) {
     const toggle = root.querySelector<HTMLButtonElement>('[data-sound-toggle]');
     if (!toggle) throw new Error('[drift] Missing [data-sound-toggle] in the world layer');
-    new SoundControls(toggle, sound, doc);
+    // A mute change while a short threshold is up changes whether it waits for Enter.
+    new SoundControls(toggle, sound, doc, (muted) => threshold?.soundChanged(!muted));
   }
 
   const showStarts = (visible: boolean) => starts.forEach((b) => (b.hidden = !visible));
@@ -126,19 +143,20 @@ export function bootDrift(
       sound?.entered(detail);
       root.dispatchEvent(new CustomEvent<EnteredDetail>('entered', { bubbles: true, detail }));
     };
-    const deepLink = (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
+    const deepLink = !kiosk && (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
     const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: sound !== null && !sound.muted }, entered), win);
     threshold = overlay;
     layer.show();
     showStarts(false);
-    if (manual) overlay.skip();
+    if (kiosk) overlay.skip(false);
+    else if (manual) overlay.skip();
     else overlay.show();
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
       .then((module) => {
         const manifest = readManifest(doc);
-        const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
-        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound });
+        const startSlug = kiosk ? null : DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
+        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk });
       })
       .then(
         (mounted) => {
@@ -155,15 +173,23 @@ export function bootDrift(
   };
 
   root.querySelector('[data-drift-wake]')?.addEventListener('click', () => {
-    preference.write('awake');
+    if (!kiosk) preference.write('awake');
     leave();
   });
   starts.forEach((b) =>
     b.addEventListener('click', () => {
-      preference.write('world');
+      if (!kiosk) preference.write('world');
       enter(true);
     }),
   );
+
+  if (kiosk) {
+    new KioskMode(doc, win, () => Date.now(), {
+      gesture: () => sound?.gesture(),
+      advance: () => handle?.advance(),
+      reset: () => (state === 'awake' ? enter() : handle?.restart()),
+    });
+  }
 
   showStarts(caps.webgl2 && decision.mode === 'awake');
   if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter());

@@ -1,4 +1,4 @@
-import { Color, Mesh, PlaneGeometry, ShaderMaterial, UniformsLib, UniformsUtils, Vector2, type Texture } from 'three';
+import { Color, EdgesGeometry, LineBasicMaterial, LineSegments, Mesh, PlaneGeometry, ShaderMaterial, UniformsLib, UniformsUtils, Vector2, type Texture } from 'three';
 import type { QualityTier } from '../core/DeviceProfile.js';
 import { lensDefines } from '../core/LensQuality.js';
 import { LENS } from '../core/LensUniforms.js';
@@ -29,6 +29,11 @@ export interface LensMaterialState {
   /** Second picture of a multiple exposure, or `null`. */
   partner: Texture | null;
 }
+
+/** Outline of the unit plane, shared by every specimen frame. */
+const FRAME_EDGES = new EdgesGeometry(PLANE);
+/** Colour of a specimen's frame (pale, like a museum drawer's edge). */
+const FRAME_COLOR = '#d8d2c4';
 
 /** Long edge of a work in the field (world units). */
 export const APPARITION_LONG_EDGE = 2.6;
@@ -75,12 +80,15 @@ void main() {
  * edge, the scene's fog, and an opacity driven by the apparition curve. It
  * turns about the vertical axis to face the camera. The lens draws over it
  * when the pointer is on it (`setLens`), in the tier's shader variant.
+ * Leak-zone specimens get a thin pale frame just outside the image (FR4),
+ * fading with it and ignored by picking.
  *
  * Verified in the browser (ADR 0006).
  */
 export class ApparitionMesh {
   readonly mesh: Mesh<PlaneGeometry, ShaderMaterial>;
   private readonly material: ShaderMaterial;
+  private readonly frame: LineSegments<EdgesGeometry, LineBasicMaterial> | null;
 
   /**
    * @param slug - Work slug (kept on the mesh for picking).
@@ -88,6 +96,7 @@ export class ApparitionMesh {
    * @param aspect - Image width / height.
    * @param tint - Dominant colour shown until the texture arrives (CSS hex).
    * @param tier - Quality tier (lens shader variant).
+   * @param framed - Draw a specimen frame around it (Leak zone).
    */
   constructor(
     readonly slug: string,
@@ -95,6 +104,7 @@ export class ApparitionMesh {
     aspect: number,
     tint: string,
     tier: QualityTier,
+    framed = false,
   ) {
     this.material = new ShaderMaterial({
       uniforms: UniformsUtils.merge([
@@ -129,6 +139,13 @@ export class ApparitionMesh {
     this.mesh.position.set(position.x, position.y, position.z);
     this.mesh.userData.slug = slug;
     this.mesh.visible = false;
+    this.frame = framed ? new LineSegments(FRAME_EDGES, new LineBasicMaterial({ color: FRAME_COLOR, transparent: true, opacity: 0, depthWrite: false, fog: true })) : null;
+    if (this.frame) {
+      this.frame.scale.set(1.06, 1.06, 1);
+      // Picking hits the work itself, never its frame.
+      this.frame.raycast = () => undefined;
+      this.mesh.add(this.frame);
+    }
   }
 
   /**
@@ -177,6 +194,7 @@ export class ApparitionMesh {
    */
   setOpacity(opacity: number): void {
     this.material.uniforms.opacity.value = opacity;
+    if (this.frame) this.frame.material.opacity = opacity * 0.8;
     this.mesh.visible = opacity > 0.002;
   }
 
@@ -194,8 +212,9 @@ export class ApparitionMesh {
     this.mesh.rotation.x = -(turn?.pitch ?? 0);
   }
 
-  /** Frees the material (the shared geometry stays). */
+  /** Frees the materials (the shared geometries stay). */
   dispose(): void {
     this.material.dispose();
+    this.frame?.material.dispose();
   }
 }

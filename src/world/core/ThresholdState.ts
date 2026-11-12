@@ -40,13 +40,10 @@ export const THRESHOLD = {
  */
 export class ThresholdState {
   readonly kind: ThresholdKind;
-  /** Entering needs a click or key press on Enter. */
-  readonly needsClick: boolean;
-  /** Seconds after showing at which the threshold enters by itself, or `null`. */
-  readonly autoEnterSeconds: number | null;
   /** Length of the fade-out after entering. */
   readonly leaveSeconds: number;
   private current: ThresholdPhase = 'hidden';
+  private soundOn: boolean;
 
   /**
    * @param context - Return, deep link, sound.
@@ -57,14 +54,38 @@ export class ThresholdState {
     private readonly onEntered: (detail: EnteredDetail) => void,
   ) {
     this.kind = context.returning || context.deepLink ? 'short' : 'full';
-    this.needsClick = this.kind === 'full' || context.soundOn;
-    this.autoEnterSeconds = this.needsClick ? null : 0;
+    this.soundOn = context.soundOn;
     this.leaveSeconds = this.kind === 'full' ? THRESHOLD.fullLeaveSeconds : THRESHOLD.shortLeaveSeconds;
   }
 
   /** Current phase. */
   get phase(): ThresholdPhase {
     return this.current;
+  }
+
+  /** Entering needs a click or key press on Enter (the full threshold, or the short one while sound is on). */
+  get needsClick(): boolean {
+    return this.kind === 'full' || this.soundOn;
+  }
+
+  /** Seconds after showing at which the threshold enters by itself, or `null`. */
+  get autoEnterSeconds(): number | null {
+    return this.needsClick ? null : 0;
+  }
+
+  /**
+   * The visitor muted or unmuted the sound while the threshold is not yet
+   * entered: a short threshold then needs the click (sound on, the click
+   * unlocks audio) or fades by itself (muted). The full threshold always
+   * needs Enter.
+   *
+   * @param on - Sound is on (not muted).
+   * @returns `true` when this changed whether a click is needed.
+   */
+  setSoundOn(on: boolean): boolean {
+    const before = this.needsClick;
+    if (this.current === 'hidden' || this.current === 'shown') this.soundOn = on;
+    return this.needsClick !== before;
   }
 
   /** Shows the threshold (only from `hidden`). */
@@ -90,11 +111,16 @@ export class ThresholdState {
     if (this.current === 'leaving') this.current = 'gone';
   }
 
-  /** Enters without showing the screen ("Drift" pressed on the awake page is itself the gesture). */
-  skip(): void {
+  /**
+   * Enters without showing the screen: "Drift" pressed on the awake page is
+   * itself the gesture; the exhibition mode enters unattended (no gesture).
+   *
+   * @param gesture - Whether a user gesture caused it (default `true`).
+   */
+  skip(gesture = true): void {
     if (this.current === 'leaving' || this.current === 'gone') return;
     this.current = 'gone';
-    this.emit(true);
+    this.emit(gesture);
   }
 
   /**

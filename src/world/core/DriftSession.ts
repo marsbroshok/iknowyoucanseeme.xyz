@@ -123,6 +123,23 @@ export class DriftSession {
   }
 
   /**
+   * The stop after a work along the zone path, starting over after the
+   * last (the exhibition mode's auto-drift).
+   *
+   * @param current - Current work, or `null` (or unknown) for the first stop.
+   * @returns Next slug, or `null` without works.
+   */
+  nextStop(current: string | null): string | null {
+    const i = this.stops.findIndex((s) => s.slug === current);
+    return this.stops[(i + 1) % Math.max(this.stops.length, 1)]?.slug ?? null;
+  }
+
+  /** Back to the start of the path, still (the exhibition mode's idle reset). */
+  restart(): void {
+    this.state = this.controller.initial(this.layout.start);
+  }
+
+  /**
    * Whether a work is the last stop in a direction (Tab then leaves the list).
    *
    * @param slug - Work slug.

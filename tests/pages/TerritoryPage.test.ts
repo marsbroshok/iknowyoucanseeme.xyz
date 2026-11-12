@@ -44,6 +44,16 @@ describe('TerritoryPage', () => {
     expect(html).toContain('hreflang="fr" href="https://www.iknowyoucanseeme.xyz/fr/territoires/dreamland/"');
   });
 
+  it('shows the Leak zone as a specimen grid with mono museum tags (EN and FR)', async () => {
+    const en = await render('en');
+    expect(en).toMatch(/<ul class="work-grid specimen-grid"[^>]*aria-label="Specimens"/);
+    expect(en).toMatch(/<span class="work-card-specimen"[^>]*>specimen 01 · 2025<\/span>/);
+    expect(en.match(/work-card-specimen"/g)).toHaveLength(1);
+    const fr = await render('fr');
+    expect(fr).toMatch(/aria-label="Spécimens"/);
+    expect(fr).toMatch(/>spécimen 01 · 2025<\/span>/);
+  });
+
   it('renders French zone names and never the EN subtitle on the FR site', async () => {
     const html = await render('fr');
     expect(html).toContain('La Loupe');
