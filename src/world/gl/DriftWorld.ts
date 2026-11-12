@@ -8,6 +8,9 @@ import { TextureStreamer } from '../stream/TextureStreamer.js';
 import { HorizonCompass } from '../island/HorizonCompass.js';
 import { WorkList } from '../island/WorkList.js';
 import { FocusOverlay } from '../island/FocusOverlay.js';
+import { DriftAnalytics } from '../island/DriftAnalytics.js';
+import { Analytics, type AnalyticsHost } from '../../analytics/Analytics.js';
+import { readAnalyticsConfig } from '../../analytics/AnalyticsConfig.js';
 import { TiltControl } from '../island/TiltControl.js';
 import { WheelInput } from '../island/input/WheelInput.js';
 import { PointerDragInput } from '../island/input/PointerDragInput.js';
@@ -104,6 +107,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     isLast: (slug, direction) => session.isLast(slug, direction),
   });
 
+  const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
+
   const raycaster = new Raycaster();
   const pointer = new Vector2();
   const onCanvasClick = (event: MouseEvent) => {
@@ -132,6 +137,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       mesh.setOpacity(w.opacity);
       if (mesh.mesh.visible) mesh.face(f.state.x, f.state.z);
     }
+    metrics.frame(f.nearest, f.nearestDistance, dt);
     if (f.plan) streamer.update(f.plan);
     if (f.settled) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
     if (f.compass) {
@@ -152,6 +158,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
 
   return {
     unmount() {
+      metrics.finish();
       stage.dispose();
       streamer.dispose();
       for (const mesh of meshes.values()) mesh.dispose();

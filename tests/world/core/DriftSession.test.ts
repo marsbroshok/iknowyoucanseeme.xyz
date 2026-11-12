@@ -45,6 +45,7 @@ describe('DriftSession', () => {
     expect(opacity['cygne-icm-1']).toBe(0);
     expect(f.works.find((w) => w.slug === 'arrivee')?.distance).toBeCloseTo(DRIFT.viewDistance, 9);
     expect(f.nearest).toBe('arrivee');
+    expect(f.nearestDistance).toBeCloseTo(DRIFT.viewDistance, 9);
   });
 
   it('plans textures on the first frame, then a few times a second', () => {
@@ -125,6 +126,7 @@ describe('DriftSession with crowded and empty fields', () => {
     expect(f.works).toEqual([]);
     expect(f.facing).toBeNull();
     expect(f.nearest).toBeNull();
+    expect(f.nearestDistance).toBe(Number.POSITIVE_INFINITY);
     expect(f.sky).toBe('#0b1030');
     expect(f.plan).toEqual({});
     expect(s.cycle(null, 1)).toBeNull();

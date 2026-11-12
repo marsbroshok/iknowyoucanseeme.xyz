@@ -43,6 +43,8 @@ export interface FrameResult {
   facing: string | null;
   /** Closest work (the keyboard entry point), or `null` without works. */
   nearest: string | null;
+  /** Distance to the closest work (infinite without works). */
+  nearestDistance: number;
   /** Work the visitor has just settled in front of (once per settling), or `null`. */
   settled: string | null;
 }
@@ -163,7 +165,7 @@ export class DriftSession {
     }
     const facing = this.facing(works);
     const settled = this.settle.update(facing, Math.hypot(this.state.vx, this.state.vz), dt);
-    return { state: this.state, works, sky, plan, compass, facing, nearest: nearest.slug || null, settled };
+    return { state: this.state, works, sky, plan, compass, facing, nearest: nearest.slug || null, nearestDistance: nearest.distance, settled };
   }
 
   /**
