@@ -2,11 +2,11 @@
 
 Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflow.md](../../workflow.md)
 
-## Phase 1: Lens logic
+## Phase 1: Lens logic [checkpoint: 0a432ca]
 
 - [x] Task: `LensDirector` (technique → mode mapping, seeded fallback, cycling) — Red/Green with property tests `36d7b06`
 - [x] Task: `LensCrossfade` + `LensUniforms` (pointer region, velocity smoothing, touch fade) — Red/Green `0a432ca`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `0a432ca` — check 0/0, test:e2e 0/0 (CI=true / CI unset)
 
 ## Phase 2: Shaders
 
