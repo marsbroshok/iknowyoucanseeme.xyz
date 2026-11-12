@@ -4,7 +4,7 @@ import path from 'node:path';
 import { inspectPage } from '../../src/tools/DistGuard.js';
 import { LanguageGuard } from '../../src/tools/LanguageGuard.js';
 import { listBuiltPages } from './builtPages.js';
-import { loadUiBlocks } from './uiBlocks.js';
+import { loadPageBlocks, loadUiBlocks } from './uiBlocks.js';
 
 /**
  * Static checks over the build the web server serves (`dist/`): no price
@@ -62,6 +62,12 @@ test.describe('Built site guard (dist/)', () => {
     expect(tagged).toEqual([]);
   });
 
+  test('without PUBLIC_GOATCOUNTER_CODE the legal notice does not mention analytics', () => {
+    const privacy = loadPageBlocks('legal').privacy;
+    expect(fs.readFileSync(path.join(DIST, 'en/legal/index.html'), 'utf8')).not.toContain(privacy.en);
+    expect(fs.readFileSync(path.join(DIST, 'fr/mentions-legales/index.html'), 'utf8')).not.toContain(privacy.fr);
+  });
+
   test('both locales have the same number of pages', () => {
     const en = pages.filter((p) => p.startsWith('en/'));
     const fr = pages.filter((p) => p.startsWith('fr/'));
@@ -94,6 +100,12 @@ test.describe('Built site guard (dist-e2e-keyed/, contact form rendered)', () =>
       const html = fs.readFileSync(path.join(KEYED, file), 'utf8');
       expect(html, file).toMatch(/<script[^>]*data-goatcounter="https:\/\/e2e-test\.goatcounter\.com\/count"[^>]*src="https:\/\/gc\.zgo\.at\/count\.js"/);
     }
+  });
+
+  test('with PUBLIC_GOATCOUNTER_CODE the legal notice states that cookieless analytics are used', () => {
+    const privacy = loadPageBlocks('legal').privacy;
+    expect(fs.readFileSync(path.join(KEYED, 'en/legal/index.html'), 'utf8')).toContain(privacy.en);
+    expect(fs.readFileSync(path.join(KEYED, 'fr/mentions-legales/index.html'), 'utf8')).toContain(privacy.fr);
   });
 
   test('every keyed page passes the price, lang, canonical, hreflang, JS and language checks', () => {

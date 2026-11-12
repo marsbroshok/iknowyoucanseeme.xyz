@@ -6,7 +6,7 @@ export default getViteConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**', 'tools/**', 'tests/**'],
-      exclude: ['src/**/*.astro', 'tests/e2e/**', '**/*.d.ts'], // Astro components are tested via container api / playwright, but not tracked for v8 coverage easily
+      exclude: ['src/**/*.astro', 'src/world/gl/**', 'tests/e2e/**', '**/*.d.ts'], // Astro components: container API / Playwright; WebGL code (src/world/gl): Playwright, see docs/adr/0006
       thresholds: {
         statements: 100,
         branches: 100,

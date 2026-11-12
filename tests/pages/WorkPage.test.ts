@@ -58,9 +58,12 @@ describe('WorkPage', () => {
     expect(html).not.toMatch(/€|\bprice\b|\bprix\b/i);
   });
 
-  it('keeps the "see it in the drift" link hidden until the drift world exists', async () => {
-    const html = await render('en');
-    expect(html).toMatch(/<[a-z]+[^>]*data-drift-link[^>]*hidden|<[a-z]+[^>]*hidden[^>]*data-drift-link/);
+  it('links to the work in the drift (/{lang}/?w=<slug>), visible and without script', async () => {
+    const en = await render('en');
+    expect(en).toMatch(/<a href="\/en\/\?w=solitude" data-drift-link[^>]*>See it in the drift<\/a>/);
+    expect(en).not.toMatch(/data-drift-link[^>]*hidden/);
+    const fr = await render('fr');
+    expect(fr).toMatch(/<a href="\/fr\/\?w=solitude" data-drift-link[^>]*>Voir dans la dérive<\/a>/);
   });
 
   it('FR: no EN subtitle, French labels and links', async () => {

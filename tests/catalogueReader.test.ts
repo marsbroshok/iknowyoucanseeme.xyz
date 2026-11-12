@@ -1,7 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readCatalogue, PdfThumbnailExtractor } from '../src/intake/CatalogueReader.js';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
+
+/**
+ * Every file and folder these tests write lives in one fresh folder under the
+ * OS temp directory, removed after the suite: nothing is left in the working
+ * directory (out_dir4/5/7 used to be).
+ */
+let tmp: string;
+const inTmp = (name: string) => path.join(tmp, name);
+const strayOutputs = ['out_dir', 'out_dir4', 'out_dir5', 'out_dir7', 'out dir with spaces', 'temp_cat.yaml'];
+
+beforeAll(() => {
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'catalogue-reader-'));
+});
+
+afterAll(() => {
+  fs.rmSync(tmp, { recursive: true, force: true });
+  expect(strayOutputs.filter((entry) => fs.existsSync(path.join(process.cwd(), entry)))).toEqual([]);
+});
 
 describe('CatalogueReader', () => {
   it('validates catalogue config schema and ensures no prices and 15 unique slugs', () => {
@@ -35,7 +54,7 @@ works:
     zone: "unknown"
     pdf_index: 0
     `;
-    const tempFile = path.resolve(__dirname, 'temp_cat.yaml');
+    const tempFile = inTmp('temp_cat.yaml');
     fs.writeFileSync(tempFile, badConfig);
     expect(() => readCatalogue(tempFile)).toThrow();
     fs.unlinkSync(tempFile);
@@ -49,17 +68,17 @@ works:
 describe('PdfThumbnailExtractor', () => {
   it('fails loudly if file is missing', async () => {
     const extractor = new PdfThumbnailExtractor();
-    await expect(extractor.extract('does_not_exist.pdf', 'out_dir'))
+    await expect(extractor.extract(inTmp('does_not_exist.pdf'), inTmp('out_dir')))
       .rejects.toThrow(/PDF not found/);
   });
   
   it('handles pdfimages error', async () => {
     const extractor = new PdfThumbnailExtractor();
-    const fakePdf = path.resolve(__dirname, 'fake4.pdf');
+    const fakePdf = inTmp('fake4.pdf');
     fs.writeFileSync(fakePdf, 'not a real pdf');
 
     try {
-      await expect(extractor.extract(fakePdf, 'out_dir4'))
+      await expect(extractor.extract(fakePdf, inTmp('out_dir4')))
         .rejects.toThrow(/Prerequisite pdfimages is not installed|Failed to extract images/);
     } finally {
       if (fs.existsSync(fakePdf)) {
@@ -71,10 +90,10 @@ describe('PdfThumbnailExtractor', () => {
   it('handles command not found by throwing specific error', async () => {
     const fakeExec = async () => { throw new Error('command not found: pdfimages'); };
     const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
-    const fakePdf = path.resolve(__dirname, 'fake5.pdf');
+    const fakePdf = inTmp('fake5.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
-    await expect(extractor.extract(fakePdf, 'out_dir5'))
+    await expect(extractor.extract(fakePdf, inTmp('out_dir5')))
       .rejects.toThrow(/Prerequisite pdfimages is not installed/);
     
     fs.unlinkSync(fakePdf);
@@ -83,13 +102,13 @@ describe('PdfThumbnailExtractor', () => {
   it('handles execution success with existing and non-existing outputDir', async () => {
     const fakeExec = async () => ({ stdout: '', stderr: '' });
     const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
-    const fakePdf = path.resolve(__dirname, 'fake6.pdf');
+    const fakePdf = inTmp('fake6.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
-    const newDir = path.resolve(__dirname, 'out_dir_brand_new_' + Math.random());
+    const newDir = inTmp('out_dir_brand_new');
     await expect(extractor.extract(fakePdf, newDir)).resolves.toBeUndefined();
     
-    const existingDir = path.resolve(__dirname, 'out_dir_existing_' + Math.random());
+    const existingDir = inTmp('out_dir_existing');
     fs.mkdirSync(existingDir, { recursive: true });
     await expect(extractor.extract(fakePdf, existingDir)).resolves.toBeUndefined();
 
@@ -101,10 +120,10 @@ describe('PdfThumbnailExtractor', () => {
   it('handles non-Error objects thrown by exec', async () => {
     const fakeExec = async () => { throw 'String error'; };
     const extractor = new PdfThumbnailExtractor(fakeExec as (cmd: string) => Promise<{ stdout: string; stderr: string }>);
-    const fakePdf = path.resolve(__dirname, 'fake7.pdf');
+    const fakePdf = inTmp('fake7.pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
-    await expect(extractor.extract(fakePdf, 'out_dir7'))
+    await expect(extractor.extract(fakePdf, inTmp('out_dir7')))
       .rejects.toThrow(/Failed to extract images from PDF: String error/);
     
     fs.unlinkSync(fakePdf);
@@ -120,22 +139,19 @@ describe('PdfThumbnailExtractor', () => {
     };
     
     const extractor = new PdfThumbnailExtractor(fakeExecFn as (cmd: string, args: string[]) => Promise<{ stdout: string | Buffer; stderr: string | Buffer }>);
-    const fakePdf = path.resolve(__dirname, 'fake pdf with spaces and "quotes".pdf');
+    const fakePdf = inTmp('fake pdf with spaces and "quotes".pdf');
     fs.writeFileSync(fakePdf, 'dummy');
 
     try {
-      await extractor.extract(fakePdf, 'out dir with spaces');
+      await extractor.extract(fakePdf, inTmp('out dir with spaces'));
       expect(capturedCmd).toBe('pdfimages');
       expect(capturedArgs).toBeDefined();
       expect(capturedArgs).toContain('-j');
       expect(capturedArgs).toContain(fakePdf);
-      expect(capturedArgs).toContain('out dir with spaces/img');
+      expect(capturedArgs).toContain(`${inTmp('out dir with spaces')}/img`);
     } finally {
       if (fs.existsSync(fakePdf)) {
         fs.unlinkSync(fakePdf);
-      }
-      if (fs.existsSync('out dir with spaces')) {
-        fs.rmSync('out dir with spaces', { recursive: true, force: true });
       }
     }
   });

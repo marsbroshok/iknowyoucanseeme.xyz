@@ -12,6 +12,17 @@ import { PageSchema, type TextBlock } from '../../src/content/schema/index.js';
  * @throws ZodError when ui.yaml does not match `PageSchema`.
  */
 export function loadUiBlocks(): Record<string, TextBlock> {
-  const source = fs.readFileSync(path.resolve('src/content/copy/pages/ui.yaml'), 'utf8');
+  return loadPageBlocks('ui');
+}
+
+/**
+ * Text blocks of a copy page (`src/content/copy/pages/<slug>.yaml`), read from disk.
+ *
+ * @param slug - Copy page slug, e.g. `legal`.
+ * @returns Text blocks keyed by id.
+ * @throws ZodError when the file does not match `PageSchema`.
+ */
+export function loadPageBlocks(slug: string): Record<string, TextBlock> {
+  const source = fs.readFileSync(path.resolve(`src/content/copy/pages/${slug}.yaml`), 'utf8');
   return PageSchema.parse(yaml.parse(source)).blocks ?? {};
 }

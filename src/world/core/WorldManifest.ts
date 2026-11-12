@@ -1,0 +1,120 @@
+import { ZONE_ORDER, type ZoneSlug } from './FieldLayout.js';
+
+/** One size of a work image (built by astro:assets). */
+export interface ManifestImage {
+  url: string;
+  width: number;
+  height: number;
+}
+
+/** A work as the world needs it, in the page language. */
+export interface ManifestWork {
+  slug: string;
+  territory: string;
+  zone: ZoneSlug | null;
+  /** Display title (French original, + English subtitle on the EN site). */
+  title: string;
+  /** Poetic fragment, when written. */
+  fragment: string | null;
+  /** Awake work page. */
+  href: string;
+  /** Contact page about this work, when it can be asked about. */
+  contactHref: string | null;
+  /** Dominant colour (first palette entry). */
+  color: string;
+  /** Low (~480 px), mid (~1200 px) and high (≤ 2400 px) images. */
+  images: { low: ManifestImage; mid: ManifestImage; high: ManifestImage };
+}
+
+/** A territory or zone name in the page language. */
+export interface ManifestName {
+  slug: string;
+  title: string;
+}
+
+/** Everything the world reads from the page (`<script type="application/json" id="drift-manifest">`). */
+export interface WorldManifest {
+  lang: 'en' | 'fr';
+  /** Territories in layout order (the first holds the start). */
+  territories: ManifestName[];
+  zones: ManifestName[];
+  works: ManifestWork[];
+}
+
+type Json = Record<string, unknown>;
+
+/**
+ * Validates the world manifest embedded in the home page. The page builds
+ * it at build time, so a failure here means the build and the world are out
+ * of sync; it is reported, never silently patched.
+ *
+ * @param input - Parsed JSON.
+ * @returns The manifest, typed.
+ * @throws Error naming the first invalid field.
+ */
+export function parseManifest(input: unknown): WorldManifest {
+  const m = object(input, 'manifest');
+  if (m.lang !== 'en' && m.lang !== 'fr') throw new Error('[manifest] lang must be "en" or "fr"');
+  const territories = array(m.territories, 'territories').map((t, i) => name(t, `territories[${i}]`));
+  const zones = array(m.zones, 'zones').map((z, i) => name(z, `zones[${i}]`));
+  const known = new Set(territories.map((t) => t.slug));
+  const works = array(m.works, 'works').map((w, i) => work(w, `works[${i}]`, known));
+  return { lang: m.lang, territories, zones, works };
+}
+
+function work(input: unknown, path: string, territories: ReadonlySet<string>): ManifestWork {
+  const w = object(input, path);
+  const territory = text(w.territory, `${path}.territory`);
+  if (!territories.has(territory)) throw new Error(`[manifest] ${path}.territory "${territory}" is not in territories`);
+  if (w.zone !== null && !ZONE_ORDER.includes(w.zone as ZoneSlug)) throw new Error(`[manifest] ${path}.zone must be one of ${ZONE_ORDER.join(', ')} or null`);
+  if (typeof w.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(w.color)) throw new Error(`[manifest] ${path}.color must be #rrggbb`);
+  const images = object(w.images, `${path}.images`);
+  return {
+    slug: text(w.slug, `${path}.slug`),
+    territory,
+    zone: w.zone as ZoneSlug | null,
+    title: text(w.title, `${path}.title`),
+    fragment: w.fragment === null ? null : text(w.fragment, `${path}.fragment`),
+    href: link(w.href, `${path}.href`),
+    contactHref: w.contactHref === null ? null : link(w.contactHref, `${path}.contactHref`),
+    color: w.color,
+    images: {
+      low: picture(images.low, `${path}.images.low`),
+      mid: picture(images.mid, `${path}.images.mid`),
+      high: picture(images.high, `${path}.images.high`),
+    },
+  };
+}
+
+function picture(input: unknown, path: string): ManifestImage {
+  const p = object(input, path);
+  const ok = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n > 0;
+  if (!ok(p.width) || !ok(p.height)) throw new Error(`[manifest] ${path} needs a positive width and height`);
+  return { url: link(p.url, `${path}.url`), width: p.width as number, height: p.height as number };
+}
+
+function name(input: unknown, path: string): ManifestName {
+  const n = object(input, path);
+  return { slug: text(n.slug, `${path}.slug`), title: text(n.title, `${path}.title`) };
+}
+
+function link(input: unknown, path: string): string {
+  const value = text(input, path);
+  if (!value.startsWith('/') || value.startsWith('//')) throw new Error(`[manifest] ${path} must be a site-relative path`);
+  return value;
+}
+
+function text(input: unknown, path: string): string {
+  if (typeof input !== 'string' || input.length === 0) throw new Error(`[manifest] ${path} must be a non-empty string`);
+  return input;
+}
+
+function array(input: unknown, path: string): unknown[] {
+  if (!Array.isArray(input)) throw new Error(`[manifest] ${path} must be an array`);
+  return input;
+}
+
+function object(input: unknown, path: string): Json {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) throw new Error(`[manifest] ${path} must be an object`);
+  return input as Json;
+}

@@ -4,6 +4,8 @@ import HomePage from '../../src/components/pages/HomePage.astro';
 import { buildTerritoryTeaser } from '../../src/domain/TerritoryView.js';
 import { uiText } from '../../src/i18n/UiCatalog.js';
 import { fixtureWork, tb } from './fixtures.js';
+import { sampleManifest } from '../world/fixtures.js';
+import { scriptBytes } from '../../src/tools/DistGuard.js';
 
 const works = [
   fixtureWork(),
@@ -58,5 +60,52 @@ describe('HomePage', () => {
     expect(html).toContain('href="/fr/expositions/"');
     expect(html).toContain('href="/fr/oeuvres/arrivee/"');
     expect(html).not.toContain('€');
+  });
+
+  describe('with the drift world', () => {
+    const renderWorld = (lang: 'en' | 'fr') =>
+      container.renderToString(HomePage, {
+        props: { lang, territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText(lang))), world: { ...sampleManifest, lang } },
+        request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
+      });
+
+    it('adds the hidden world layer after the footer (outside main), and keeps the awake page whole', async () => {
+      const html = await renderWorld('en');
+      const layer = html.indexOf('data-drift ');
+      expect(layer).toBeGreaterThan(html.indexOf('</footer>'));
+      expect(html.slice(layer - 40, layer + 120)).toMatch(/<section class="drift" data-drift hidden tabindex="-1" aria-label="The drift"/);
+      expect(html).toContain('data-territory="dreamland"');
+      expect(html).toContain('>Wake up</button>');
+      expect(html).toContain('aria-label="Works around you"');
+      expect(html).toMatch(/<canvas[^>]*data-drift-canvas[^>]*aria-hidden="true"/);
+    });
+
+    it('has the focus dialog, labelled by its title, with light dismiss and localized links', async () => {
+      const html = await renderWorld('fr');
+      expect(html).toMatch(/<dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title"/);
+      expect(html).toContain('>Voir la page de l&#39;œuvre</a>');
+      expect(html).toContain('>Demander au sujet de cette œuvre</a>');
+      expect(html).toContain('>Fermer la boîte de dialogue</button>');
+    });
+
+    it('offers a hidden "Drift" button in the intro (shown by the boot script on the awake layer)', async () => {
+      const html = await renderWorld('fr');
+      expect(html).toMatch(/<button type="button" class="drift-start"[^>]*data-drift-start[^>]*hidden[^>]*>Dériver<\/button>/);
+      expect(html).toContain('>Se réveiller</button>');
+      expect(html).toContain('Bouger avec le téléphone');
+    });
+
+    it('embeds the world manifest as JSON data (not executable script)', async () => {
+      const html = await renderWorld('fr');
+      const json = /<script type="application\/json" id="drift-manifest">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+      expect(JSON.parse(json)).toEqual({ ...sampleManifest, lang: 'fr' });
+      expect(scriptBytes(html).inlineBytes).toBe(0);
+    });
+
+    it('renders no world without a manifest', async () => {
+      const html = await render('en');
+      expect(html).not.toContain('data-drift');
+      expect(html).not.toContain('drift-manifest');
+    });
   });
 });

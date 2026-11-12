@@ -360,3 +360,33 @@ blocks:
     fr: Code QR vers la page de l'œuvre
     sources:
       - spec
+  drift_layer_label:
+    status: draft
+    en: The drift
+    fr: La dérive
+    sources:
+      - spec
+  drift_help:
+    status: draft
+    en: Scroll or drag to move. Arrow keys move too. Tab goes to the next work, Enter opens it.
+    fr: Faites défiler ou glissez pour avancer. Les flèches aussi. Tab va à l'œuvre suivante, Entrée l'ouvre.
+    sources:
+      - spec
+  drift_works_label:
+    status: draft
+    en: Works around you
+    fr: Les œuvres autour de vous
+    sources:
+      - spec
+  drift_tilt:
+    status: draft
+    en: Move with the phone
+    fr: Bouger avec le téléphone
+    sources:
+      - spec
+  drift_open_work:
+    status: draft
+    en: See the work page
+    fr: Voir la page de l'œuvre
+    sources:
+      - spec

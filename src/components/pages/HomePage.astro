@@ -2,22 +2,27 @@
 /**
  * Awake home `/{lang}/`: signature, the threshold line, one entry block per
  * territory (statement excerpt + three works) and links to About,
- * Exhibitions and Contact. Meaningful on its own; the drift world will later
- * enhance this page progressively.
+ * Exhibitions and Contact. Meaningful on its own; with a world manifest the
+ * drift world enhances it progressively (DriftIsland, plus a "Drift" button
+ * shown by the boot script when the visitor is on the awake layer).
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { TerritoryTeaserView } from '../../domain/TerritoryView.js';
+import type { WorldManifest } from '../../world/core/WorldManifest.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import BaseLayout from '../BaseLayout.astro';
 import WorkCard from '../WorkCard.astro';
+import DriftIsland from '../DriftIsland.astro';
 
 interface Props {
   lang: Locale;
   territories: readonly TerritoryTeaserView[];
+  /** Works for the drift world; without it the page is awake-only. */
+  world?: WorldManifest;
 }
 
-const { lang, territories } = Astro.props;
+const { lang, territories, world } = Astro.props;
 const ui = uiText(lang);
 ---
 <BaseLayout lang={lang} routeKey="home" title="iknowyoucanseeme · Alexander Usoltsev" description={ui.t('desc_home')}>
@@ -25,6 +30,7 @@ const ui = uiText(lang);
     <h1>iknowyoucanseeme</h1>
     <p class="threshold-line">{ui.t('gaze')}</p>
     <p class="artist">Alexander Usoltsev</p>
+    {world && <p><button type="button" class="drift-start" data-drift-start hidden>{ui.t('drift')}</button></p>}
   </section>
 
   <section class="home-territories" aria-labelledby="territories-heading">
@@ -49,6 +55,7 @@ const ui = uiText(lang);
       <li><a href={localizedPath('contact', lang)}>{ui.t('nav_contact')}</a></li>
     </ul>
   </div>
+  {world && <DriftIsland slot="world" lang={lang} manifest={world} />}
 </BaseLayout>
 
 <style>
@@ -98,6 +105,23 @@ const ui = uiText(lang);
     list-style: none;
     padding: 0;
     margin: 0 0 var(--space-3);
+  }
+  .drift-start {
+    margin-top: var(--space-3);
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    border-radius: 2px;
+    padding: var(--space-2) var(--space-3);
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .drift-start:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
   }
   .home-links ul {
     display: flex;

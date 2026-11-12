@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { inspectPage, scriptBytes, jsBudgetFor, CONTACT_JS_BUDGET } from '../src/tools/DistGuard.js';
+import { inspectPage, scriptBytes, jsBudgetFor, isAllowedExternalScript, CONTACT_JS_BUDGET } from '../src/tools/DistGuard.js';
 
 const page = (body: string, head = '') => `<!DOCTYPE html><html lang="en"><head>
 <link rel="canonical" href="https://x/en/a/">
@@ -95,5 +95,31 @@ describe('jsBudgetFor', () => {
     expect(jsBudgetFor('en/contact/index.html')).toBe(CONTACT_JS_BUDGET);
     expect(jsBudgetFor('index.html')).toBeGreaterThan(0);
     expect(jsBudgetFor('fr/oeuvres/arrivee/index.html')).toBe(0);
+  });
+});
+
+describe('inspectPage: drift world modules (ADR 0007)', () => {
+  const boot = '<script type="module" src="/_astro/DriftIsland.astro_astro_type_script_index_0_lang.BMdQS50T.js"></script>';
+
+  it('allows the site\'s own module scripts from /_astro/ on the two home pages', () => {
+    expect(inspectPage('en/index.html', page(boot))).toEqual([]);
+    expect(inspectPage('fr/index.html', page(boot))).toEqual([]);
+    expect(isAllowedExternalScript('fr/index.html', '/_astro/a.js')).toBe(true);
+  });
+
+  it('still flags them anywhere else (awake pages ship no JavaScript)', () => {
+    expect(inspectPage('en/works/arrivee/index.html', page(boot)).map((v) => v.rule)).toEqual(['js-budget']);
+    expect(isAllowedExternalScript('en/about/index.html', '/_astro/a.js')).toBe(false);
+  });
+
+  it('flags other origins, other folders and non-JS files on the home pages too', () => {
+    for (const src of ['https://cdn.example.com/three.js', '//cdn.example.com/a.js', '/scripts/a.js', '/_astro/sub/a.js', '/_astro/a.css']) {
+      expect(isAllowedExternalScript('en/index.html', src), src).toBe(false);
+    }
+  });
+
+  it('keeps the home pages\' inline budget at zero', () => {
+    expect(jsBudgetFor('en/index.html')).toBe(0);
+    expect(inspectPage('en/index.html', page(`${boot}<script>x()</script>`)).map((v) => v.rule)).toEqual(['js-budget']);
   });
 });
