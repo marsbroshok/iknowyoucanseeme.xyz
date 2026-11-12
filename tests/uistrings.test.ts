@@ -24,6 +24,7 @@ blocks:
     expect(ui).toHaveProperty('welcome');
     expect(ui.welcome.en).toBe('Welcome');
     expect(ui.welcome.fr).toBe('Bienvenue');
+    expect(getUIString(ui, 'welcome', 'fr')).toBe('Bienvenue');
   });
 
   it('getUIString falls back to en and warns', () => {

@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run test:coverage",
     "intake": "npx tsx tools/intake/cli.ts",
-    "copy:review": "npx tsx tools/copy/review.ts"
+    "copy:review": "npx tsx tools/copy/review.ts",
+    "build": "astro build"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "eslint": "^9.29.0",
     "fast-check": "^4.1.1",
     "prettier": "^3.6.2",
+    "subset-font": "^1.7.1",
     "tsx": "^4.20.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.35.0",

@@ -1,0 +1,23 @@
+---
+import type { Locale, RouteKey } from '../i18n/RouteMap.js';
+import { localizedPath } from '../i18n/LocalizedPath.js';
+import SkipLink from './SkipLink.astro';
+
+interface Props {
+  lang: Locale;
+  currentRouteKey: RouteKey;
+}
+
+const { lang, currentRouteKey } = Astro.props;
+const otherLang = lang === 'en' ? 'fr' : 'en';
+
+const switchHref = localizedPath(currentRouteKey, otherLang);
+---
+<header style="display: flex; justify-content: space-between; padding: var(--space-3); position: relative;">
+  <SkipLink targetId="main-content" />
+  <div>iknowyoucanseeme</div>
+  <nav>
+    <a href={switchHref}>{otherLang.toUpperCase()}</a>
+    <a href="#drift">{lang === 'en' ? 'Drift' : 'Dériver'}</a>
+  </nav>
+</header>

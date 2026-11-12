@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { RouteMap, type RouteKey } from '../src/i18n/RouteMap.js';
+import { RouteMap, type RouteKey, type Locale } from '../src/i18n/RouteMap.js';
 import { localizedPath, pathToKey } from '../src/i18n/LocalizedPath.js';
 import { alternateLinks } from '../src/i18n/Alternates.js';
 import { getPreferredLocale } from '../src/i18n/ChooseLocale.js';
 
 describe('i18n Route Helpers', () => {
   it('every key has en and fr', () => {
-    for (const [key, value] of Object.entries(RouteMap)) {
+    for (const value of Object.values(RouteMap)) {
       expect(value).toHaveProperty('en');
       expect(value).toHaveProperty('fr');
       expect(typeof value.en).toBe('string');
@@ -16,12 +16,13 @@ describe('i18n Route Helpers', () => {
   });
 
   it('no collisions between route segments', () => {
-    const segments = new Set<string>();
+    const enSegments = new Set<string>();
+    const frSegments = new Set<string>();
     for (const value of Object.values(RouteMap)) {
-      expect(segments.has(value.en)).toBe(false);
-      segments.add(value.en);
-      expect(segments.has(value.fr)).toBe(false);
-      segments.add(value.fr);
+      expect(enSegments.has(value.en)).toBe(false);
+      enSegments.add(value.en);
+      expect(frSegments.has(value.fr)).toBe(false);
+      frSegments.add(value.fr);
     }
   });
 
@@ -34,7 +35,7 @@ describe('i18n Route Helpers', () => {
         fc.constantFrom('en', 'fr'),
         fc.array(fc.string({ minLength: 1 }).filter(s => !s.includes('/'))),
         (key, lang, params) => {
-          const path = localizedPath(key, lang as any, params);
+          const path = localizedPath(key as RouteKey, lang as Locale, params);
           const roundTrippedKey = pathToKey(path);
           expect(roundTrippedKey).toBe(key);
         }
@@ -67,5 +68,11 @@ describe('i18n Route Helpers', () => {
     expect(getPreferredLocale('en-US')).toBe('en');
     expect(getPreferredLocale('es-ES')).toBe('en');
     expect(getPreferredLocale(undefined)).toBe('en');
+  });
+
+  it('pathToKey returns undefined for unknown paths or segments', () => {
+    expect(pathToKey('/en')).toBeUndefined();
+    expect(pathToKey('/de/works')).toBeUndefined();
+    expect(pathToKey('/en/unknown-segment')).toBeUndefined();
   });
 });

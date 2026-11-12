@@ -1,9 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('astro:content', () => ({
-  defineCollection: (cfg: any) => cfg,
-  z: require('zod')
-}));
+vi.mock('astro:content', async () => {
+  return {
+    defineCollection: (cfg: unknown) => cfg,
+    z: (await import('zod')).default
+  };
+});
 vi.mock('astro/loaders', () => ({
   glob: () => ({}),
   file: () => ({})

@@ -1,0 +1,24 @@
+---
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+<div class="fragment-text">
+  {text.split('\n').map((line, idx) => (
+    <p key={idx}>{line || '\u00A0'}</p>
+  ))}
+</div>
+
+<style>
+  .fragment-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    line-height: 1.6;
+    margin: var(--space-4) 0;
+  }
+  .fragment-text p {
+    margin-bottom: var(--space-2);
+  }
+</style>

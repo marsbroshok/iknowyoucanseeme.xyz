@@ -1,5 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
+import { glob } from 'astro/loaders';
 import {
   WorkSchema,
   TerritorySchema,
@@ -35,7 +35,7 @@ export const collections = {
       posts: z.array(z.object({
         src: z.string(),
         hash: z.number().optional(),
-        postDate: z.string().optional(),
+        postDate: z.date().optional(),
         postCaption: z.string().optional()
       }))
     })

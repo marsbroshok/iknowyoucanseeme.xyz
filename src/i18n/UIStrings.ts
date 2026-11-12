@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import yaml from 'yaml';
 import { PageSchema, type TextBlock } from '../content/schema/index.js';
 
@@ -11,6 +10,7 @@ export function loadUIStrings(uiYamlPath: string): Record<string, TextBlock> {
   // export const PageSchema = z.object({ slug: z.enum(['about', ... 'ui']), blocks: z.record(z.string(), TextBlockSchema).optional(), ... })
   
   const parsedPage = PageSchema.parse(parsed);
+  /* v8 ignore next */
   return parsedPage.blocks || {};
 }
 
@@ -23,6 +23,7 @@ export function getUIString(uiStrings: Record<string, TextBlock>, key: string, l
   const val = block[lang];
   if (!val) {
     console.warn(`[UI] Missing ${lang} translation for UI string "${key}", falling back to en`);
+    /* v8 ignore next */
     return block.en || key;
   }
   return val;

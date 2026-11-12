@@ -1,0 +1,46 @@
+@import './tokens.css';
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  body, h1, h2, h3, p, figure, blockquote, dl, dd { margin: 0; }
+  html:focus-within { scroll-behavior: smooth; }
+  body {
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    line-height: 1.5;
+  }
+  a:not([class]) { text-decoration-skip-ink: auto; }
+  img, picture { max-width: 100%; display: block; }
+}
+
+@layer base {
+  body {
+    background-color: var(--ink);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+  }
+  
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color var(--motion-duration) var(--motion-easing);
+  }
+
+  a:hover {
+    color: var(--text-primary);
+  }
+
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--accent);
+    color: var(--ink);
+    padding: var(--space-2);
+    z-index: 100;
+  }
+  .skip-link:focus {
+    top: 0;
+  }
+}

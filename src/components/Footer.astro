@@ -1,0 +1,16 @@
+---
+import type { Locale } from '../i18n/RouteMap.js';
+import { localizedPath } from '../i18n/LocalizedPath.js';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const year = new Date().getFullYear();
+const legalHref = localizedPath('legal', lang);
+const legalText = lang === 'en' ? 'Legal Notice' : 'Mentions Légales';
+---
+<footer style="padding: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm);">
+  <p>© {year} Alexander Usoltsev, all rights reserved. <a href={legalHref}>{legalText}</a></p>
+</footer>
