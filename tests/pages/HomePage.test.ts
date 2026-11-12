@@ -102,6 +102,18 @@ describe('HomePage', () => {
       expect(scriptBytes(html).inlineBytes).toBe(0);
     });
 
+    it('keeps the manifest inside its script element even when a fragment holds </script>', async () => {
+      const fragment = 'Avant </script><script>alert(1)</script> & après <!-- fin';
+      const world = { ...sampleManifest, works: sampleManifest.works.map((w, i) => (i === 0 ? { ...w, fragment } : w)) };
+      const html = await container.renderToString(HomePage, {
+        props: { lang: 'fr', territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText('fr'))), world },
+        request: new Request('https://www.iknowyoucanseeme.xyz/fr/'),
+      });
+      const json = /<script type="application\/json" id="drift-manifest">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+      expect(JSON.parse(json).works[0].fragment).toBe(fragment);
+      expect(html).not.toContain('<script>alert(1)');
+    });
+
     it('renders no world without a manifest', async () => {
       const html = await render('en');
       expect(html).not.toContain('data-drift');

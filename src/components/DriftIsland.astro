@@ -14,6 +14,7 @@
 import type { Locale } from '../i18n/RouteMap.js';
 import type { WorldManifest } from '../world/core/WorldManifest.js';
 import { uiText } from '../i18n/UiCatalog.js';
+import { inlineJson } from '../domain/InlineJson.js';
 
 interface Props {
   lang: Locale;
@@ -41,7 +42,7 @@ const ui = uiText(lang);
     <button type="button" data-focus-close>{ui.t('dialog_close')}</button>
   </dialog>
 </section>
-<script type="application/json" id="drift-manifest" set:html={JSON.stringify(manifest)} />
+<script type="application/json" id="drift-manifest" set:html={inlineJson(manifest)} />
 
 <script>
   import { bootDrift } from '../world/island/DriftBoot.js';
