@@ -27,12 +27,27 @@ blocks:
     expect(getUIString(ui, 'welcome', 'fr')).toBe('Bienvenue');
   });
 
-  it('getUIString falls back to en and warns', () => {
+  it('handles empty blocks gracefully', () => {
+    const yamlContent = `
+slug: ui
+`;
+    vi.mocked(fs.readFileSync).mockReturnValue(yamlContent);
+    const ui = loadUIStrings('dummy/path.yaml');
+    expect(ui).toEqual({});
+  });
+
+  it('getUIString falls back to en and warns, or to key if en missing', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const ui = {
       only_en: {
         status: 'draft' as const,
         en: 'Only English',
+        fr: '',
+        sources: []
+      },
+      no_lang: {
+        status: 'draft' as const,
+        en: '',
         fr: '',
         sources: []
       }
@@ -43,6 +58,8 @@ blocks:
     
     expect(getUIString(ui, 'missing_key', 'en')).toBe('missing_key');
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('Missing UI string'));
+
+    expect(getUIString(ui, 'no_lang', 'fr')).toBe('no_lang');
     
     warn.mockRestore();
   });

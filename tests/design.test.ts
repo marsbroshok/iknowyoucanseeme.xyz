@@ -20,7 +20,7 @@ describe('AccentColor', () => {
           const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
           const adjusted = accentFor(hex);
           const ratio = contrast(adjusted, '#0b1030');
-          expect(ratio).toBeGreaterThanOrEqual(4.45); // slight float tolerance
+          expect(ratio).toBeGreaterThanOrEqual(4.5);
         }
       )
     );
