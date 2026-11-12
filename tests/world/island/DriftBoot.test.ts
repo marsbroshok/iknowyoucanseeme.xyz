@@ -520,6 +520,19 @@ describe('bootDrift — exhibition mode (?kiosk=1, FR5)', () => {
     expect(world.mounts).toHaveLength(2);
   });
 
+  it('"Drift" after "Wake up" brings the world back without remembering the mode choice', async () => {
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    $('[data-drift-wake]').click();
+    expect($('[data-drift-start]').hidden).toBe(false);
+    $('[data-drift-start]').click();
+    await flush();
+    expect($('[data-drift]').hidden).toBe(false);
+    expect(localStorage.getItem(ModePreference.KEY)).toBeNull();
+    expect(world.mounts).toHaveLength(2);
+  });
+
   it('ignores ?w= on open and when resetting from "Wake up" back to the start of the path', async () => {
     vi.useFakeTimers();
     history.replaceState(null, '', '/en/?kiosk=1&w=arrivee');

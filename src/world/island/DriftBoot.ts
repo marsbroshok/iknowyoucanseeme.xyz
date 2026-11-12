@@ -78,7 +78,7 @@ export interface DriftBootHandle {
  * whatever was stored; a {@link KioskMode} takes the links out of the page,
  * hands the first tap to the sound as its gesture, drifts on by itself and
  * resets after 90 s without input (back into the world from the awake page
- * too); "Wake up" is not remembered.
+ * too); neither "Wake up" nor "Drift" is remembered.
  *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
@@ -178,7 +178,7 @@ export function bootDrift(
   });
   starts.forEach((b) =>
     b.addEventListener('click', () => {
-      preference.write('world');
+      if (!kiosk) preference.write('world');
       enter(true);
     }),
   );
