@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { techniqueHints, TECHNIQUE_KEYS } from '../../../src/world/manifest/TechniqueHints.js';
+import { lensTechniques, techniqueHints, TECHNIQUE_KEYS } from '../../../src/world/manifest/TechniqueHints.js';
 
 describe('techniqueHints', () => {
   it('reads the artist\'s own technique words, in English and French', () => {
@@ -24,6 +24,12 @@ describe('techniqueHints', () => {
     expect(techniqueHints([])).toEqual([]);
   });
 
+  it('reads "ND" only in capitals: a standalone "nd" or "Nd" names nothing', () => {
+    expect(techniqueHints(['2nd print', 'the nd of it', 'Nd: magnet'])).toEqual([]);
+    expect(techniqueHints(['selective ND, handheld'])).toEqual(['filter']);
+    expect(techniqueHints(['Neutral Density'])).toEqual(['filter']);
+  });
+
   it('accepts declared technique keys as they are', () => {
     expect(techniqueHints(['multiple-exposure'])).toEqual(['multiple-exposure']);
   });
@@ -34,6 +40,28 @@ describe('techniqueHints', () => {
         const keys = techniqueHints(texts);
         expect(new Set(keys).size).toBe(keys.length);
         expect(keys).toEqual(TECHNIQUE_KEYS.filter((k) => keys.includes(k)));
+      }),
+    );
+  });
+});
+
+describe('lensTechniques', () => {
+  it('uses only the declared techniques when the work declares any: a title word does not override them', () => {
+    expect(lensTechniques(['colour filter'], ['Les Reflets I', 'reflets dans l\'eau'])).toEqual(['filter']);
+    expect(lensTechniques(['cyanotype'], ['Éclipse au miroir'])).toEqual([]);
+  });
+
+  it('falls back to the title and caption words when nothing is declared', () => {
+    expect(lensTechniques([], ['Les Reflets I'])).toEqual(['mirror']);
+    expect(lensTechniques([], [])).toEqual([]);
+    expect(lensTechniques(['', '  '], ['Les Reflets I'])).toEqual(['mirror']);
+  });
+
+  it('property: with declared techniques, the inferred texts never change the result', () => {
+    fc.assert(
+      fc.property(fc.array(fc.string().filter((t) => t.trim() !== ''), { minLength: 1 }), fc.array(fc.string()), fc.array(fc.string()), (declared, a, b) => {
+        expect(lensTechniques(declared, a)).toEqual(lensTechniques(declared, b));
+        expect(lensTechniques(declared, a)).toEqual(techniqueHints(declared));
       }),
     );
   });

@@ -36,11 +36,16 @@ export interface ManifestName {
   title: string;
 }
 
+/** A territory in the page language, with its statement split into sentences (fragments, FR3). */
+export interface ManifestTerritory extends ManifestName {
+  sentences: string[];
+}
+
 /** Everything the world reads from the page (`<script type="application/json" id="drift-manifest">`). */
 export interface WorldManifest {
   lang: 'en' | 'fr';
   /** Territories in layout order (the first holds the start). */
-  territories: ManifestName[];
+  territories: ManifestTerritory[];
   zones: ManifestName[];
   works: ManifestWork[];
 }
@@ -59,7 +64,7 @@ type Json = Record<string, unknown>;
 export function parseManifest(input: unknown): WorldManifest {
   const m = object(input, 'manifest');
   if (m.lang !== 'en' && m.lang !== 'fr') throw new Error('[manifest] lang must be "en" or "fr"');
-  const territories = array(m.territories, 'territories').map((t, i) => name(t, `territories[${i}]`));
+  const territories = array(m.territories, 'territories').map((t, i) => territory(t, `territories[${i}]`));
   const zones = array(m.zones, 'zones').map((z, i) => name(z, `zones[${i}]`));
   const known = new Set(territories.map((t) => t.slug));
   const works = array(m.works, 'works').map((w, i) => work(w, `works[${i}]`, known));
@@ -97,6 +102,11 @@ function picture(input: unknown, path: string): ManifestImage {
   const ok = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n > 0;
   if (!ok(p.width) || !ok(p.height)) throw new Error(`[manifest] ${path} needs a positive width and height`);
   return { url: link(p.url, `${path}.url`), width: p.width as number, height: p.height as number };
+}
+
+function territory(input: unknown, path: string): ManifestTerritory {
+  const t = object(input, path);
+  return { ...name(t, path), sentences: array(t.sentences, `${path}.sentences`).map((s, i) => text(s, `${path}.sentences[${i}]`)) };
 }
 
 function name(input: unknown, path: string): ManifestName {

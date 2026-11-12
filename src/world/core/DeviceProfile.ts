@@ -2,7 +2,11 @@
 export interface DeviceCapabilities {
   /** A WebGL2 context can be created. */
   webgl2: boolean;
-  /** `prefers-reduced-motion: reduce` matches. */
+  /**
+   * `prefers-reduced-motion: reduce` matches. Probed, but deliberately not
+   * used for routing (docs/adr/0009): the always-visible "Wake up" control
+   * is the opt-out.
+   */
   reducedMotion: boolean;
   /** `navigator.connection.saveData` is on. */
   saveData: boolean;
@@ -24,7 +28,7 @@ export type WorldMode = 'world' | 'awake';
 export type ModeOverride = WorldMode | null;
 
 /** Why a device gets the awake layer. */
-export type AwakeReason = 'no-webgl2' | 'reduced-motion' | 'save-data' | 'low-memory' | 'few-cores' | 'override';
+export type AwakeReason = 'no-webgl2' | 'save-data' | 'low-memory' | 'few-cores' | 'override';
 
 /** The routing decision for one visit. */
 export interface DeviceDecision {
@@ -47,9 +51,11 @@ const HIGH_CORES = 8;
 
 /**
  * Capability routing of the drift world (FR1, "respect the visitor's
- * device"): the world needs WebGL2, no reduced-motion preference, Save-Data
- * off, and (when the browser exposes them) at least 4 GB of memory and 4
- * cores. Values the browser hides (Safari, Firefox) count as sufficient.
+ * device"): the world needs WebGL2, Save-Data off, and (when the browser
+ * exposes them) at least 4 GB of memory and 4 cores. Values the browser hides
+ * (Safari, Firefox) count as sufficient. `prefers-reduced-motion` does not
+ * route (artist decision, docs/adr/0009): the world is the artwork and the
+ * always-visible "Wake up" control is the opt-out.
  *
  * The visitor's toggle wins over the automatic choice, except that the world
  * is never forced onto a device without WebGL2. A device that only gets the
@@ -83,7 +89,6 @@ export class DeviceProfile {
   private static reasonsAgainst(caps: DeviceCapabilities): AwakeReason[] {
     const reasons: AwakeReason[] = [];
     if (!caps.webgl2) reasons.push('no-webgl2');
-    if (caps.reducedMotion) reasons.push('reduced-motion');
     if (caps.saveData) reasons.push('save-data');
     if (DeviceProfile.below(caps.deviceMemory, MIN_MEMORY_GB)) reasons.push('low-memory');
     if (DeviceProfile.below(caps.hardwareConcurrency, MIN_CORES)) reasons.push('few-cores');

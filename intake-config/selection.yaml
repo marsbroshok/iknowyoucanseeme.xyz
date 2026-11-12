@@ -67,12 +67,16 @@ selection:
     title_fr: Les Reflets I
     territory: dreamland
     zone: lens
+    techniques:
+      - colour filter
   - src: media/posts/18064849663947864.jpg
     keep: true
     slug: les-reflets-ii
     title_fr: Les Reflets II
     territory: dreamland
     zone: lens
+    techniques:
+      - colour filter
   - src: media/posts/18373057408193453.jpg
     keep: true
     slug: la-frontiere-s-estompe
@@ -85,6 +89,8 @@ selection:
     title_fr: Les Reflets III
     territory: dreamland
     zone: lens
+    techniques:
+      - colour filter
   - src: media/posts/18122048333069684.jpg
     keep: true
     slug: un-etranger

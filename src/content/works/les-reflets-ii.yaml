@@ -5,7 +5,8 @@ territory: dreamland
 zone: lens
 year: 2025
 medium: photo
-techniques: []
+techniques:
+  - colour filter
 availability: unknown
 images:
   - src: 0.jpg

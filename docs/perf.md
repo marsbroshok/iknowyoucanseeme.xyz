@@ -8,15 +8,22 @@ Budgets (`conductor/product-guidelines.md`, track `drift-world_20261111`):
 
 | Part | Gzipped | Budget | When it loads |
 |---|---|---|---|
-| Boot module (home pages only) | 3.0 KB | 8 KB | with the page (module script) |
-| World chunk (Three.js + scene code + lens) | 129.7 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
+| Boot module (home pages only) | 4.0 KB | 8 KB | with the page (module script) |
+| World chunk (Three.js + scene code + lens + threshold, gaze, fragments) | 132.7 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
 
 Re-measured 2026-11-12 after track `lens_20261111`: the lens (six shaders,
 its pure logic and input) adds about 5.5 KB gzipped to the world chunk and
 nothing to the boot module (before: 3.7 KB / 124.2 KB).
 
+Re-measured 2026-11-12 after track `threshold-gaze_20261111`: the threshold
+(state machine, overlay, visit memory) adds about 1 KB to the boot module;
+the leak shader, gaze and fragments add about 3 KB to the world chunk.
+Territory pages carry one small inline script for "Fragments found" (within
+the 2 KB inline budget of `DistGuard`).
+
 Other pages load no JavaScript file. Devices that get the awake layer
-(reduced motion, Save-Data, no WebGL2, < 4 GB or < 4 cores) never request
+(Save-Data, no WebGL2, < 4 GB or < 4 cores; reduced motion does not route,
+ADR 0009) never request
 the world chunk (`tests/e2e/drift.spec.ts`).
 
 ## Frame rate (measured 2026-11-12, `npm run perf:trace`)

@@ -33,6 +33,7 @@ import { canonicalUrl } from '../../i18n/Alternates.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
 import { getImage } from 'astro:assets';
 import { buildWorldManifest } from '../../world/manifest/WorldManifestBuilder.js';
+import { territoryFragmentIds } from '../../world/manifest/TerritoryFragments.js';
 import { assetImageResolver } from '../../world/manifest/AssetImageResolver.js';
 
 export async function getStaticPaths() {
@@ -115,7 +116,11 @@ function territoryFor(slug: string) {
   <HomePage lang={lang} territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))} world={world} />
 )}
 {page.kind === 'territory' && (
-  <TerritoryPage lang={lang} territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)} />
+  <TerritoryPage
+    lang={lang}
+    territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)}
+    fragmentIds={territoryFragmentIds(territoryFor(page.slug), works, ui)}
+  />
 )}
 {page.kind === 'work' && <WorkPage lang={lang} {...workPageProps(page.slug)} />}
 {page.kind === 'works' && <WorksIndexPage lang={lang} sections={buildIndexSections(territories, works, ui)} />}

@@ -10,6 +10,8 @@ export interface SelectionEntry {
   zone?: string;
   people?: { consent: 'confirmed' };
   titlePlaceholder?: boolean;
+  /** Techniques the artist declares for the work (e.g. `colour filter`); they override title/caption hints for the lens. */
+  techniques?: string[];
 }
 
 /**

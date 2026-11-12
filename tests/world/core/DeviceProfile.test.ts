@@ -19,7 +19,6 @@ describe('DeviceProfile.decide', () => {
 
   it.each([
     [{ webgl2: false }, 'no-webgl2'],
-    [{ reducedMotion: true }, 'reduced-motion'],
     [{ saveData: true }, 'save-data'],
     [{ deviceMemory: 2 }, 'low-memory'],
     [{ hardwareConcurrency: 2 }, 'few-cores'],
@@ -35,7 +34,11 @@ describe('DeviceProfile.decide', () => {
       { webgl2: false, reducedMotion: true, saveData: true, deviceMemory: 1, hardwareConcurrency: 1, coarsePointer: true },
       null,
     );
-    expect(decision.reasons).toEqual(['no-webgl2', 'reduced-motion', 'save-data', 'low-memory', 'few-cores']);
+    expect(decision.reasons).toEqual(['no-webgl2', 'save-data', 'low-memory', 'few-cores']);
+  });
+
+  it('gives a capable device with reduced motion the world (ADR 0009: Wake up is the opt-out)', () => {
+    expect(DeviceProfile.decide({ ...laptop, reducedMotion: true }, null)).toEqual({ mode: 'world', automatic: 'world', tier: 'high', reasons: [] });
   });
 
   it('accepts exactly 4 GB and 4 cores (the thresholds are inclusive)', () => {
@@ -59,7 +62,7 @@ describe('DeviceProfile.decide', () => {
   });
 
   it('honours the "Drift" override on a device that would get the awake layer automatically', () => {
-    const decision = DeviceProfile.decide({ ...laptop, reducedMotion: true }, 'world');
+    const decision = DeviceProfile.decide({ ...laptop, saveData: true }, 'world');
     expect(decision).toEqual({ mode: 'world', automatic: 'awake', tier: 'low', reasons: [] });
   });
 
@@ -97,11 +100,18 @@ describe('DeviceProfile.decide', () => {
     );
   });
 
-  it('property: reduced motion, Save-Data, < 4 GB or < 4 cores never get the world automatically', () => {
+  it('property: reduced motion never changes the decision, whatever the device and override', () => {
+    fc.assert(
+      fc.property(capabilities, override, (caps, o) => {
+        expect(DeviceProfile.decide({ ...caps, reducedMotion: true }, o)).toEqual(DeviceProfile.decide({ ...caps, reducedMotion: false }, o));
+      }),
+    );
+  });
+
+  it('property: Save-Data, < 4 GB or < 4 cores never get the world automatically', () => {
     fc.assert(
       fc.property(capabilities, (caps) => {
         const weak =
-          caps.reducedMotion ||
           caps.saveData ||
           (caps.deviceMemory !== undefined && caps.deviceMemory < 4) ||
           (caps.hardwareConcurrency !== undefined && caps.hardwareConcurrency < 4);

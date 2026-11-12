@@ -24,6 +24,8 @@ interface FrameStats {
 /** Drifts and measures frame times with requestAnimationFrame. */
 async function measure(page: Page): Promise<FrameStats> {
   await page.goto(`${KEYED}/en/`);
+  // First visit: enter through the threshold (the world holds still while it is up).
+  await page.locator('[data-threshold-enter]').click({ timeout: 30_000 });
   await page.waitForFunction(() => ((window as unknown as { __driftDebug?: { frames: number } }).__driftDebug?.frames ?? 0) > 30, null, { timeout: 30_000 });
   const run = page.evaluate((seconds) => {
     return new Promise<FrameStats>((resolve) => {

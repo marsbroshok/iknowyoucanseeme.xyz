@@ -9,8 +9,8 @@ import ts from 'typescript';
  * is transpiled on the fly and served through `page.route`, so it never
  * enters the site build. Each lens is checked by pixel statistics that hold
  * on any GPU and in SwiftShader (the lens region changes in the way the
- * technique would, everything outside stays untouched, the texture is never
- * modified) and by a tolerance-based screenshot stored in tests/visual/.
+ * technique would, everything outside stays untouched, and a redraw without
+ * lens after any lens is identical to the first one) and by a tolerance-based screenshot stored in tests/visual/.
  */
 
 const SIZE = 256;
@@ -63,7 +63,6 @@ async function openHarness(page: Page): Promise<void> {
 const draw = (page: Page, lens: Lens | null, tier: Tier = 'high') =>
   page.evaluate(([l, t]) => (window as unknown as { __lens: { draw(l: unknown, t: string): number[] } }).__lens.draw(l, t), [lens, tier] as const);
 const shaderErrors = (page: Page) => page.evaluate(() => (window as unknown as { __lens: { errors: string[] } }).__lens.errors);
-const checksum = (page: Page) => page.evaluate(() => (window as unknown as { __lens: { textureChecksum(): number } }).__lens.textureChecksum());
 
 /** Pixel indices (bottom row first) whose texture point satisfies `keep`. */
 function region(keep: (u: number, v: number) => boolean): number[] {
@@ -214,11 +213,11 @@ test.describe('Lens shaders (fixed test texture)', () => {
     expect(await shaderErrors(page)).toEqual([]);
   });
 
-  test('the lens never changes the stored image (FR4)', async () => {
-    const before = await checksum(page);
-    for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) await draw(page, { mode });
-    expect(await checksum(page)).toBe(before);
-    expect(maxDiff(await draw(page, null), base, region(() => true))).toBe(0);
+  test('the lens never changes the stored image (FR4): after every lens, a redraw without lens equals the first one', async () => {
+    for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) {
+      expect(maxDiff(await draw(page, { mode }), base, region(() => true)), mode).toBeGreaterThan(0);
+      expect(maxDiff(await draw(page, null), base, region(() => true)), mode).toBe(0);
+    }
   });
 
   for (const mode of ['gel', 'mirror', 'exposure', 'fracture', 'flare', 'icm'] as const) {

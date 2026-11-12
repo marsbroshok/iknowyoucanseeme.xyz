@@ -1,4 +1,4 @@
-import { Raycaster, Vector2, type Texture } from 'three';
+import { Raycaster, Vector2, Vector3, type Texture } from 'three';
 import { DriftSession } from '../core/DriftSession.js';
 import { DeepLink } from '../core/DeepLink.js';
 import { InputAccumulator } from '../core/InputAccumulator.js';
@@ -18,8 +18,16 @@ import { KeyboardInput } from '../island/input/KeyboardInput.js';
 import { LensInput } from '../island/input/LensInput.js';
 import { LensAnnouncer } from '../island/LensAnnouncer.js';
 import { LensDirector } from '../core/LensDirector.js';
-import { LensCrossfade, type LensBlend } from '../core/LensCrossfade.js';
+import type { LensBlend } from '../core/LensCrossfade.js';
 import { LensUniforms, type LensAim } from '../core/LensUniforms.js';
+import { LensSession } from '../core/LensSession.js';
+import { GazeDirector, type GazeTurn } from '../core/GazeDirector.js';
+import { FragmentCatalog } from '../core/FragmentCatalog.js';
+import { FragmentProgress } from '../core/FragmentProgress.js';
+import { FragmentSurfacer } from '../core/FragmentSurfacer.js';
+import { ThresholdPalette } from '../core/ThresholdPalette.js';
+import { WorldWhisper } from '../island/WorldWhisper.js';
+import { ThresholdLeak } from './ThresholdLeak.js';
 import { modeIndex, type LensMode } from '../core/LensMode.js';
 import type { MountOptions, WorldHandle } from '../island/DriftBoot.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
@@ -35,6 +43,9 @@ export interface DriftDebugState {
   nearest: string | null;
   loaded: Record<string, string>;
   lens: { slug: string | null; mode: LensMode | null; strength: number; unaltered: boolean; blend: LensBlend | null; modes: readonly LensMode[] };
+  threshold: { holding: boolean; visible: boolean; leak: boolean };
+  gaze: { turns: GazeTurn[]; lineOpacity: number };
+  fragment: { id: string; opacity: number } | null;
 }
 
 /**
@@ -66,7 +77,7 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
  * @throws Error when the page lacks a part of the layer or WebGL2 fails.
  */
 export async function mountWorld(root: HTMLElement, options: MountOptions): Promise<WorldHandle> {
-  const { manifest, tier, startSlug, win } = options;
+  const { manifest, tier, startSlug, win, threshold } = options;
   const canvas = part<HTMLCanvasElement>(root, '[data-drift-canvas]');
   const stage = new WorldStage(canvas, tier, win.devicePixelRatio);
   const session = new DriftSession(manifest, tier, startSlug);
@@ -121,18 +132,31 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     manifest.works.map((w) => ({ slug: w.slug, territory: w.territory, zone: w.zone, techniques: w.techniques, palette: w.palette })),
     tier,
   );
-  const lens = new LensUniforms();
-  const fade = new LensCrossfade(director.modes[0]);
+  const lens = new LensSession(director);
   const announcer = new LensAnnouncer(part<HTMLElement>(root, '[data-drift-lens]'));
-  let lensSlug: string | null = null;
   const lensInput = new LensInput(canvas, root, () => {
-    if (!lensSlug) return;
-    const mode = director.cycle(lensSlug);
-    fade.to(mode);
-    announcer.announce(mode);
+    const mode = lens.cycle();
+    if (mode) announcer.announce(mode);
   });
 
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
+
+  // The threshold's breathing leak, the gaze and the fragments (decisions in src/world/core).
+  const leakCanvas = part<HTMLCanvasElement>(root, '[data-threshold-leak]');
+  let leak: ThresholdLeak | null = threshold.visible ? new ThresholdLeak(leakCanvas, ThresholdPalette.pick(manifest.works, Math.random), win) : null;
+  const gaze = new GazeDirector(webStorage(win, 'sessionStorage'), Math.random);
+  const fragments = new FragmentSurfacer(
+    new FragmentCatalog(session.stops, manifest.works, manifest.territories),
+    new FragmentProgress(webStorage(win, 'localStorage')),
+  );
+  const whisper = new WorldWhisper(root);
+  const above = new Vector3();
+  /** Screen position (NDC) just above a work, or `null` when it is behind the camera. */
+  const screenAbove = (slug: string): { x: number; y: number } | null => {
+    const mesh = (meshes.get(slug) as ApparitionMesh).mesh;
+    above.set(mesh.position.x, mesh.position.y + mesh.scale.y * 0.5 + 0.25, mesh.position.z).project(stage.camera);
+    return above.z < 1 ? { x: above.x, y: above.y } : null;
+  };
 
   const raycaster = new Raycaster();
   const pointer = new Vector2();
@@ -162,43 +186,36 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     keys.poll(acc, dt);
     tilt.poll(acc, dt);
     const input = acc.drain();
-    // The world holds still while a work is open in the focus dialog.
-    const f = session.frame(overlay.isOpen ? { thrust: 0, turn: 0 } : input, dt);
+    // The world holds still while the threshold is up or a work is open in the focus dialog.
+    const held = threshold.holding || overlay.isOpen;
+    const f = session.frame(held ? { thrust: 0, turn: 0 } : input, dt);
     frames++;
     stage.setPose(f.state);
     stage.setSkyColor(f.sky);
+    if (leak && !threshold.visible) {
+      leak.dispose();
+      leak = null;
+    }
+    const li = lensInput.state();
+    const hovered = held ? null : lensPointer(li.ndc);
+    const g = gaze.frame({ hovered, drifting: !held }, dt);
+    const turns = new Map(g.turns.map((t) => [t.slug, t]));
     for (const w of f.works) {
       const mesh = meshes.get(w.slug) as ApparitionMesh;
       mesh.setOpacity(w.opacity);
-      if (mesh.mesh.visible) mesh.face(f.state.x, f.state.z);
+      if (mesh.mesh.visible) mesh.face(f.state.x, f.state.z, turns.get(w.slug) ?? null);
     }
-    const li = lensInput.state();
-    const aim = overlay.isOpen ? null : LensUniforms.aimFrom(lensPointer(li.ndc), li.keyboard, f.facing);
-    const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt);
-    if (lf.slug !== lensSlug) {
-      if (lensSlug) meshes.get(lensSlug)?.setLens(null);
-      lensSlug = lf.slug;
-      if (lensSlug) {
-        fade.jump(director.mode(lensSlug));
-        announcer.announce(fade.target);
-      } else announcer.clear();
-    }
-    fade.advance(dt);
-    const blend = fade.blend();
-    if (lensSlug) {
-      const partner = director.partnerFor(lensSlug, (s) => meshes.get(s)?.texture != null);
-      (meshes.get(lensSlug) as ApparitionMesh).setLens({
-        strength: lf.strength,
-        center: lf.center,
-        blur: lf.blur,
-        modeA: modeIndex(blend.a),
-        modeB: modeIndex(blend.b),
-        mix: blend.mix,
-        gel: director.gel(lensSlug),
-        segments: director.segments(lensSlug),
-        seed: director.seed(lensSlug),
-        partner: partner ? (meshes.get(partner)?.texture ?? null) : null,
-      });
+    whisper.gaze(g.lineOpacity, g.lineStarted);
+    const fr = fragments.frame({ facing: f.facing, settled: held ? null : f.settled }, dt);
+    whisper.fragment(fr.current && { text: fr.current.text, opacity: fr.current.opacity, at: screenAbove(fr.current.slug) }, fr.started !== null);
+    const aim = held ? null : LensUniforms.aimFrom(hovered, li.keyboard, f.facing);
+    const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt, (slug) => meshes.get(slug)?.texture != null);
+    if (lf.released) meshes.get(lf.released)?.setLens(null);
+    if (lf.announce === 'clear') announcer.clear();
+    else if (lf.announce) announcer.announce(lf.announce);
+    if (lf.slug && lf.settings) {
+      const { modeA, modeB, partner, ...rest } = lf.settings;
+      (meshes.get(lf.slug) as ApparitionMesh).setLens({ ...rest, modeA: modeIndex(modeA), modeB: modeIndex(modeB), partner: partner ? (meshes.get(partner)?.texture ?? null) : null });
     }
     metrics.frame(f.nearest, f.nearestDistance, dt);
     if (f.plan) streamer.update(f.plan);
@@ -215,13 +232,19 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         facing: f.facing,
         nearest: f.nearest,
         loaded: streamer.loaded,
-        lens: { slug: lensSlug, mode: lensSlug ? fade.target : null, strength: lf.strength, unaltered: li.unaltered, blend: lensSlug ? blend : null, modes: director.modes },
+        lens: { slug: lf.slug, mode: lf.mode, strength: lf.strength, unaltered: li.unaltered, blend: lf.blend, modes: director.modes },
+        threshold: { holding: threshold.holding, visible: threshold.visible, leak: leak !== null },
+        gaze: { turns: g.turns, lineOpacity: g.lineOpacity },
+        fragment: fr.current && { id: fr.current.id, opacity: fr.current.opacity },
       };
     }
   });
 
   return {
     unmount() {
+      leak?.dispose();
+      whisper.fragment(null, false);
+      whisper.gaze(0, false);
       metrics.finish();
       stage.dispose();
       streamer.dispose();
@@ -236,4 +259,21 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       overlay.detach();
     },
   };
+}
+
+/**
+ * `localStorage` or `sessionStorage`, or `null` when the browser blocks it
+ * (fragment progress and the gaze line then last for the page only).
+ *
+ * @param win - The window.
+ * @param kind - Which storage.
+ * @returns Storage or `null`.
+ */
+function webStorage(win: Window, kind: 'localStorage' | 'sessionStorage'): Storage | null {
+  try {
+    return win[kind];
+  } catch (error) {
+    console.warn(`[drift] ${kind} is blocked; fragments read and the gaze line are kept for this page only.`, error);
+    return null;
+  }
 }
