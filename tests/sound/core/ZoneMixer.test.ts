@@ -76,7 +76,7 @@ describe('ZoneMixer', () => {
 
   it('ramps monotonically towards a fixed target and reaches it (property)', () => {
     fc.assert(
-      fc.property(mixArb, mixArb, dtArb, (start, target, dt) => {
+      fc.property(mixArb, mixArb, fc.double({ min: 0.01, max: 0.25, noNaN: true }), (start, target, dt) => {
         const m = new ZoneMixer(start);
         let previous = m.current;
         const frames = Math.ceil(m.rampSeconds / dt) + 1;
