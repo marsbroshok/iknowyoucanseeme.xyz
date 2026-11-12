@@ -21,7 +21,7 @@ Track: `sound_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workfl
 - [x] Task: Wire to drift position + `entered`; mute toggle UI (persisted); visibility suspend (d110429; `SoundDirector`, `SoundPreference`, `SoundControls`, e2e `sound.spec.ts`)
 - [x] Task: Bundle test: `tone` absent from initial chunks (9e2b8da; boot 5.4 KB gz, world 133.2 KB gz, sound 64.3 KB gz; boundary test)
 - [x] Task: ADR "Tone.js behind SoundEngine" (39be02a; ADR 0011, README, tech stack)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) — gates at a6ff12e: `npm run check` exit 0 and `npm run test:e2e` exit 0 (206 passed) with `CI=true` and with `env -u CI`
 
 ## Inherited Findings
 
