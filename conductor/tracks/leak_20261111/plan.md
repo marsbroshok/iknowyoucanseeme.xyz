@@ -7,7 +7,7 @@ Track: `leak_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 - [x] Task: `LeakMeter` (accumulate, curve, decay) — Red: property tests — Green `a521c26`
 - [x] Task: `LeakStyle` mapping (level + palette → CSS vars, contrast-capped) — Red: property test contrast ≥ 4.5 — Green `5950133`
 - [x] Task: `KioskState` idle machine — Red: fake-clock tests — Green `2e196d1`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `e8585be`
 
 ## Phase 2: Awake staining
 
@@ -15,14 +15,14 @@ Track: `leak_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 - [x] Task: Stray apparition (margin-only placement, reduced-motion off) `2d04cab`
 - [x] Task: "Clear the leak" control on legal page `ebb967c`
 - [x] Task: e2e at levels 0/0.5/1 with axe + screenshots `7b47b5e`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `e8585be`
 
 ## Phase 3: Specimens & kiosk
 
 - [x] Task: Specimen presentation in world + awake specimen grid + labels (sketch/esquisse) `7dc1aa5`, `a24df33`
 - [x] Task: Kiosk mode (`?kiosk=1`): auto-drift, QR instead of form, idle reset, cursor hide `56d58bc`
 - [x] Task: Docs: `docs/exhibition-mode.md` for gallery setup `22a050c`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `e8585be`
 
 ## Inherited Findings
 
