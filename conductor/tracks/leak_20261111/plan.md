@@ -19,9 +19,9 @@ Track: `leak_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 
 ## Phase 3: Specimens & kiosk
 
-- [ ] Task: Specimen presentation in world + awake specimen grid + labels (sketch/esquisse)
-- [ ] Task: Kiosk mode (`?kiosk=1`): auto-drift, QR instead of form, idle reset, cursor hide
-- [ ] Task: Docs: `docs/exhibition-mode.md` for gallery setup
+- [x] Task: Specimen presentation in world + awake specimen grid + labels (sketch/esquisse) `7dc1aa5`, `a24df33`
+- [x] Task: Kiosk mode (`?kiosk=1`): auto-drift, QR instead of form, idle reset, cursor hide `56d58bc`
+- [x] Task: Docs: `docs/exhibition-mode.md` for gallery setup `22a050c`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
@@ -32,7 +32,7 @@ From `sound_20261111` and earlier reviews (do first):
 - [x] Task: `src/world/island/DriftBoot.ts` (~L130) reads `soundOn` once in `enter()`; muting while the threshold is up does not let a returning visitor's short threshold fade by itself. Re-evaluate on mute changes (covered logic + test). `021d0de`
 - [x] Task: product docs: state explicitly that with sound on by default, QR/deep-link visitors click once on the short threshold (threshold FR1); add to README / product docs only as a documented behaviour (do not change product.md's vision). `292ba4d`
 - Note: crossfade tests use seeded randomness and `toBeCloseTo(…, 3)` RMS checks; if they flake in CI, widen with a justified tolerance, never remove.
-- [ ] Task: **flaky e2e hunt.** One e2e test failed once under `CI=true` in the repo root after merges (205/206) and passed on rerun; the merge log did not name it (suspects: sound crossfade/timing, threshold timing). Run `CI=true npm run test:e2e --repeat-each=3` (or Playwright `--repeat-each`) on the full suite, identify any flaky test, fix the root cause (wait for state, not time; deterministic seeds), never add retries or skips. Record findings in the plan.
+- [x] Task: **flaky e2e hunt.** One e2e test failed once under `CI=true` in the repo root after merges (205/206) and passed on rerun; the merge log did not name it (suspects: sound crossfade/timing, threshold timing). Run `CI=true npm run test:e2e --repeat-each=3` (or Playwright `--repeat-each`) on the full suite, identify any flaky test, fix the root cause (wait for state, not time; deterministic seeds), never add retries or skips. Record findings in the plan. `e1b7e12` — see Flaky-test findings below.
 
 ## Assumptions ledger
 
@@ -41,3 +41,12 @@ From `sound_20261111` and earlier reviews (do first):
 - Kiosk auto-drift: after 10 s without input, then one work every 12 s (`2e196d1`).
 - The stray apparition is the right-hand swan of *Les Reflets II* (the picture has swans, not crows; its caption speaks of dreaming birds) (`2d04cab`).
 - The leak script trusts the cap the world stored (computed with `LeakStyle.cap`), clamped to 0.3; `DistGuard` counts only the exact leak script on its own 1.5 KB budget (`72fe86f`).
+- Specimen place from the series (slug prefix `venise-portrait` → Venice / Venise); tags are whole `ui.yaml` templates (`a24df33`).
+- Kiosk "no external links" applied as "no links at all" (the QR code is the way to the work page); after an idle reset the start view stays 10 s before drifting on (`56d58bc`).
+
+## Flaky-test findings
+
+- Run 1 (`CI=true npx playwright test --repeat-each=3` at `292ba4d`, before this track's features): 618 passed, 0 failed, 0 flaky (7.7 min). The 205/206 failure from the merge log did not reproduce.
+- Review of every fixed delay in `tests/e2e/`: all but one guard negative checks (nothing happens during the delay: no AudioContext, pose unchanged, no gaze turn before 2 s). The one positive check after a fixed delay was `drift.spec.ts` "canvas not blank" (texture loaded → 300 ms → one screenshot), sensitive to slow SwiftShader frames under load; it now polls the drawn picture with the same threshold (`e1b7e12`).
+- Remaining suspect (not reproduced, left unchanged): `lens.touch.spec.ts` measures the lens fade in wall-clock ms (400–900 ms) while the fade advances with frame time; a heavily loaded machine with very slow frames could stretch it. Recorded as out-of-scope finding; no retry or skip added.
+- New e2e of this track wait for state (frames, `expect.poll`) and use Playwright's fake clock (`page.clock.fastForward`) for the 5 s / 10 s / 90 s kiosk timers.
