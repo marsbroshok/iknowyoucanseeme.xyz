@@ -6,8 +6,8 @@ interface Props {
 const { text } = Astro.props;
 ---
 <div class="fragment-text">
-  {text.split('\n').map((line, idx) => (
-    <p key={idx}>{line || '\u00A0'}</p>
+  {text.split('\n').map((line) => (
+    <p>{line || '\u00A0'}</p>
   ))}
 </div>
 
