@@ -252,6 +252,12 @@ blocks:
     fr: ICM
     sources:
       - spec
+  technique_multiple_exposure:
+    status: draft
+    en: multiple exposure
+    fr: exposition multiple
+    sources:
+      - spec
   work_contact_link:
     status: draft
     en: Ask about this work

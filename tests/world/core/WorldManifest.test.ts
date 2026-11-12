@@ -24,7 +24,9 @@ describe('parseManifest', () => {
     ['a technique that is not text', { ...sampleManifest, works: [{ ...sampleManifest.works[0], techniques: [7] }] }, /works\[0\]\.techniques\[0\]/],
     ['a palette that is not a list', { ...sampleManifest, works: [{ ...sampleManifest.works[0], palette: null }] }, /works\[0\]\.palette must be an array/],
     ['a palette entry that is not a colour', { ...sampleManifest, works: [{ ...sampleManifest.works[0], palette: ['#123456', 'red'] }] }, /works\[0\]\.palette\[1\] must be #rrggbb/],
-    ['a territory without title', { ...sampleManifest, territories: [{ slug: 'dreamland' }] }, /territories\[0\]\.title/],
+    ['a territory without title', { ...sampleManifest, territories: [{ slug: 'dreamland', sentences: [] }] }, /territories\[0\]\.title/],
+    ['a territory without sentences', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland' }] }, /territories\[0\]\.sentences must be an array/],
+    ['an empty sentence', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland', sentences: [''] }] }, /territories\[0\]\.sentences\[0\]/],
   ])('rejects %s', (_label, input, message) => {
     expect(() => parseManifest(input)).toThrow(message);
   });

@@ -5,7 +5,7 @@ import { uiText } from '../../../src/i18n/UiCatalog.js';
 import { fixtureWork, tb } from '../../pages/fixtures.js';
 
 const territories = [
-  { slug: 'dreamland', title: { en: 'Dreamland', fr: 'Dreamland' } },
+  { slug: 'dreamland', title: { en: 'Dreamland', fr: 'Dreamland' }, statement: tb('A journey is a cycle. Home is the dream.', 'Un voyage est un cycle : le rêve est la maison.') },
   { slug: 'the-border-is-thin', title: { en: 'The border is thin', fr: 'La frontière est mince' } },
 ];
 const zones = [
@@ -31,8 +31,8 @@ describe('buildWorldManifest', () => {
     expect(parseManifest(JSON.parse(JSON.stringify(m)))).toEqual(m);
     expect(m.lang).toBe('en');
     expect(m.territories).toEqual([
-      { slug: 'dreamland', title: 'Dreamland' },
-      { slug: 'the-border-is-thin', title: 'The border is thin' },
+      { slug: 'dreamland', title: 'Dreamland', sentences: ['A journey is a cycle.', 'Home is the dream.'] },
+      { slug: 'the-border-is-thin', title: 'The border is thin', sentences: [] },
     ]);
     expect(m.zones.map((z) => z.title)).toEqual(['Arrival', 'Lens', 'Leak']);
     expect(m.works[0]).toEqual({
@@ -58,6 +58,7 @@ describe('buildWorldManifest', () => {
     const m = await buildWorldManifest({ works, territories, zones, ui: uiText('fr'), resolve });
     const cygne = m.works[1];
     expect(cygne.title).toBe('Cygne');
+    expect(m.territories[0].sentences).toEqual(['Un voyage est un cycle : le rêve est la maison.']);
     expect(cygne.zone).toBeNull();
     expect(cygne.fragment).toBeNull();
     expect(cygne.contactHref).toBeNull();
@@ -83,10 +84,10 @@ describe('buildWorldManifest', () => {
     const works = [
       fixtureWork({ slug: 'declared', title: { fr: 'Les Reflets II' }, techniques: ['colour filter'] }),
       fixtureWork({ slug: 'inferred', title: { fr: 'Les Reflets III' }, techniques: [] }),
-      fixtureWork({ slug: 'unknown', title: { fr: 'Éclipse au miroir' }, sourceNotes: '#icm', techniques: ['cyanotype'] }),
+      fixtureWork({ slug: 'icm', title: { fr: 'Éclipse au miroir' }, sourceNotes: 'mirror deflections', techniques: ['ICM'] }),
     ];
     const m = await buildWorldManifest({ works, territories, zones, ui: uiText('en'), resolve });
-    expect(m.works.map((w) => w.techniques)).toEqual([['filter'], ['mirror'], []]);
+    expect(m.works.map((w) => w.techniques)).toEqual([['filter'], ['mirror'], ['icm']]);
   });
 
   it('asks for the low, mid and high sizes', () => {

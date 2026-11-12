@@ -5,8 +5,8 @@ const image = (w: number, h: number) => ({ url: `/_astro/x_${w}.webp`, width: w,
 export const sampleManifest: WorldManifest = {
   lang: 'fr',
   territories: [
-    { slug: 'dreamland', title: 'Dreamland' },
-    { slug: 'the-border-is-thin', title: 'La frontière est mince' },
+    { slug: 'dreamland', title: 'Dreamland', sentences: ['Un voyage est un cycle.', 'Le rêve est la maison.'] },
+    { slug: 'the-border-is-thin', title: 'La frontière est mince', sentences: [] },
   ],
   zones: [
     { slug: 'arrival', title: 'Arrivée' },

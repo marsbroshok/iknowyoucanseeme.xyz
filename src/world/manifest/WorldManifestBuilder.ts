@@ -6,6 +6,7 @@ import { NIGHT_BLUE } from '../core/StageSettings.js';
 import type { ManifestImage, ManifestWork, WorldManifest } from '../core/WorldManifest.js';
 import type { ZoneSlug } from '../core/FieldLayout.js';
 import { lensTechniques } from './TechniqueHints.js';
+import { splitSentences } from './StatementSentences.js';
 
 /** Long edge (px) of the three image sizes the world streams. */
 export const IMAGE_EDGES = { low: 480, mid: 1200, high: 2400 } as const;
@@ -32,7 +33,8 @@ export interface ManifestSources {
 
 /**
  * The world manifest embedded in the home page of one language: names of
- * territories and zones, and for every work its title, fragment, links,
+ * territories (with their statement split into sentences, for the
+ * fragments) and zones, and for every work its title, fragment, links,
  * dominant colour and palette, the techniques it declares (or, without
  * declared ones, that its title and caption name; for the lens) and three image sizes (FR5 low/full levels).
  *
@@ -45,7 +47,7 @@ export async function buildWorldManifest(sources: ManifestSources): Promise<Worl
   const works = await Promise.all(sources.works.map((w) => manifestWork(w, sources)));
   return {
     lang: ui.lang,
-    territories: sources.territories.map((t) => ({ slug: t.slug, title: titleOf(t, ui) })),
+    territories: sources.territories.map((t) => ({ slug: t.slug, title: titleOf(t, ui), sentences: splitSentences(t.statement?.[ui.lang] ?? '') })),
     zones: sources.zones.map((z) => ({ slug: z.slug, title: titleOf(z, ui) })),
     works,
   };
