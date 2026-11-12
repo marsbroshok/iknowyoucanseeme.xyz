@@ -116,6 +116,25 @@ never removed; while the world is shown it is made `inert`.
   stored in `localStorage`; each territory page then shows "Fragments found:
   n / N" (JavaScript only). Design notes:
   `docs/adr/0010-threshold-gaze-fragments.md`.
+- Leak: the longer someone drifts, the more the awake pages take on dream
+  colour. The world keeps the drift time and the colour of the last work
+  seen up close in `localStorage` (`iknowyoucanseeme.leak`, local only; it
+  fades over days of absence); a ~1.2 KB inline script in the head of every
+  awake page tints the background and gives work images a soft colour edge
+  (`src/styles/leak.css`, `@layer leak`) before first paint, never below
+  4.5:1 contrast for any text (`src/leak/LeakStyle.ts`). From level 0.4 a
+  faint cut-out of *Les Reflets II* may drift once down the page margin
+  (wide screens only, never over text). "Clear the leak / Effacer
+  l'infiltration" on the legal page removes it. Design notes:
+  `docs/adr/0012-leak-specimens-and-exhibition-mode.md`.
+- Specimens: the Leak zone's Venice portraits and clay sketches carry
+  museum tags (`spécimen 03 · Venise · 2025`, `esquisse 01 · argile ·
+  2026`): a framed specimen grid on the awake Dreamland page, a thin frame
+  and a tag under the work in the world, and the tag in its dialog.
+- Exhibition mode: `/{lang}/?kiosk=1` runs the drift unattended for a
+  gallery screen (no threshold, auto-drift, reset after 90 s, hidden
+  cursor, sound after the first tap, QR codes instead of links). Setup:
+  [`docs/exhibition-mode.md`](docs/exhibition-mode.md).
 - Move: scroll or drag; arrow keys; tilt on phones (after a tap, with the
   iOS permission prompt). Tab goes to the nearest work, then along the
   path; Enter opens it in a dialog with its links.
@@ -137,7 +156,8 @@ never removed; while the world is shown it is made `inert`.
   `tests/visual/` (`docs/adr/0008-lens-techniques-and-shader-harness.md`);
   refresh them after a deliberate change with
   `npx playwright test tests/e2e/lens.visual.spec.ts --update-snapshots`.
-- Code: pure logic in `src/world/core/` and `src/sound/core/`, DOM in
+- Code: pure logic in `src/world/core/`, `src/sound/core/`, `src/leak/`
+  and `src/kiosk/`, DOM in
   `src/world/island/` and `src/sound/island/`, Tone.js only in
   `src/sound/engine/` (unit-tested in Node with `node-web-audio-api` and
   `Tone.Offline`; on Linux `npm run check` needs the ALSA library,
@@ -217,6 +237,13 @@ event until the GoatCounter script has loaded.
 title, size, year, medium and a QR code to the work's page. Print it from the
 browser (A4, margins "none" or "default"). The page is not indexed and not in
 the sitemap.
+
+### Exhibition screen
+
+`/{lang}/?kiosk=1` turns the home page into an unattended gallery screen;
+the build also writes one QR code per work and language to
+`/qr/<lang>/<slug>.svg` for it. How to set up a screen:
+[`docs/exhibition-mode.md`](docs/exhibition-mode.md).
 
 ## Deploy
 
