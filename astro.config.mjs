@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { isLocalizedPage, sitemapLinks } from './src/seo/SitemapLinks.ts';
 import { ogImages } from './tools/og/OgIntegration.ts';
+import { leakApparition } from './tools/leak/ApparitionIntegration.ts';
 
 export default defineConfig({
   output: 'static',
@@ -17,5 +18,6 @@ export default defineConfig({
       serialize: (item) => ({ ...item, links: sitemapLinks(item.url) }),
     }),
     ogImages(),
+    leakApparition(),
   ],
 });
