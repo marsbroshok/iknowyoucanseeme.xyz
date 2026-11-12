@@ -69,6 +69,15 @@ describe('HorizonCompass', () => {
     expect(marker('La Loupe').style.getPropertyValue('--x')).toBe('0.040');
   });
 
+  it('stacks markers that would overlap, the nearest on the line', () => {
+    const ahead = [region('dreamland', 'arrival', 0, -40), region('dreamland', 'lens', -58, -100), region('dreamland', 'leak', -118, -200), region('the-border-is-thin', null, 0, -90, 300)];
+    const c = new HorizonCompass(root, ahead, labels, Math.PI / 3);
+    c.update(CompassBearing.read({ x: 0, z: -10, yaw: 0 }, ahead));
+    expect(marker('La Loupe').style.getPropertyValue('--row')).toBe('0');
+    expect(marker("L'Infiltration").style.getPropertyValue('--row')).toBe('1');
+    expect(marker('La frontière est mince').style.getPropertyValue('--row')).toBe('0');
+  });
+
   it('fails loudly when a label is missing (content and layout out of sync)', () => {
     expect(() => new HorizonCompass(root, [region('nowhere', null, 0, -9)], labels, 1)).toThrow(/No label for territory "nowhere"/);
     expect(() => new HorizonCompass(root, regions, { ...labels, zones: { arrival: 'A' } }, 1)).toThrow(/No label for zone "lens"/);

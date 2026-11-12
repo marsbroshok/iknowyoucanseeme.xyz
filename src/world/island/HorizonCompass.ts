@@ -9,12 +9,15 @@ export interface CompassLabels {
 
 /** Horizontal room used by markers on the horizon line (fraction of width, each side of centre). */
 const SPREAD = 0.46;
+/** Markers closer than this (fraction of width) go on separate rows. */
+const MIN_GAP = 0.2;
 
 /**
  * The faint horizon line of the world (FR4, "never truly lost"): the name
  * of the zone or territory the visitor is in, and a marker for every other
  * region placed along the line by its direction. Regions outside the view
- * are pinned to the nearer edge with an arrow.
+ * are pinned to the nearer edge with an arrow; markers that would overlap
+ * are stacked on rows below the line, the nearest region on top.
  *
  * The current name sits in a polite live region and only changes when the
  * visitor crosses into another region, so screen readers are not flooded.
@@ -66,12 +69,17 @@ export class HorizonCompass {
       this.here.textContent = label;
     }
     for (const [region, marker] of this.markers) marker.element.hidden = region === reading.current;
-    for (const { region, bearing } of reading.others) {
+    const rows: number[][] = [];
+    for (const { region, bearing } of [...reading.others].sort((a, b) => a.distance - b.distance)) {
       const { element, label: name } = this.markers.get(region) as { element: HTMLElement; label: string };
       const side = bearing > this.halfFov ? 'right' : bearing < -this.halfFov ? 'left' : 'ahead';
-      const t = Math.min(Math.max(bearing / this.halfFov, -1), 1);
+      const x = 0.5 + SPREAD * Math.min(Math.max(bearing / this.halfFov, -1), 1);
+      let row = rows.findIndex((taken) => taken.every((other) => Math.abs(other - x) >= MIN_GAP));
+      if (row < 0) row = rows.push([]) - 1;
+      rows[row].push(x);
       element.dataset.side = side;
-      element.style.setProperty('--x', (0.5 + SPREAD * t).toFixed(3));
+      element.style.setProperty('--x', x.toFixed(3));
+      element.style.setProperty('--row', String(row));
       element.textContent = side === 'right' ? `${name} ›` : side === 'left' ? `‹ ${name}` : name;
     }
   }

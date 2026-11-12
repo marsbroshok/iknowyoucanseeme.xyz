@@ -13,7 +13,9 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // WebGL2 for the drift world: the GPU where there is one, otherwise
+      // SwiftShader (Chrome no longer falls back to it without this flag).
+      use: { ...devices['Desktop Chrome'], launchOptions: { args: ['--enable-unsafe-swiftshader'] } },
     },
   ],
   // Two builds: the default one (no Web3Forms key → email-only contact page;

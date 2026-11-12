@@ -3,7 +3,8 @@
  * Page shell for every awake-layer page: `<html lang>`, title/description,
  * canonical + hreflang alternates, Open Graph, optional JSON-LD, header and
  * footer. Ships no JavaScript of its own; adds GoatCounter's async script
- * only when analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`).
+ * only when analytics is enabled (`PUBLIC_GOATCOUNTER_CODE`). The `world`
+ * slot (home page only) holds the drift layer as a direct child of `<body>`.
  */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
 import { alternateLinks, canonicalUrl, type LocalizedParams } from '../i18n/Alternates.js';
@@ -95,6 +96,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
     <slot />
   </main>
   <Footer lang={lang} />
+  <slot name="world" />
   <AnalyticsScript config={analytics} />
 </body>
 </html>

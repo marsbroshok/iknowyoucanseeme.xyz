@@ -20,6 +20,25 @@ export const ROOT_CHOOSER_JS_BUDGET = 512;
  */
 export const ALLOWED_EXTERNAL_SCRIPTS: readonly string[] = [GOATCOUNTER_SCRIPT_SRC];
 
+/** Pages that host the drift world (the two home pages). */
+const WORLD_PAGES = /^(en|fr)\/index\.html$/;
+/** The site's own bundled modules (Astro output), one folder deep. */
+const FIRST_PARTY_MODULE = /^\/_astro\/[\w.-]+\.js$/;
+
+/**
+ * Whether a page may load an external script: GoatCounter anywhere, and on
+ * the two home pages the site's own modules from `/_astro/` (the drift
+ * world's boot script, which lazy-loads the Three.js chunk; ADR 0007).
+ * Their size is held by the e2e bundle-size test, not by this inline budget.
+ *
+ * @param file - Path relative to the build directory.
+ * @param src - Script URL.
+ * @returns `true` when allowed.
+ */
+export function isAllowedExternalScript(file: string, src: string): boolean {
+  return ALLOWED_EXTERNAL_SCRIPTS.includes(src) || (WORLD_PAGES.test(file) && FIRST_PARTY_MODULE.test(src));
+}
+
 /** Price-like content: a currency sign/code, or the words price/prix/tarif. */
 const PRICE_PATTERNS: readonly RegExp[] = [/€/, /\bEUR\b/, /\$\s?\d/, /\bprices?\b/i, /\bprix\b/i, /\btarifs?\b/i];
 
@@ -61,7 +80,7 @@ export function jsBudgetFor(file: string): number {
  * localized pages) exactly one canonical plus EN/FR/x-default alternates
  * (redirect pages of old addresses: canonical = refresh target, noindex);
  * JavaScript within the page's budget, never as external files except
- * {@link ALLOWED_EXTERNAL_SCRIPTS}.
+ * those allowed by {@link isAllowedExternalScript}.
  *
  * @param file - Path relative to the build directory (e.g. `fr/oeuvres/x/index.html`).
  * @param html - Page HTML.
@@ -105,7 +124,7 @@ export function inspectPage(file: string, html: string): GuardViolation[] {
  */
 function withScriptCheck(file: string, html: string, violations: GuardViolation[]): GuardViolation[] {
   const { inlineBytes, external: allExternal } = scriptBytes(html);
-  const external = allExternal.filter((src) => !ALLOWED_EXTERNAL_SCRIPTS.includes(src));
+  const external = allExternal.filter((src) => !isAllowedExternalScript(file, src));
   const budget = jsBudgetFor(file);
   if (external.length > 0 || inlineBytes > budget) {
     violations.push({ file, rule: 'js-budget', detail: `inline ${inlineBytes} B (budget ${budget} B), external ${external.join(', ') || 'none'}` });
