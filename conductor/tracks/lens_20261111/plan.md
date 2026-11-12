@@ -8,14 +8,14 @@ Track: `lens_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workflo
 - [x] Task: `LensCrossfade` + `LensUniforms` (pointer region, velocity smoothing, touch fade) — Red/Green `0a432ca`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `0a432ca` — check 0/0, test:e2e 0/0 (CI=true / CI unset)
 
-## Phase 2: Shaders
+## Phase 2: Shaders [checkpoint: 15d0198]
 
 - [x] Task: Shared GLSL chunk (pointer mask, tier defines) + shader compile test harness (headless WebGL in Playwright) `05a2893`
 - [x] Task: Colour filter + Mirror fold shaders with visual snapshots `9c0e820`
 - [x] Task: Multiple exposure + Fracture shaders with visual snapshots `93163ff`
 - [x] Task: Light leak + ICM shaders with visual snapshots `e4888e2`
 - [x] Task: Low-tier variants `8d71f14`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `15d0198` — check 0/0, test:e2e 0/0 (CI=true / CI unset; first run: check 2 from an e2e type error, fixed in 15d0198)
 
 ## Phase 3: Integration
 
