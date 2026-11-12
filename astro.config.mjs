@@ -8,6 +8,8 @@ export default defineConfig({
   site: 'https://www.iknowyoucanseeme.xyz',
   srcDir: './src',
   publicDir: './public',
+  // The e2e suite builds a second variant (contact form with a test key) into its own folder.
+  outDir: process.env.ASTRO_OUT_DIR ?? './dist',
   integrations: [
     sitemap({
       filter: isLocalizedPage,

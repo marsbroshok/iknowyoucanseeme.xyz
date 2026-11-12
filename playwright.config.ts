@@ -16,9 +16,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  // Two builds: the default one (no Web3Forms key → email-only contact page)
+  // and a keyed one (contact form rendered; the endpoint is mocked in tests).
   webServer: {
-    command: 'npm run build && npx astro preview --port 4325',
+    command:
+      'npm run build && ASTRO_OUT_DIR=dist-e2e-keyed PUBLIC_WEB3FORMS_KEY=e2e-test-key npx astro build && npx tsx tests/e2e/staticServer.ts',
     url: 'http://localhost:4325',
     reuseExistingServer: false,
+    timeout: 300_000,
   },
 });
