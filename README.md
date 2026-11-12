@@ -8,8 +8,9 @@ built with [Astro](https://astro.build) and hosted on GitHub Pages at
 The site has two layers. The **awake layer** is plain, fast HTML for every
 work, territory and exhibition. **The drift** is a Three.js world mounted
 on the home pages `/en/` and `/fr/` on capable devices (see "The drift"
-below); everything else (lens, threshold, sound, leak) comes in later
-tracks, see `conductor/product.md` and `conductor/tracks.md`.
+below), with **the lens** over the work under the pointer; everything else
+(threshold, sound, leak) comes in later tracks, see `conductor/product.md`
+and `conductor/tracks.md`.
 
 The former Hugo site is preserved under the git tag `legacy-hugo`.
 
@@ -84,6 +85,19 @@ never removed; while the world is shown it is made `inert`.
 - Deep links: `/{lang}/?w=<slug>` opens the world in front of a work; every
   work page has a "See it in the drift" link. The address follows the work
   the visitor stops at.
+- Lens: pointing at a work (mouse, or a finger while it touches) shows it
+  through one of the artist's camera techniques inside a soft circle:
+  colour filter, mirror fold, multiple exposure, fracture and collage,
+  light leak, motion blur. Each work starts with the lens its caption names
+  (mirror, ND / filter, ICM, multiple exposure; otherwise a fixed choice per
+  work). L or a long press changes the lens (with a crossfade); holding
+  Shift or a two-finger tap shows the photo unaltered; a lifted finger lets
+  the lens fade out over ~600 ms. Phones get cheaper variants and no
+  fracture. The lens never changes the stored image. Shaders are checked in
+  Chromium on a fixed test texture with reference pictures in
+  `tests/visual/` (`docs/adr/0008-lens-techniques-and-shader-harness.md`);
+  refresh them after a deliberate change with
+  `npx playwright test tests/e2e/lens.visual.spec.ts --update-snapshots`.
 - Code: pure logic in `src/world/core/`, DOM in `src/world/island/`, GPU code
   only in `src/world/gl/` (verified by Playwright, see
   `docs/adr/0006-webgl-code-verified-in-browser.md`; module scripts on the
