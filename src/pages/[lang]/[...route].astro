@@ -78,6 +78,8 @@ function workPageProps(slug: string) {
     next: next && buildWorkView(next, ui),
     territory: { title: titleOf(territory, ui), href: localizedPath('territories', lang, [territory.slug]) },
     jsonLd: buildVisualArtworkJsonLd(work, ARTIST_NAME, canonicalUrl('works', lang, site, params)),
+    // Written by the og-images integration (tools/og) after the build.
+    ogImage: `/og/${slug}.jpg`,
   };
 }
 

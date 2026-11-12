@@ -49,6 +49,7 @@ describe('astro config', () => {
     expect(config.site).toBe(SITE);
     const names = (config.integrations ?? []).flat().map((i) => (i && typeof i === 'object' && 'name' in i ? i.name : ''));
     expect(names).toContain('@astrojs/sitemap');
+    expect(names).toContain('og-images');
   });
 });
 
