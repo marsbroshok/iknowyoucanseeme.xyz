@@ -44,7 +44,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 9: Sound: generative ambience behind SoundEngine**
+- [x] **Track 9: Sound: generative ambience behind SoundEngine**
   *Link: [./tracks/sound_20261111/index.md](./tracks/sound_20261111/index.md)*
 
 ---
