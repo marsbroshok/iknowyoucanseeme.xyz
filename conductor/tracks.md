@@ -34,7 +34,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 7: The Lens: camera-technique shaders**
+- [x] **Track 7: The Lens: camera-technique shaders**
   *Link: [./tracks/lens_20261111/index.md](./tracks/lens_20261111/index.md)*
 
 ---
