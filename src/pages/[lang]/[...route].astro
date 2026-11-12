@@ -32,7 +32,8 @@ import { getPrevNextWork } from '../../domain/WorkQueries.js';
 import { canonicalUrl } from '../../i18n/Alternates.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
 import { getImage } from 'astro:assets';
-import { buildWorldManifest, type ImageResolver } from '../../world/manifest/WorldManifestBuilder.js';
+import { buildWorldManifest } from '../../world/manifest/WorldManifestBuilder.js';
+import { assetImageResolver } from '../../world/manifest/AssetImageResolver.js';
 
 export async function getStaticPaths() {
   const works = await getCollection('works');
@@ -80,16 +81,7 @@ const labels =
 const workImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/works/**/*.{jpeg,jpg,png,gif,avif,webp}');
 
 /** One WebP size of a work image, never larger than the source; throws when the file is missing. */
-const resolveImage: ImageResolver = async (work, index, longEdge) => {
-  const path = `/src/assets/works/${work.slug}/${work.images[index].src}`;
-  const load = workImages[path];
-  if (!load) throw new Error(`[route] Image "${path}" does not exist`);
-  const meta = (await load()).default;
-  const scale = Math.min(1, longEdge / Math.max(meta.width, meta.height));
-  const width = Math.round(meta.width * scale);
-  const image = await getImage({ src: meta, width, format: 'webp' });
-  return { url: image.src, width, height: Math.round(meta.height * scale) };
-};
+const resolveImage = assetImageResolver(workImages, (src, width) => getImage({ src, width, format: 'webp' }));
 
 /** The drift world's manifest (home page only). */
 const world = page.kind === 'home' ? await buildWorldManifest({ works, territories, zones, ui, resolve: resolveImage }) : undefined;
