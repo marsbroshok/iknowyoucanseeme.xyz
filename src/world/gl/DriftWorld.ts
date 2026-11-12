@@ -18,8 +18,9 @@ import { KeyboardInput } from '../island/input/KeyboardInput.js';
 import { LensInput } from '../island/input/LensInput.js';
 import { LensAnnouncer } from '../island/LensAnnouncer.js';
 import { LensDirector } from '../core/LensDirector.js';
-import { LensCrossfade, type LensBlend } from '../core/LensCrossfade.js';
+import type { LensBlend } from '../core/LensCrossfade.js';
 import { LensUniforms, type LensAim } from '../core/LensUniforms.js';
+import { LensSession } from '../core/LensSession.js';
 import { modeIndex, type LensMode } from '../core/LensMode.js';
 import type { MountOptions, WorldHandle } from '../island/DriftBoot.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
@@ -121,15 +122,11 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     manifest.works.map((w) => ({ slug: w.slug, territory: w.territory, zone: w.zone, techniques: w.techniques, palette: w.palette })),
     tier,
   );
-  const lens = new LensUniforms();
-  const fade = new LensCrossfade(director.modes[0]);
+  const lens = new LensSession(director);
   const announcer = new LensAnnouncer(part<HTMLElement>(root, '[data-drift-lens]'));
-  let lensSlug: string | null = null;
   const lensInput = new LensInput(canvas, root, () => {
-    if (!lensSlug) return;
-    const mode = director.cycle(lensSlug);
-    fade.to(mode);
-    announcer.announce(mode);
+    const mode = lens.cycle();
+    if (mode) announcer.announce(mode);
   });
 
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
@@ -174,31 +171,13 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     }
     const li = lensInput.state();
     const aim = overlay.isOpen ? null : LensUniforms.aimFrom(lensPointer(li.ndc), li.keyboard, f.facing);
-    const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt);
-    if (lf.slug !== lensSlug) {
-      if (lensSlug) meshes.get(lensSlug)?.setLens(null);
-      lensSlug = lf.slug;
-      if (lensSlug) {
-        fade.jump(director.mode(lensSlug));
-        announcer.announce(fade.target);
-      } else announcer.clear();
-    }
-    fade.advance(dt);
-    const blend = fade.blend();
-    if (lensSlug) {
-      const partner = director.partnerFor(lensSlug, (s) => meshes.get(s)?.texture != null);
-      (meshes.get(lensSlug) as ApparitionMesh).setLens({
-        strength: lf.strength,
-        center: lf.center,
-        blur: lf.blur,
-        modeA: modeIndex(blend.a),
-        modeB: modeIndex(blend.b),
-        mix: blend.mix,
-        gel: director.gel(lensSlug),
-        segments: director.segments(lensSlug),
-        seed: director.seed(lensSlug),
-        partner: partner ? (meshes.get(partner)?.texture ?? null) : null,
-      });
+    const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt, (slug) => meshes.get(slug)?.texture != null);
+    if (lf.released) meshes.get(lf.released)?.setLens(null);
+    if (lf.announce === 'clear') announcer.clear();
+    else if (lf.announce) announcer.announce(lf.announce);
+    if (lf.slug && lf.settings) {
+      const { modeA, modeB, partner, ...rest } = lf.settings;
+      (meshes.get(lf.slug) as ApparitionMesh).setLens({ ...rest, modeA: modeIndex(modeA), modeB: modeIndex(modeB), partner: partner ? (meshes.get(partner)?.texture ?? null) : null });
     }
     metrics.frame(f.nearest, f.nearestDistance, dt);
     if (f.plan) streamer.update(f.plan);
@@ -215,7 +194,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         facing: f.facing,
         nearest: f.nearest,
         loaded: streamer.loaded,
-        lens: { slug: lensSlug, mode: lensSlug ? fade.target : null, strength: lf.strength, unaltered: li.unaltered, blend: lensSlug ? blend : null, modes: director.modes },
+        lens: { slug: lf.slug, mode: lf.mode, strength: lf.strength, unaltered: li.unaltered, blend: lf.blend, modes: director.modes },
       };
     }
   });
