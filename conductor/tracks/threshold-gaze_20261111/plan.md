@@ -6,7 +6,7 @@ Track: `threshold-gaze_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../
 
 - [x] Task: `ThresholdState` machine (first/returning/reduced-motion; emits `entered`) — Red/Green (716eba7; reduced motion is deliberately not an input, ADR 0009)
 - [x] Task: `GazeDirector` (dwell detection, bounded rotation, once-per-session line with fake clock) — Red/Green + property tests (946ade8)
-- [ ] Task: `FragmentSurfacer` + `FragmentProgress` store — Red/Green + property tests
+- [x] Task: `FragmentSurfacer` + `FragmentProgress` store — Red/Green + property tests (3a02cdd; with `FragmentCatalog`, `splitSentences` and territory sentences in the manifest)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Presentation
@@ -37,4 +37,5 @@ Ledger of reasonable assumptions made while the artist was away (also in commit 
 - A2 (716eba7): the short threshold enters by itself at once and fades over 1 s while sound is off (no sound exists yet, so returning visitors never need the click in this track); the full threshold fades over 1.6 s after Enter.
 - A3 (946ade8): "near an apparition" means the pointer is over it (the lens raycast). Turns are bounded at 0.22 rad yaw / 0.1 rad pitch and eased; the gaze line, once allowed after 3 min of drifting, comes after a memoryless random wait (mean 90 s), fades in 2 s, holds 4 s, fades out 3 s.
 - A4 (59cff04): blank entries in declared techniques do not count as declared.
+- A6 (3a02cdd): sentence ids are per-language indices (EN Dreamland 7 sentences, FR 6); "found n / N" counts only ids valid in the page language, so n ≤ N. A territory without works has no place for sentences and does not count them.
 - A5 (13a864a): declared techniques are a small vocabulary named in `ui.yaml` (`technique_<key>`); FR label for "colour filter" is "filtre coloré" (draft, native proof pending); "ICM" stays "ICM".
