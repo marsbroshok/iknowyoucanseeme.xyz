@@ -21,6 +21,21 @@ describe('bootContactForms', () => {
     }
   });
 
+  it('calls fetch with the window as receiver (native fetch throws "Illegal invocation" otherwise)', async () => {
+    document.body.innerHTML = form('a');
+    const win = {
+      location: { search: '' },
+      fetch(this: unknown) {
+        if (this !== win) throw new TypeError('Illegal invocation');
+        return Promise.resolve(new Response(JSON.stringify({ success: true })));
+      },
+    };
+    bootContactForms(document, win as unknown as Parameters<typeof bootContactForms>[1]);
+    const f = document.querySelector('form') as HTMLFormElement;
+    f.dispatchEvent(new Event('submit', { cancelable: true }));
+    await vi.waitFor(() => expect(f.querySelector('[data-form-status]')?.textContent).toBe('OK'));
+  });
+
   it('does nothing when there is no contact form', () => {
     document.body.innerHTML = '<p>no form</p>';
     expect(bootContactForms(document, { fetch: vi.fn(), location: { search: '' } })).toBe(0);

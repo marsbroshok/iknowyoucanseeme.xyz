@@ -16,7 +16,9 @@ export interface ContactWindow {
 export function bootContactForms(doc: Document, win: ContactWindow): number {
   const forms = doc.querySelectorAll<HTMLFormElement>('form[data-contact-form]');
   forms.forEach((form) => {
-    new ContactFormEnhancer(form, { fetch: win.fetch, search: win.location.search, document: doc }).init();
+    // Keep `win` as the receiver: native fetch throws "Illegal invocation" when detached.
+    const boundFetch: typeof fetch = (input, init) => win.fetch(input, init);
+    new ContactFormEnhancer(form, { fetch: boundFetch, search: win.location.search, document: doc }).init();
   });
   return forms.length;
 }
