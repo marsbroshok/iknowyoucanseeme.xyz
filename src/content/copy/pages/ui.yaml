@@ -480,30 +480,6 @@ blocks:
     fr: "L'infiltration est effacée."
     sources:
       - spec
-  specimen:
-    status: draft
-    en: "specimen"
-    fr: "spécimen"
-    sources:
-      - spec
-  specimen_sketch:
-    status: draft
-    en: "sketch"
-    fr: "esquisse"
-    sources:
-      - spec
-  specimen_clay:
-    status: draft
-    en: "clay"
-    fr: "argile"
-    sources:
-      - spec
-  specimen_venice:
-    status: draft
-    en: "Venice"
-    fr: "Venise"
-    sources:
-      - spec
   specimens_label:
     status: draft
     en: "Specimens"
@@ -520,5 +496,23 @@ blocks:
     status: draft
     en: "QR code of the work page"
     fr: "Code QR de la page de l'œuvre"
+    sources:
+      - spec
+  specimen_tag:
+    status: draft
+    en: "specimen {n} · {year}"
+    fr: "spécimen {n} · {year}"
+    sources:
+      - spec
+  specimen_tag_venice:
+    status: draft
+    en: "specimen {n} · Venice · {year}"
+    fr: "spécimen {n} · Venise · {year}"
+    sources:
+      - spec
+  sketch_tag:
+    status: draft
+    en: "sketch {n} · clay · {year}"
+    fr: "esquisse {n} · argile · {year}"
     sources:
       - spec
