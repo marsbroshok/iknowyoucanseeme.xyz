@@ -11,9 +11,9 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 
 ## Phase 2: Deploy & analytics
 
-- [ ] Task: `deploy.yml` + `public/CNAME`; test: workflow YAML schema/`actionlint` script check
-- [ ] Task: `Analytics` module (`track()` + script injection when code set) — Red: tests for enabled/disabled config — Green
-- [ ] Task: Old-URL redirect pages — Red: build test that each legacy path exists with meta-refresh + canonical — Green
+- [x] Task: `deploy.yml` + `public/CNAME`; test: workflow YAML schema/`actionlint` script check `70431ee` (local actionlint 1.7.12: exit 0; CI runs the pinned release)
+- [x] Task: `Analytics` module (`track()` + script injection when code set) — Red: tests for enabled/disabled config — Green `0753499`
+- [x] Task: Old-URL redirect pages — Red: build test that each legacy path exists with meta-refresh + canonical — Green `99e4914`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Exhibition labels & docs
@@ -26,14 +26,19 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 
 ## Inherited Findings
 
-- [ ] Task (BLOCKING for deploy): `package-lock.json` has ~650 `resolved` URLs pointing at the local machine's internal npm proxy (`http://airlock-proxy…:999/npm/artifact-foundry-prod/npm-3p-limited-internal-use/...`), because this machine's npm `registry` is that proxy. GitHub Actions cannot reach it, so `npm ci` in `deploy.yml` would fail. Fix so that CI on GitHub installs from the public registry while local installs on this machine keep working:
+- [x] Task (BLOCKING for deploy): `package-lock.json` has ~650 `resolved` URLs pointing at the local machine's internal npm proxy (`http://airlock-proxy…:999/npm/artifact-foundry-prod/npm-3p-limited-internal-use/...`), because this machine's npm `registry` is that proxy. GitHub Actions cannot reach it, so `npm ci` in `deploy.yml` would fail. Fix so that CI on GitHub installs from the public registry while local installs on this machine keep working:
     - Preferred: a tested script `scripts/normalize-lockfile.ts` that rewrites `resolved` to canonical public URLs (`https://registry.npmjs.org/<name>/-/<basename>-<version>.tgz`, handling scoped names) keeping `integrity`; run it in a test that asserts no private host remains in the committed lockfile; verify locally that `npm ci` still works (npm maps registry hosts via `replace-registry-host`; set it in a project `.npmrc` if needed, never edit the user's `~/.npmrc`).
     - Verify integrity hashes match public tarballs for a sample (and document any mismatch); if public access is blocked from this machine, document the verification step for the artist in `docs/deploy.md` (first GitHub Actions run).
     - Add a lockfile guard test (no `airlock-proxy`/private hosts) to the gates.
+    - Done `f99c3cd`: normalizer in `tools/lockfile/` (not `scripts/`, so it is inside the 100% coverage scope), `npm run lockfile:normalize`, project `.npmrc` `replace-registry-host=npmjs`, guard `tests/lockfile/committedLockfile.test.ts`, ADR 0004. Public registry IS reachable from this machine: `npm ci --registry=https://registry.npmjs.org/ --replace-registry-host=never` with a fresh cache → exit 0, all 625 tarballs fetched from the public registry with integrity verified (no mismatch). Local `npm ci` with a fresh cache → exit 0 via the mirror. Also found and repaired a version-less stub entry (`astro/node_modules/sharp/node_modules/@img/sharp-linuxmusl-arm64`) that crashed the public install (`Invalid Version`).
 - [ ] Task: Footer/skip-link localisation was fixed in awake-layer; keep the FR/EN UI-string regression test green when removing Hugo.
 
 ## Assumptions ledger
 
 - `.github/FUNDING.yml` (gcushen / HugoBlox sponsor links) is template boilerplate and was removed with the template.
 - `package.json` name/description were leftovers (intake track, HugoBlox); renamed to `iknowyoucanseeme`, marked `private`.
+- Lockfile tooling lives in `tools/lockfile/` instead of the suggested `scripts/normalize-lockfile.ts`, so it is inside the coverage scope (`scripts/` is excluded, ADR 0002).
+- GitHub Actions uses Node 24 (LTS) and `registry.npmjs.org`; build variables are repository *variables* (public values), not secrets.
+- Old Hugo addresses: only menu/post pages existed (authors `render: never`, no tags on the post); RSS feeds are left as 404.
+- GoatCounter custom event data is sent as the event title (`key=value`, sorted keys); page views are counted by `count.js` itself.
 - Code license stays MIT (holder → Alexander Usoltsev, 2026); works, images and texts are all rights reserved (matches `legal.yaml` `image_use`).
