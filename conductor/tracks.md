@@ -19,7 +19,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 4: Awake layer pages (works, territories, about, exhibitions, contact, SEO)**
+- [x] **Track 4: Awake layer pages (works, territories, about, exhibitions, contact, SEO)**
   *Link: [./tracks/awake-layer_20261111/index.md](./tracks/awake-layer_20261111/index.md)*
 
 ---
