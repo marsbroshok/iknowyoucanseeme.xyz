@@ -50,7 +50,19 @@ From `astro-foundation_20261111` (non-blocking):
 
 ## Out-of-scope findings
 
-- `Footer.astro` hardcodes English copy ("all rights reserved", "Legal Notice"/"Mentions Légales") instead of `ui.yaml`; the FR footer shows English text.
-- `SkipLink.astro` text is English on both locales (`ui.yaml` already has `skip_content`).
 - `src/i18n/UIStrings.ts#getUIString` silently falls back (warn + EN/key); pages now use the strict `UiText`, the old helper is unused by pages and could be removed.
 - The root chooser `src/pages/index.astro` has no canonical/hreflang (it is excluded from the sitemap; the guard only requires `lang` there).
+
+## Review fixes
+
+Round base `07eeb2b`.
+
+- [x] Fix (blocking): FR pages showed English skip link and footer (WCAG 3.1.2). `SkipLink` takes a localized `label` (ui.yaml `skip_content`); `Footer` reads `footer_rights` and `nav_legal` (also fixes the "Légales" capitalisation); container tests for both locales `050556e`
+- [x] Fix: availability labels moved from `src/domain/Availability.ts` into ui.yaml (`availability_sold`, `availability_not_for_sale`, `contact`), CopyGuard-checked; never-a-price test kept `04026ec`
+- [x] Fix: generic regression `LanguageGuard` + `PageText` (`src/tools/`): no other-locale ui.yaml string in a page's visible text (title, description, body, alt/aria-label/title/placeholder; elements marked with their `lang` excluded). Unit + property tests, rendered-layout test, e2e over all 96 localized pages of `dist/` `7457536`
+- [x] Fix: dist guard and language guard also run over `dist-e2e-keyed/` (explicit check of both keyed contact pages) `945f1a9`
+- [x] Fix: ADR 0002 gets "Considered & Rejected Alternatives"; test that every ADR has Context, Decision and that section `a4639df`
+- [x] Verification: `npm run check` (232 unit tests, 100% coverage) and `npm run test:e2e` (116 passed) exit 0 with CI=true and with CI unset
+- Assumption: new ui.yaml key `footer_rights` (EN "all rights reserved", FR "tous droits réservés"); strings identical in both locales are not checked by the language guard; no allow-list needed (0 hits on proper nouns or work titles).
+- Deferred (orchestrator): lockfile `resolved` URLs → launch track; empty no-JS `work` field accepted.
+
