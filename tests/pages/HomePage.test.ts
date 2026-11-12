@@ -45,6 +45,8 @@ describe('HomePage', () => {
     }
     expect(html).toContain('rel="canonical" href="https://www.iknowyoucanseeme.xyz/en/"');
     expect(html).toContain('hreflang="fr" href="https://www.iknowyoucanseeme.xyz/fr/"');
+    // axe landmark-unique: only the header navigation is a <nav> landmark.
+    expect(html.match(/<nav\b/g)).toHaveLength(1);
   });
 
   it('renders the French home with French copy and FR links', async () => {
