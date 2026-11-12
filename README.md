@@ -35,6 +35,7 @@ Useful extras:
 | `npm run intake <step>` | Content intake from the Instagram export (see below) |
 | `npm run copy:review` | Writes `docs/copy/REVIEW.md`, the copy review sheet |
 | `npm run lockfile:normalize` | Rewrites `package-lock.json` to public registry URLs (run after `npm install <pkg>`) |
+| `npm run verify:clean-clone` | Clones the current commit into a temp folder, installs from the public npm registry, runs the check and builds (rehearsal of the deploy job) |
 
 ## Pages
 
