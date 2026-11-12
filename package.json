@@ -13,6 +13,7 @@
     "check": "npm run typecheck && astro check && npm run lint && npm run test:coverage && astro build",
     "intake": "npx tsx tools/intake/cli.ts",
     "copy:review": "npx tsx tools/copy/review.ts",
+    "lockfile:normalize": "npx tsx tools/lockfile/normalize.ts",
     "build": "astro build",
     "test:e2e": "playwright test"
   },

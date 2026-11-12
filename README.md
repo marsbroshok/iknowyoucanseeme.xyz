@@ -33,6 +33,7 @@ Useful extras:
 | `npm run typecheck` | `astro sync` + TypeScript (site, tools and e2e tests) |
 | `npm run intake <step>` | Content intake from the Instagram export (see below) |
 | `npm run copy:review` | Writes `docs/copy/REVIEW.md`, the copy review sheet |
+| `npm run lockfile:normalize` | Rewrites `package-lock.json` to public registry URLs (run after `npm install <pkg>`) |
 
 ## Pages
 
@@ -114,6 +115,11 @@ on every push to `main` (and on manual runs): `npm ci`, `npm run check`,
 `astro build`, then GitHub Pages. The exact first-time cutover steps, the
 DNS/HTTPS check and the rollback to `legacy-hugo` are in
 [`docs/deploy.md`](docs/deploy.md).
+
+`package-lock.json` must only point at the public npm registry; a test fails
+otherwise. After `npm install <pkg>` on a machine with a private registry
+mirror, run `npm run lockfile:normalize` (see
+`docs/adr/0004-public-registry-lockfile.md`).
 
 ## Rules of the repository
 
