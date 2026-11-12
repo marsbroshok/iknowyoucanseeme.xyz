@@ -39,7 +39,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 8: Threshold, gaze & fragments**
+- [x] **Track 8: Threshold, gaze & fragments**
   *Link: [./tracks/threshold-gaze_20261111/index.md](./tracks/threshold-gaze_20261111/index.md)*
 
 ---
