@@ -10,13 +10,14 @@ import { withCopy } from '../../content/helpers.js';
 import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
 import type { Locale } from '../../i18n/RouteMap.js';
 import { uiText } from '../../i18n/UiCatalog.js';
-import { buildTerritoryTeaser } from '../../domain/TerritoryView.js';
+import { buildTerritoryTeaser, buildTerritoryView } from '../../domain/TerritoryView.js';
 import HomePage from '../../components/pages/HomePage.astro';
+import TerritoryPage from '../../components/pages/TerritoryPage.astro';
 
 export async function getStaticPaths() {
   const works = await getCollection('works');
   const territories = await getCollection('territories');
-  const implemented = new Set<PageRef['kind']>(['home']);
+  const implemented = new Set<PageRef['kind']>(['home', 'territory']);
   return buildSiteRoutes({
     works: works.map((w) => w.data.slug),
     territories: territories.map((t) => t.data.slug),
@@ -33,7 +34,18 @@ const ui = uiText(lang);
 
 const works = (await Promise.all((await getCollection('works')).map(withCopy))).map((e) => e.data);
 const territories = (await Promise.all((await getCollection('territories')).map(withCopy))).map((e) => e.data);
+const zones = (await Promise.all((await getCollection('zones')).map(withCopy))).map((e) => e.data);
+
+/** The territory of a territory page; throws when the route points nowhere. */
+function territoryFor(slug: string) {
+  const territory = territories.find((t) => t.slug === slug);
+  if (!territory) throw new Error(`[route] Unknown territory "${slug}"`);
+  return territory;
+}
 ---
 {page.kind === 'home' && (
   <HomePage lang={lang} territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))} />
+)}
+{page.kind === 'territory' && (
+  <TerritoryPage lang={lang} territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)} />
 )}

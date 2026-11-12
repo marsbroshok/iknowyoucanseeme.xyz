@@ -28,7 +28,8 @@
 | Concern | Tool |
 |---|---|
 | Package manager / runtime | Node.js (v25 present) + **npm** (see Decision Notes, 2026-11-11) |
-| Unit & component tests | **Vitest** (+ `@vitest/coverage-v8`) |
+| Unit & component tests | **Vitest** (+ `@vitest/coverage-v8`); Astro container API for page components; **jsdom** (per-file `@vitest-environment jsdom`) for the small client scripts (added 2026-11-12, awake-layer) |
+| SEO | **@astrojs/sitemap** with hreflang alternates derived from the route map (added 2026-11-12, awake-layer) |
 | Property-based tests | **fast-check** (content schema, routing, palette, drift math invariants) |
 | End-to-end & visual | **Playwright** (awake layer flows, device routing, i18n, screenshots of the world) |
 | Accessibility | `@axe-core/playwright` |
