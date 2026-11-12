@@ -32,5 +32,5 @@ Track: `awake-layer_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 
 From `astro-foundation_20261111` (non-blocking):
 
-- [ ] Task: `vitest.config.ts` excludes `tools/download-fonts.ts` from coverage. Either test it (pure parts: URL list, subset ranges) with the network call injected, or move it out of `tools/` into `scripts/` and document it as a one-off, network-dependent maintenance script that is excluded from coverage on purpose (ADR-worthy only if you keep it excluded).
-- [ ] Task: Build-time tooling quirks fixed on main (keep them): `typecheck` runs `astro sync` first; `typescript` pinned `~5.8.3` (typescript-eslint peer range); `overrides.@emnapi/runtime = 1.4.3`; Vitest excludes `.worktrees/**` and nested `node_modules`. Do not undo these.
+- [x] Task: `vitest.config.ts` excludes `tools/download-fonts.ts` from coverage. Either test it (pure parts: URL list, subset ranges) with the network call injected, or move it out of `tools/` into `scripts/` and document it as a one-off, network-dependent maintenance script that is excluded from coverage on purpose (ADR-worthy only if you keep it excluded).
+- [x] Task: Build-time tooling quirks fixed on main (keep them): `typecheck` runs `astro sync` first; `typescript` pinned `~5.8.3` (typescript-eslint peer range); `overrides.@emnapi/runtime = 1.4.3`; Vitest excludes `.worktrees/**` and nested `node_modules`. Do not undo these.
