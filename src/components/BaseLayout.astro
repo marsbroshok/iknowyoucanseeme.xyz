@@ -1,6 +1,11 @@
 ---
+/**
+ * Page shell for every awake-layer page: `<html lang>`, title/description,
+ * canonical + hreflang alternates, Open Graph, optional JSON-LD, header and
+ * footer. Ships no JavaScript.
+ */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
-import { alternateLinks } from '../i18n/Alternates.js';
+import { alternateLinks, canonicalUrl, type LocalizedParams } from '../i18n/Alternates.js';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import '../styles/base.css';
@@ -8,16 +13,18 @@ import '../styles/base.css';
 interface Props {
   lang: Locale;
   routeKey: RouteKey;
-  routeParams?: { en?: string[], fr?: string[] };
+  routeParams?: LocalizedParams;
   title: string;
   description?: string;
+  /** Site-relative path of the Open Graph image (e.g. `/og/arrivee.jpg`). */
   ogImage?: string;
+  /** JSON-LD objects to embed in the head. */
+  jsonLd?: readonly object[];
 }
 
-const { lang, routeKey, routeParams, title, description, ogImage } = Astro.props;
+const { lang, routeKey, routeParams, title, description, ogImage, jsonLd = [] } = Astro.props;
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
-const currentPath = Astro.url.pathname;
-const canonicalUrl = `${siteUrl}${currentPath}`;
+const canonical = canonicalUrl(routeKey, lang, siteUrl, routeParams);
 const alternates = alternateLinks(routeKey, siteUrl, routeParams);
 ---
 
@@ -28,22 +35,24 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
-  
-  <link rel="canonical" href={canonicalUrl} />
+
+  <link rel="canonical" href={canonical} />
   {alternates.map(alt => (
     <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
   ))}
 
-  {/* Open Graph & Twitter */}
   <meta property="og:title" content={title} />
   {description && <meta property="og:description" content={description} />}
-  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content={lang === 'fr' ? 'fr_FR' : 'en_GB'} />
   {ogImage && <meta property="og:image" content={new URL(ogImage, siteUrl).toString()} />}
+  {ogImage && <meta property="og:image:width" content="1200" />}
+  {ogImage && <meta property="og:image:height" content="630" />}
   <meta name="twitter:card" content="summary_large_image" />
+  {jsonLd.map((ld) => <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />)}
 
-  {/* Preload Fonts */}
   <link rel="preload" href="/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/JetBrainsMono.woff2" as="font" type="font/woff2" crossorigin />
 
   <style is:inline>
     @font-face {
@@ -63,7 +72,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   </style>
 </head>
 <body>
-  <Header lang={lang} currentRouteKey={routeKey} />
+  <Header lang={lang} currentRouteKey={routeKey} routeParams={routeParams} />
   <main id="main-content">
     <slot />
   </main>

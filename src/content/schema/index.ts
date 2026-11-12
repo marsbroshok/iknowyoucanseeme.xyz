@@ -23,7 +23,13 @@ export const ZoneSchema = z.object({
 
 export const ExhibitionSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
-  title: z.record(z.string(), z.string()).optional()
+  title: z.record(z.string(), z.string()).optional(),
+  /** Year the exhibition opened (orders the CV list). */
+  year: z.number().int(),
+  /** Venue name, e.g. "Atelier 51". */
+  venue: z.string().min(1),
+  /** Optional human-readable dates per locale, e.g. { en: "16–30 Oct 2025" }. */
+  dates: z.record(z.string(), z.string()).optional()
 });
 
 export const WorkSchema = z.object({

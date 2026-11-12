@@ -1,0 +1,57 @@
+---
+/**
+ * A work as a list item: thumbnail, title (+ EN subtitle on the EN site),
+ * optional territory name and year, linking to the work page.
+ */
+import type { WorkView } from '../domain/WorkView.js';
+import WorkImage from './WorkImage.astro';
+
+interface Props {
+  work: WorkView;
+  /** Territory display name, shown on the works index. */
+  territoryName?: string;
+}
+
+const { work, territoryName } = Astro.props;
+const first = work.images[0];
+---
+<a class="work-card" href={work.href}>
+  {first && (
+    <WorkImage
+      src={`works/${work.slug}/${first.src}`}
+      alt=""
+      palette={first.palette}
+      sizes="(max-width: 40rem) 50vw, 18rem"
+      widths={[320, 640]}
+      className="work-card-image"
+    />
+  )}
+  <span class="work-card-title">{work.title}</span>
+  {work.subtitle && <span class="work-card-subtitle">{work.subtitle}</span>}
+  <span class="work-card-meta">{territoryName ? `${territoryName} · ` : ''}{work.year}</span>
+</a>
+
+<style>
+  .work-card {
+    display: grid;
+    gap: var(--space-1);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .work-card:hover .work-card-title,
+  .work-card:focus-visible .work-card-title {
+    text-decoration: underline;
+  }
+  .work-card-title {
+    font-size: var(--text-lg);
+  }
+  .work-card-subtitle {
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+  .work-card-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+/**
+ * Territory page `/{lang}/territories|territoires/<slug>/`: the statement,
+ * then the works grouped by zone (Dreamland: Arrival → Lens → Leak) with
+ * each zone's statement.
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import type { TerritoryView } from '../../domain/TerritoryView.js';
+import BaseLayout from '../BaseLayout.astro';
+import WorkCard from '../WorkCard.astro';
+import { excerpt } from '../../domain/TextExcerpt.js';
+
+interface Props {
+  lang: Locale;
+  territory: TerritoryView;
+}
+
+const { lang, territory } = Astro.props;
+const params = { en: [territory.slug], fr: [territory.slug] };
+---
+<BaseLayout
+  lang={lang}
+  routeKey="territories"
+  routeParams={params}
+  title={`${territory.title} · iknowyoucanseeme`}
+  description={territory.statement ? excerpt(territory.statement, 155) : territory.title}
+>
+  <article class="page">
+    <h1>{territory.title}</h1>
+    {territory.statement && <div class="prose statement"><p>{territory.statement}</p></div>}
+    {territory.groups.map((group) => (
+      <section class="zone" data-zone={group.slug ?? 'none'}>
+        {group.title && <h2>{group.title}</h2>}
+        {group.statement && <p class="prose zone-statement">{group.statement}</p>}
+        <ul class="work-grid">
+          {group.works.map((w) => <li><WorkCard work={w} /></li>)}
+        </ul>
+      </section>
+    ))}
+  </article>
+</BaseLayout>

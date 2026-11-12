@@ -5,6 +5,8 @@ import { HashedIgImage } from '../src/intake/ProposalEngine.js';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import yaml from 'yaml';
+import { ExhibitionSchema } from '../src/content/schema/index.js';
 
 describe('ContentGenerator', () => {
   it('generates content files correctly and handles originals swap', async () => {
@@ -74,6 +76,10 @@ describe('ContentGenerator', () => {
     // Check exhibitions
     expect(fs.existsSync(path.join(srcDir, 'content/exhibitions/mpaa-2019.yaml'))).toBe(true);
     expect(fs.existsSync(path.join(srcDir, 'content/exhibitions/atelier-51-2025.yaml'))).toBe(true);
+    const atelier = ExhibitionSchema.parse(yaml.parse(fs.readFileSync(path.join(srcDir, 'content/exhibitions/atelier-51-2025.yaml'), 'utf-8')));
+    expect(atelier).toMatchObject({ year: 2025, venue: 'Atelier 51', title: { fr: 'Dreamland' } });
+    const mpaa = ExhibitionSchema.parse(yaml.parse(fs.readFileSync(path.join(srcDir, 'content/exhibitions/mpaa-2019.yaml'), 'utf-8')));
+    expect(mpaa).toMatchObject({ year: 2019, venue: 'MPAA', title: { fr: "L'Emprunt, la Citation" } });
     
     // Idempotency
     const contentBefore = fs.readFileSync(workFile, 'utf-8');

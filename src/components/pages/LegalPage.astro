@@ -1,0 +1,34 @@
+---
+/**
+ * Legal notice `/{lang}/legal|mentions-legales/`: copyright, image use,
+ * cookieless analytics note and publisher identity (name + contact email;
+ * no postal address is published).
+ */
+import type { Locale } from '../../i18n/RouteMap.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import { CONTACT_EMAIL } from '../../content/Publisher.js';
+import BaseLayout from '../BaseLayout.astro';
+
+interface Props {
+  lang: Locale;
+  copyright: string;
+  imageUse: string;
+  privacy: string;
+  publisher: string;
+}
+
+const { lang, copyright, imageUse, privacy, publisher } = Astro.props;
+const ui = uiText(lang);
+---
+<BaseLayout lang={lang} routeKey="legal" title={`${ui.t('nav_legal')} · iknowyoucanseeme`} description={ui.t('desc_legal')}>
+  <article class="page">
+    <h1>{ui.t('nav_legal')}</h1>
+    <div class="prose">
+      <p>{publisher}</p>
+      <p>{ui.t('legal_contact_label')} · <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+      <p>{copyright}</p>
+      <p>{imageUse}</p>
+      <p>{privacy}</p>
+    </div>
+  </article>
+</BaseLayout>

@@ -1,23 +1,78 @@
 ---
+/**
+ * Site header: skip link, signature (home link), main navigation and the
+ * language switch, which keeps the visitor on the same page in the other
+ * locale.
+ */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
+import type { LocalizedParams } from '../i18n/Alternates.js';
 import { localizedPath } from '../i18n/LocalizedPath.js';
+import { uiText } from '../i18n/UiCatalog.js';
 import SkipLink from './SkipLink.astro';
 
 interface Props {
   lang: Locale;
   currentRouteKey: RouteKey;
+  routeParams?: LocalizedParams;
 }
 
-const { lang, currentRouteKey } = Astro.props;
-const otherLang = lang === 'en' ? 'fr' : 'en';
-
-const switchHref = localizedPath(currentRouteKey, otherLang);
+const { lang, currentRouteKey, routeParams } = Astro.props;
+const ui = uiText(lang);
+const otherLang: Locale = lang === 'en' ? 'fr' : 'en';
+const switchHref = localizedPath(currentRouteKey, otherLang, routeParams?.[otherLang]);
+const navKeys = ['works', 'exhibitions', 'about', 'contact'] as const;
+const navLabels = {
+  works: ui.t('nav_works'),
+  exhibitions: ui.t('nav_exhibitions'),
+  about: ui.t('nav_about'),
+  contact: ui.t('nav_contact'),
+};
 ---
-<header style="display: flex; justify-content: space-between; padding: var(--space-3); position: relative;">
-  <SkipLink targetId="main-content" />
-  <div>iknowyoucanseeme</div>
-  <nav>
-    <a href={switchHref}>{otherLang.toUpperCase()}</a>
-    <a href="#drift">{lang === 'en' ? 'Drift' : 'Dériver'}</a>
+<header class="site-header">
+  <SkipLink targetId="main-content" label={ui.t('skip_content')} />
+  <a class="signature" href={localizedPath('home', lang)}>iknowyoucanseeme</a>
+  <nav aria-label={ui.t('nav_label')}>
+    <ul>
+      {navKeys.map((key) => (
+        <li>
+          <a href={localizedPath(key, lang)} aria-current={key === currentRouteKey ? 'page' : undefined}>{navLabels[key]}</a>
+        </li>
+      ))}
+      <li>
+        <a href={switchHref} hreflang={otherLang} lang={otherLang} aria-label={`${otherLang.toUpperCase()} · ${uiText(otherLang).t('lang_switch')}`}>{otherLang.toUpperCase()}</a>
+      </li>
+    </ul>
   </nav>
 </header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--space-3);
+    position: relative;
+  }
+  .signature {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  a[aria-current='page'] {
+    color: var(--text-primary);
+    text-decoration-thickness: 2px;
+  }
+</style>

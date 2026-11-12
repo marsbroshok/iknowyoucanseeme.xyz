@@ -12,3 +12,15 @@ blocks:
     fr: Des analyses sans cookies sont utilisées pour respecter votre vie privée.
     sources:
       - spec
+  image_use:
+    status: draft
+    en: All images on this site belong to Alexander Usoltsev. Please ask before you use them.
+    fr: Toutes les images de ce site appartiennent à Alexander Usoltsev. Merci de demander avant de les utiliser.
+    sources:
+      - spec
+  publisher:
+    status: draft
+    en: This site is published by Alexander Usoltsev.
+    fr: Ce site est publié par Alexander Usoltsev.
+    sources:
+      - spec

@@ -1,0 +1,127 @@
+---
+/**
+ * Single static route for every awake-layer page in both locales. Localized
+ * first segments differ per locale (`works` / `oeuvres`), so one rest
+ * parameter covers them all; `buildSiteRoutes` is the tested source of truth
+ * for which paths exist. This file only loads content and picks the page.
+ */
+import { getCollection, getEntry } from 'astro:content';
+import { withCopy } from '../../content/helpers.js';
+import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
+import type { Locale } from '../../i18n/RouteMap.js';
+import { uiText } from '../../i18n/UiCatalog.js';
+import { buildIndexSections, buildTerritoryTeaser, buildTerritoryView, titleOf } from '../../domain/TerritoryView.js';
+import HomePage from '../../components/pages/HomePage.astro';
+import TerritoryPage from '../../components/pages/TerritoryPage.astro';
+import WorkPage from '../../components/pages/WorkPage.astro';
+import WorksIndexPage from '../../components/pages/WorksIndexPage.astro';
+import ExhibitionsPage from '../../components/pages/ExhibitionsPage.astro';
+import AboutPage from '../../components/pages/AboutPage.astro';
+import LegalPage from '../../components/pages/LegalPage.astro';
+import ContactPage from '../../components/pages/ContactPage.astro';
+import { buildExhibitionViews } from '../../domain/ExhibitionQueries.js';
+import { buildPersonJsonLd } from '../../domain/JsonLd.js';
+import { requireBlock } from '../../content/PageBlocks.js';
+import { ARTIST_NAME } from '../../content/Publisher.js';
+import { buildWorkView } from '../../domain/WorkView.js';
+import { buildVisualArtworkJsonLd } from '../../domain/JsonLd.js';
+import { getPrevNextWork } from '../../domain/WorkQueries.js';
+import { canonicalUrl } from '../../i18n/Alternates.js';
+import { localizedPath } from '../../i18n/LocalizedPath.js';
+
+export async function getStaticPaths() {
+  const works = await getCollection('works');
+  const territories = await getCollection('territories');
+  return buildSiteRoutes({
+    works: works.map((w) => w.data.slug),
+    territories: territories.map((t) => t.data.slug),
+  });
+}
+
+interface Props {
+  page: PageRef;
+}
+
+const { page } = Astro.props;
+const lang = Astro.params.lang as Locale;
+const ui = uiText(lang);
+
+const works = (await Promise.all((await getCollection('works')).map(withCopy))).map((e) => e.data);
+const territories = (await Promise.all((await getCollection('territories')).map(withCopy))).map((e) => e.data);
+const zones = (await Promise.all((await getCollection('zones')).map(withCopy))).map((e) => e.data);
+
+const exhibitions = (await getCollection('exhibitions')).map((e) => e.data);
+
+/** A copy page entry; throws when the file is missing. */
+async function copyPage(slug: 'about' | 'legal' | 'contact') {
+  const entry = await getEntry('pages', slug);
+  if (!entry) throw new Error(`[route] Missing copy page "${slug}"`);
+  return entry.data;
+}
+const about = await copyPage('about');
+const legal = await copyPage('legal');
+const aboutTitle = about.title?.[lang];
+if (!aboutTitle) throw new Error(`[route] Missing ${lang} title in about.yaml`);
+
+const site = (Astro.site ?? new URL('https://www.iknowyoucanseeme.xyz')).toString();
+
+/** Everything the work page needs; throws when the route points nowhere. */
+function workPageProps(slug: string) {
+  const work = works.find((w) => w.slug === slug);
+  if (!work) throw new Error(`[route] Unknown work "${slug}"`);
+  const { prev, next } = getPrevNextWork(works, slug, work.territory);
+  const territory = territoryFor(work.territory);
+  const params = { en: [slug], fr: [slug] };
+  return {
+    work: buildWorkView(work, ui),
+    prev: prev && buildWorkView(prev, ui),
+    next: next && buildWorkView(next, ui),
+    territory: { title: titleOf(territory, ui), href: localizedPath('territories', lang, [territory.slug]) },
+    jsonLd: buildVisualArtworkJsonLd(work, ARTIST_NAME, canonicalUrl('works', lang, site, params)),
+    // Written by the og-images integration (tools/og) after the build.
+    ogImage: `/og/${slug}.jpg`,
+  };
+}
+
+/** The territory of a territory page; throws when the route points nowhere. */
+function territoryFor(slug: string) {
+  const territory = territories.find((t) => t.slug === slug);
+  if (!territory) throw new Error(`[route] Unknown territory "${slug}"`);
+  return territory;
+}
+---
+{page.kind === 'home' && (
+  <HomePage lang={lang} territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))} />
+)}
+{page.kind === 'territory' && (
+  <TerritoryPage lang={lang} territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)} />
+)}
+{page.kind === 'work' && <WorkPage lang={lang} {...workPageProps(page.slug)} />}
+{page.kind === 'works' && <WorksIndexPage lang={lang} sections={buildIndexSections(territories, works, ui)} />}
+{page.kind === 'exhibitions' && <ExhibitionsPage lang={lang} exhibitions={buildExhibitionViews(exhibitions, lang)} />}
+{page.kind === 'about' && (
+  <AboutPage
+    lang={lang}
+    title={aboutTitle}
+    bio={requireBlock(about, 'bio', lang)}
+    origin={requireBlock(about, 'origin', lang)}
+    exhibitionsSummary={requireBlock(about, 'exhibitions', lang)}
+    personJsonLd={buildPersonJsonLd(ARTIST_NAME, canonicalUrl('about', lang, site))}
+  />
+)}
+{page.kind === 'legal' && (
+  <LegalPage
+    lang={lang}
+    copyright={requireBlock(legal, 'copyright', lang)}
+    imageUse={requireBlock(legal, 'image_use', lang)}
+    privacy={requireBlock(legal, 'privacy', lang)}
+    publisher={requireBlock(legal, 'publisher', lang)}
+  />
+)}
+{page.kind === 'contact' && (
+  <ContactPage
+    lang={lang}
+    accessKey={import.meta.env.PUBLIC_WEB3FORMS_KEY}
+    workTitles={Object.fromEntries(works.map((w) => [w.slug, buildWorkView(w, ui).displayTitle]))}
+  />
+)}

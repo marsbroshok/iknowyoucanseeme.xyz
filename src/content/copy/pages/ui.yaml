@@ -36,6 +36,18 @@ blocks:
     fr: Disponibilité sur demande
     sources:
       - spec
+  availability_sold:
+    status: draft
+    en: Sold
+    fr: Vendu
+    sources:
+      - spec
+  availability_not_for_sale:
+    status: draft
+    en: Not for sale
+    fr: Non disponible
+    sources:
+      - spec
   form_name:
     status: draft
     en: Name
@@ -136,5 +148,179 @@ blocks:
     status: draft
     en: Toggle drift mode
     fr: Activer le mode dérive
+    sources:
+      - spec
+  nav_label:
+    status: draft
+    en: Main
+    fr: Principal
+    sources:
+      - spec
+  nav_home:
+    status: draft
+    en: Home
+    fr: Accueil
+    sources:
+      - spec
+  nav_works:
+    status: draft
+    en: Works
+    fr: Œuvres
+    sources:
+      - spec
+  nav_about:
+    status: draft
+    en: About
+    fr: À propos
+    sources:
+      - spec
+  nav_exhibitions:
+    status: draft
+    en: Exhibitions
+    fr: Expositions
+    sources:
+      - spec
+  nav_contact:
+    status: draft
+    en: Contact
+    fr: Contact
+    sources:
+      - spec
+  nav_legal:
+    status: draft
+    en: Legal notice
+    fr: Mentions légales
+    sources:
+      - spec
+  footer_rights:
+    status: draft
+    en: all rights reserved
+    fr: tous droits réservés
+    sources:
+      - spec
+  territories_heading:
+    status: draft
+    en: Territories
+    fr: Territoires
+    sources:
+      - spec
+  territory_link:
+    status: draft
+    en: See the territory
+    fr: Voir le territoire
+    sources:
+      - spec
+  works_all_link:
+    status: draft
+    en: See all works
+    fr: Voir toutes les œuvres
+    sources:
+      - spec
+  works_filter_label:
+    status: draft
+    en: Filter by territory
+    fr: Filtrer par territoire
+    sources:
+      - spec
+  drift_link:
+    status: draft
+    en: See it in the drift
+    fr: Voir dans la dérive
+    sources:
+      - spec
+  medium_photo:
+    status: draft
+    en: photograph
+    fr: photographie
+    sources:
+      - spec
+  medium_ceramic:
+    status: draft
+    en: ceramic
+    fr: céramique
+    sources:
+      - spec
+  work_contact_link:
+    status: draft
+    en: Ask about this work
+    fr: Demander au sujet de cette œuvre
+    sources:
+      - spec
+  contact_intro:
+    status: draft
+    en: Write to me about a work, an exhibition or anything else.
+    fr: Écrivez-moi au sujet d'une œuvre, d'une exposition ou d'autre chose.
+    sources:
+      - spec
+  contact_email_only:
+    status: draft
+    en: The best way to reach me is by email.
+    fr: Le mieux est de m'écrire par email.
+    sources:
+      - spec
+  contact_email_fallback:
+    status: draft
+    en: You can also write to me directly.
+    fr: Vous pouvez aussi m'écrire directement.
+    sources:
+      - spec
+  contact_about_work:
+    status: draft
+    en: About the work
+    fr: Au sujet de l'œuvre
+    sources:
+      - spec
+  form_sending:
+    status: draft
+    en: Sending
+    fr: Envoi en cours
+    sources:
+      - spec
+  exhibitions_empty:
+    status: draft
+    en: No exhibitions yet.
+    fr: Pas encore d'exposition.
+    sources:
+      - spec
+  legal_contact_label:
+    status: draft
+    en: Contact
+    fr: Contact
+    sources:
+      - spec
+  desc_home:
+    status: draft
+    en: Photographs and ceramics by Alexander Usoltsev, between dream and the waking world.
+    fr: Photographies et céramiques d'Alexander Usoltsev, entre le rêve et le monde éveillé.
+    sources:
+      - product
+  desc_works:
+    status: draft
+    en: All works by Alexander Usoltsev, by territory.
+    fr: Toutes les œuvres d'Alexander Usoltsev, par territoire.
+    sources:
+      - spec
+  desc_exhibitions:
+    status: draft
+    en: Past exhibitions of Alexander Usoltsev.
+    fr: Les expositions passées d'Alexander Usoltsev.
+    sources:
+      - spec
+  desc_about:
+    status: draft
+    en: About Alexander Usoltsev, photographer and ceramic artist living in France.
+    fr: À propos d'Alexander Usoltsev, photographe et céramiste vivant en France.
+    sources:
+      - about
+  desc_contact:
+    status: draft
+    en: Contact Alexander Usoltsev about a work or an exhibition.
+    fr: Contacter Alexander Usoltsev au sujet d'une œuvre ou d'une exposition.
+    sources:
+      - spec
+  desc_legal:
+    status: draft
+    en: Legal notice of iknowyoucanseeme.
+    fr: Mentions légales de iknowyoucanseeme.
     sources:
       - spec

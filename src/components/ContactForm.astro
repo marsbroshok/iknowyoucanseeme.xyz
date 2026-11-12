@@ -1,0 +1,104 @@
+---
+/**
+ * Web3Forms contact form. Works as a plain POST without JavaScript; the
+ * bundled enhancement (`ContactFormBoot`) pre-fills the hidden `work` field
+ * from `?work=<slug>` and submits in place with live status messages.
+ * Rendered only when an access key exists (see `ContactPage`).
+ */
+import type { Locale } from '../i18n/RouteMap.js';
+import { uiText } from '../i18n/UiCatalog.js';
+
+interface Props {
+  lang: Locale;
+  /** Web3Forms public access key (`PUBLIC_WEB3FORMS_KEY`). */
+  accessKey: string;
+  /** Work titles by slug, to name the work the visitor asks about. */
+  workTitles: Readonly<Record<string, string>>;
+}
+
+const { lang, accessKey, workTitles } = Astro.props;
+const ui = uiText(lang);
+---
+<form
+  class="contact-form"
+  action="https://api.web3forms.com/submit"
+  method="POST"
+  data-contact-form
+  data-msg-sending={ui.t('form_sending')}
+  data-msg-success={ui.t('form_success')}
+  data-msg-error={ui.t('form_error')}
+>
+  <input type="hidden" name="access_key" value={accessKey} />
+  <input type="hidden" name="subject" value="iknowyoucanseeme · contact" />
+  <input type="hidden" name="work" value="" />
+  <p class="work-note" data-work-note hidden>{ui.t('contact_about_work')} · <span data-work-title></span></p>
+
+  <div class="field">
+    <label for="contact-name">{ui.t('form_name')}</label>
+    <input id="contact-name" name="name" type="text" autocomplete="name" required />
+  </div>
+  <div class="field">
+    <label for="contact-email">{ui.t('form_email')}</label>
+    <input id="contact-email" name="email" type="email" autocomplete="email" required />
+  </div>
+  <div class="field">
+    <label for="contact-message">{ui.t('form_message')}</label>
+    <textarea id="contact-message" name="message" rows="6" required></textarea>
+  </div>
+  <div class="honeypot" hidden>
+    <label for="contact-botcheck">{ui.t('form_honeypot')}</label>
+    <input id="contact-botcheck" name="botcheck" type="checkbox" tabindex="-1" autocomplete="off" />
+  </div>
+  <button type="submit">{ui.t('form_send')}</button>
+  <p class="form-status" data-form-status role="status" aria-live="polite"></p>
+</form>
+<script type="application/json" id="work-titles" set:html={JSON.stringify(workTitles)} />
+
+<script>
+  import { bootContactForms } from '../scripts/ContactFormBoot.js';
+  bootContactForms(document, window);
+</script>
+
+<style>
+  .contact-form {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 36rem;
+    margin-top: var(--space-4);
+  }
+  .field {
+    display: grid;
+    gap: var(--space-1);
+  }
+  label {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  input,
+  textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--text-primary);
+    border: 2px solid var(--text-secondary);
+    padding: var(--space-2);
+  }
+  input:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  button {
+    justify-self: start;
+    font: inherit;
+    color: var(--ink);
+    background: var(--text-primary);
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+</style>
