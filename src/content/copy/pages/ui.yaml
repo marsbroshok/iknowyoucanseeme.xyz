@@ -36,6 +36,18 @@ blocks:
     fr: Disponibilité sur demande
     sources:
       - spec
+  availability_sold:
+    status: draft
+    en: Sold
+    fr: Vendu
+    sources:
+      - spec
+  availability_not_for_sale:
+    status: draft
+    en: Not for sale
+    fr: Non disponible
+    sources:
+      - spec
   form_name:
     status: draft
     en: Name

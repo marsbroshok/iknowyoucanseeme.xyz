@@ -18,6 +18,8 @@
 | pages/ui.yaml | blocks.wakeup | draft | Wake up | Se réveiller | spec |
 | pages/ui.yaml | blocks.drift | draft | Drift | Dériver | spec |
 | pages/ui.yaml | blocks.contact | draft | Contact for availability | Disponibilité sur demande | spec |
+| pages/ui.yaml | blocks.availability_sold | draft | Sold | Vendu | spec |
+| pages/ui.yaml | blocks.availability_not_for_sale | draft | Not for sale | Non disponible | spec |
 | pages/ui.yaml | blocks.form_name | draft | Name | Nom | spec |
 | pages/ui.yaml | blocks.form_email | draft | Email | Email | spec |
 | pages/ui.yaml | blocks.form_message | draft | Message | Message | spec |
