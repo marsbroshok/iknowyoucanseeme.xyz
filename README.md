@@ -9,9 +9,11 @@ The site has two layers. The **awake layer** is plain, fast HTML for every
 work, territory and exhibition. **The drift** is a Three.js world mounted
 on the home pages `/en/` and `/fr/` on capable devices (see "The drift"
 below), opening on **the threshold**, with **the lens** over the work under
-the pointer, **the gaze**, **fragments** of text near the works and
-**sound** (a generative ambience that follows the drift); the leak comes in
-a later track, see `conductor/product.md` and `conductor/tracks.md`.
+the pointer, **the gaze**, **fragments** of text near the works, **sound**
+(a generative ambience that follows the drift) and framed **specimens**.
+Through **the leak**, drift time colours the awake pages without hurting
+contrast; an **exhibition mode** (`?kiosk=1`) runs the drift unattended on a
+gallery screen.
 
 The former Hugo site is preserved under the git tag `legacy-hugo`.
 
