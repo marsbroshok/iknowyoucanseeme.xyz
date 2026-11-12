@@ -4,7 +4,7 @@ Date: 2026-11-12
 
 ## Status
 
-Accepted
+Accepted. Superseded in part by [ADR 0009](0009-reduced-motion-does-not-route.md): reduced motion no longer sends phones to the awake layer, so the "phones with reduced motion" example in the first rejected alternative below is historical wording (left as written).
 
 ## Context
 
