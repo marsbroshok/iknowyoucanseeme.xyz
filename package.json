@@ -5,6 +5,7 @@
   "description": "Bilingual portfolio of the photographer and ceramicist Alexander Usoltsev (iknowyoucanseeme.xyz), built with Astro.",
   "main": "index.js",
   "scripts": {
+    "dev": "astro dev",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
