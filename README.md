@@ -92,7 +92,9 @@ never removed; while the world is shown it is made `inert`.
   colour filter, mirror fold, multiple exposure, fracture and collage,
   light leak, motion blur. Each work starts with the lens its caption names
   (mirror, ND / filter, ICM, multiple exposure; otherwise a fixed choice per
-  work). L or a long press changes the lens (with a crossfade); holding
+  work); techniques declared in a work file (`techniques:`, from
+  `intake-config/selection.yaml`) override what the title and caption say.
+  L or a long press changes the lens (with a crossfade); holding
   Shift or a two-finger tap shows the photo unaltered; a lifted finger lets
   the lens fade out over ~600 ms. Phones get cheaper variants and no
   fracture. The lens never changes the stored image. Shaders are checked in
