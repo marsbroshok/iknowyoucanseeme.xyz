@@ -23,3 +23,11 @@ Track: `launch_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../workf
 - [ ] Task: `docs/deploy.md` cutover + rollback runbook
 - [ ] Task: Clean-clone build test
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Inherited Findings
+
+- [ ] Task (BLOCKING for deploy): `package-lock.json` has ~650 `resolved` URLs pointing at the local machine's internal npm proxy (`http://airlock-proxy…:999/npm/artifact-foundry-prod/npm-3p-limited-internal-use/...`), because this machine's npm `registry` is that proxy. GitHub Actions cannot reach it, so `npm ci` in `deploy.yml` would fail. Fix so that CI on GitHub installs from the public registry while local installs on this machine keep working:
+    - Preferred: a tested script `scripts/normalize-lockfile.ts` that rewrites `resolved` to canonical public URLs (`https://registry.npmjs.org/<name>/-/<basename>-<version>.tgz`, handling scoped names) keeping `integrity`; run it in a test that asserts no private host remains in the committed lockfile; verify locally that `npm ci` still works (npm maps registry hosts via `replace-registry-host`; set it in a project `.npmrc` if needed, never edit the user's `~/.npmrc`).
+    - Verify integrity hashes match public tarballs for a sample (and document any mismatch); if public access is blocked from this machine, document the verification step for the artist in `docs/deploy.md` (first GitHub Actions run).
+    - Add a lockfile guard test (no `airlock-proxy`/private hosts) to the gates.
+- [ ] Task: Footer/skip-link localisation was fixed in awake-layer; keep the FR/EN UI-string regression test green when removing Hugo.
