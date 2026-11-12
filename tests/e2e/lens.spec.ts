@@ -92,7 +92,11 @@ test.describe('Lens in the world (desktop)', () => {
     await page.mouse.move(c.x, c.y);
     await expect.poll(async () => (await lensState(page)).strength).toBe(1);
     // A lens that clearly changes the picture under the pointer.
-    while ((await lensState(page)).mode !== 'flare') await page.keyboard.press('l');
+    while ((await lensState(page)).mode !== 'flare') {
+      const before = (await lensState(page)).mode;
+      await page.keyboard.press('l');
+      await expect.poll(async () => (await lensState(page)).mode).not.toBe(before);
+    }
     await page.waitForTimeout(500);
     const lensed = await patch(page, c);
     await page.keyboard.down('Shift');
