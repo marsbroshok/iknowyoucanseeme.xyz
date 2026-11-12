@@ -95,6 +95,32 @@ vec3 lensFracture(vec2 uv) {
 }
 #endif
 
+// 4. Light leak / flare: a warm anamorphic streak and glow at the pointer,
+// and chromatic ghosts along the line to the centre of the frame.
+vec3 lensFlare(vec2 uv, vec3 base) {
+  vec2 p = lensToLocal(uv);
+  float r = length(p) / lensRadius;
+  float streak = exp(-abs(p.y) * 60.0) * exp(-abs(p.x) * 3.0);
+  float glow = exp(-r * r * 4.0);
+  vec2 axis = vec2(0.5) - lensCenter;
+  vec3 ghost = vec3(0.0);
+  for (int i = 1; i <= LENS_GHOSTS; i++) {
+    float k = float(i) * 0.06 + 0.04;
+    ghost += vec3(lensSample(uv + axis * k).r, lensSample(uv + axis * k * 1.15).g, lensSample(uv + axis * k * 1.3).b);
+  }
+  ghost /= float(LENS_GHOSTS);
+  return base + vec3(1.0, 0.62, 0.28) * (streak * 0.9 + glow * 0.35) + ghost * 0.25;
+}
+
+// 5. Motion blur / ICM: samples along the pointer's streak.
+vec3 lensIcm(vec2 uv) {
+  vec3 acc = vec3(0.0);
+  for (int i = 0; i < LENS_SAMPLES; i++) {
+    acc += lensSample(uv + lensBlur * (float(i) / float(LENS_SAMPLES - 1) - 0.5));
+  }
+  return acc / float(LENS_SAMPLES);
+}
+
 vec3 lensMode(int mode, vec2 uv, vec3 base) {
   if (mode == 0) return lensGelFilter(base);
   if (mode == 1) return lensMirror(uv);
@@ -102,6 +128,8 @@ vec3 lensMode(int mode, vec2 uv, vec3 base) {
 #ifdef LENS_FRACTURE
   if (mode == 3) return lensFracture(uv);
 #endif
+  if (mode == 4) return lensFlare(uv, base);
+  if (mode == 5) return lensIcm(uv);
   return base;
 }
 
