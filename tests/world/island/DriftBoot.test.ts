@@ -2,6 +2,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { bootDrift, type MountOptions, type WorldModule } from '../../../src/world/island/DriftBoot.js';
 import { ModePreference } from '../../../src/world/core/ModePreference.js';
+import { VisitMemory } from '../../../src/world/core/VisitMemory.js';
+import type { EnteredDetail } from '../../../src/world/core/ThresholdState.js';
 import type { DeviceCapabilities } from '../../../src/world/core/DeviceProfile.js';
 import { sampleManifest } from '../fixtures.js';
 
@@ -59,11 +61,100 @@ beforeEach(() => {
   win = windowWith(() => localStorage);
   document.body.innerHTML = `
     <main><p><button data-drift-start hidden>Drift</button></p></main>
-    <section data-drift hidden tabindex="-1"><button data-drift-wake>Wake up</button></section>
+    <section data-drift hidden tabindex="-1">
+      <div class="drift-top"><button data-drift-wake>Wake up</button></div>
+      <canvas data-drift-canvas></canvas>
+      <div data-threshold hidden><p>I know you can see me</p><button data-threshold-enter hidden>Enter</button></div>
+    </section>
     <script type="application/json" id="drift-manifest">${JSON.stringify(sampleManifest)}</script>`;
 });
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+/** Collects `entered` events reaching the document. */
+function enteredEvents(): EnteredDetail[] {
+  const seen: EnteredDetail[] = [];
+  document.addEventListener('entered', (e) => seen.push((e as CustomEvent<EnteredDetail>).detail));
+  return seen;
+}
+
+describe('bootDrift — the threshold', () => {
+  it('opens a first visit on the full threshold: Enter focused, the world mounted behind it and holding still', async () => {
+    const world = fakeWorld();
+    const seen = enteredEvents();
+    const boot = bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect($('[data-threshold]').hidden).toBe(false);
+    expect($('[data-threshold]').dataset.kind).toBe('full');
+    expect(document.activeElement).toBe($('[data-threshold-enter]'));
+    expect(world.mounts[0].threshold.holding).toBe(true);
+    expect(boot?.threshold?.holding).toBe(true);
+    expect($('[data-drift-wake]').closest('[inert]')).toBeNull();
+    expect(seen).toEqual([]);
+  });
+
+  it('Enter emits "entered" (with the gesture, for the sound track) and remembers the visit', async () => {
+    const world = fakeWorld();
+    const seen = enteredEvents();
+    bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    $('[data-threshold-enter]').click();
+    expect(seen).toEqual([{ gesture: true, returning: false }]);
+    expect(world.mounts[0].threshold.holding).toBe(false);
+    expect(localStorage.getItem(VisitMemory.KEY)).toBe('1');
+  });
+
+  it('gives a returning visitor the short threshold, which enters by itself', async () => {
+    vi.useFakeTimers();
+    localStorage.setItem(VisitMemory.KEY, '1');
+    const seen = enteredEvents();
+    bootDrift(document, win, fakeWorld().load, () => capable, now);
+    expect($('[data-threshold]').dataset.kind).toBe('short');
+    vi.advanceTimersByTime(0);
+    expect(seen).toEqual([{ gesture: false, returning: true }]);
+    vi.useRealTimers();
+  });
+
+  it('gives a deep link the short threshold', () => {
+    history.replaceState(null, '', '/fr/?w=arrivee');
+    bootDrift(document, win, fakeWorld().load, () => capable, now);
+    expect($('[data-threshold]').dataset.kind).toBe('short');
+    history.replaceState(null, '', '/');
+  });
+
+  it('"Drift" on the awake page enters at once (it is the gesture): no threshold screen', async () => {
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    const seen = enteredEvents();
+    bootDrift(document, win, fakeWorld().load, () => capable, now);
+    $('[data-drift-start]').click();
+    expect($('[data-threshold]').hidden).toBe(true);
+    expect(seen).toEqual([{ gesture: true, returning: false }]);
+  });
+
+  it('the handle\'s enter() opens the world on the threshold, and leave() closes both', async () => {
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => ({ ...capable, saveData: true }), now);
+    expect(boot?.threshold).toBeNull();
+    boot?.enter();
+    await flush();
+    expect(world.mounts).toHaveLength(1);
+    expect(boot?.threshold?.visible).toBe(true);
+    boot?.leave();
+    expect(boot?.threshold?.visible).toBe(false);
+    expect($('[data-drift]').hidden).toBe(true);
+  });
+
+  it('"Wake up" on the threshold leads to the awake page without entering', async () => {
+    const seen = enteredEvents();
+    bootDrift(document, win, fakeWorld().load, () => capable, now);
+    await flush();
+    $('[data-drift-wake]').click();
+    expect($('[data-threshold]').hidden).toBe(true);
+    expect($('[data-drift]').hidden).toBe(true);
+    expect(seen).toEqual([]);
+    expect(localStorage.getItem(VisitMemory.KEY)).toBeNull();
+  });
 });
 
 describe('bootDrift', () => {
@@ -98,13 +189,14 @@ describe('bootDrift', () => {
     history.replaceState(null, '', '/');
   });
 
-  it('mounts the world for reduced motion too (ADR 0009), with "Wake up" at hand', async () => {
+  it('mounts the world for reduced motion too (ADR 0009), threshold included, with "Wake up" at hand', async () => {
     const world = fakeWorld();
     const boot = bootDrift(document, win, world.load, () => ({ ...capable, reducedMotion: true }), now);
     await flush();
     expect(boot?.decision).toMatchObject({ mode: 'world', reasons: [] });
     expect(world.mounts).toHaveLength(1);
     expect($('[data-drift]').hidden).toBe(false);
+    expect($('[data-threshold]').hidden).toBe(false);
     $('[data-drift-wake]').click();
     expect($('[data-drift]').hidden).toBe(true);
     expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');

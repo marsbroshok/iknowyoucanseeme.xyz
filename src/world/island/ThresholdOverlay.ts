@@ -30,6 +30,7 @@ export class ThresholdOverlay implements ThresholdView {
   private readonly el: HTMLElement;
   private readonly enterButton: HTMLButtonElement;
   private readonly timers: number[] = [];
+  private closed = false;
   private readonly onEnter = () => this.enter(true);
 
   /**
@@ -54,12 +55,12 @@ export class ThresholdOverlay implements ThresholdView {
 
   /** The threshold is up and the world holds still. */
   get holding(): boolean {
-    return this.state.phase === 'shown';
+    return !this.closed && this.state.phase === 'shown';
   }
 
   /** The threshold is on screen (shown or fading out). */
   get visible(): boolean {
-    return this.state.phase === 'shown' || this.state.phase === 'leaving';
+    return !this.closed && (this.state.phase === 'shown' || this.state.phase === 'leaving');
   }
 
   /** Shows the threshold (full: Enter focused, world inert; short: fades by itself unless a click is needed). */
@@ -106,6 +107,7 @@ export class ThresholdOverlay implements ThresholdView {
 
   /** Hides the overlay for good: timers cancelled, Enter detached, world parts restored. */
   private close(): void {
+    this.closed = true;
     for (const id of this.timers.splice(0)) this.timers$.clearTimeout(id);
     this.enterButton.removeEventListener('click', this.onEnter);
     this.setInert(false);

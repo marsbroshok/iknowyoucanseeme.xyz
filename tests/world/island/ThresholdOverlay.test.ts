@@ -115,6 +115,8 @@ describe('ThresholdOverlay — leaving without entering', () => {
     const { o, entered } = overlay({ ...first, returning: true });
     o.show();
     o.dismiss();
+    expect(o.visible).toBe(false);
+    expect(o.holding).toBe(false);
     vi.advanceTimersByTime(5000);
     expect(entered).toEqual([]);
     expect($('[data-threshold]').hidden).toBe(true);

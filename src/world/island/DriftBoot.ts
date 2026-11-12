@@ -5,6 +5,9 @@ import { DeepLink } from '../core/DeepLink.js';
 import { probeCapabilities, type ProbeHost } from './CapabilityProbe.js';
 import { afterFirstPaint, type PaintHost } from './FirstPaint.js';
 import { DriftLayer } from './DriftLayer.js';
+import { ThresholdState, type EnteredDetail } from '../core/ThresholdState.js';
+import { VisitMemory } from '../core/VisitMemory.js';
+import { ThresholdOverlay, type ThresholdView } from './ThresholdOverlay.js';
 
 /** What the world module receives when mounted. */
 export interface MountOptions {
@@ -13,6 +16,8 @@ export interface MountOptions {
   /** Deep-linked work (`?w=`), or `null`. */
   startSlug: string | null;
   win: Window;
+  /** The threshold over the world (the world holds still while it is up). */
+  threshold: ThresholdView;
 }
 
 /** A mounted world. */
@@ -29,7 +34,9 @@ export interface WorldModule {
 /** The running boot, for the page and for tests. */
 export interface DriftBootHandle {
   decision: DeviceDecision;
-  /** Shows the world (loading it on first use). */
+  /** The current threshold, or `null` before the world was first shown. */
+  readonly threshold: ThresholdView | null;
+  /** Shows the world (loading it on first use), on the threshold. */
   enter(): void;
   /** Back to the awake page. */
   leave(): void;
@@ -38,8 +45,11 @@ export interface DriftBootHandle {
 /**
  * Boots the drift on the home page (small script, loaded with the page):
  * decides between world and awake layer (FR1), wires the "Wake up" and
- * "Drift" controls, and loads the Three.js world only after first paint
- * and only when it is shown.
+ * "Drift" controls, opens the world on the threshold (full on a first
+ * visit, short for a returning or deep-linked one; "Drift" skips it, being
+ * itself the gesture) and emits `entered` on the world layer (bubbling,
+ * detail {@link EnteredDetail}) for the sound track, and loads the
+ * Three.js world only after first paint and only when it is shown.
  *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
@@ -61,18 +71,22 @@ export function bootDrift(
   const root = doc.querySelector<HTMLElement>('[data-drift]');
   if (!root) return null;
   const layer = new DriftLayer(root);
-  const preference = new ModePreference(storageOf(win));
+  const storage = storageOf(win);
+  const preference = new ModePreference(storage);
+  const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
   const decision = DeviceProfile.decide(caps, preference.read());
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
   let state: 'awake' | 'loading' | 'world' = 'awake';
   let handle: WorldHandle | null = null;
   let failed = false;
+  let threshold: ThresholdOverlay | null = null;
 
   const showStarts = (visible: boolean) => starts.forEach((b) => (b.hidden = !visible));
 
   const leave = (): void => {
     state = 'awake';
+    threshold?.dismiss();
     handle?.unmount();
     handle = null;
     layer.hide();
@@ -80,17 +94,26 @@ export function bootDrift(
     starts.find((b) => !b.hidden)?.focus();
   };
 
-  const enter = (): void => {
+  const enter = (manual = false): void => {
     if (state !== 'awake') return;
     state = 'loading';
+    const entered = (detail: EnteredDetail) => {
+      visits.mark();
+      root.dispatchEvent(new CustomEvent<EnteredDetail>('entered', { bubbles: true, detail }));
+    };
+    const deepLink = (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
+    const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: false }, entered), win);
+    threshold = overlay;
     layer.show();
     showStarts(false);
+    if (manual) overlay.skip();
+    else overlay.show();
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
       .then((module) => {
         const manifest = readManifest(doc);
         const startSlug = DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
-        return module.mountWorld(root, { manifest, tier, startSlug, win });
+        return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay });
       })
       .then(
         (mounted) => {
@@ -113,13 +136,20 @@ export function bootDrift(
   starts.forEach((b) =>
     b.addEventListener('click', () => {
       preference.write('world');
-      enter();
+      enter(true);
     }),
   );
 
   showStarts(caps.webgl2 && decision.mode === 'awake');
-  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, enter);
-  return { decision, enter, leave };
+  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter());
+  return {
+    decision,
+    get threshold() {
+      return threshold;
+    },
+    enter: () => enter(),
+    leave,
+  };
 }
 
 /**
