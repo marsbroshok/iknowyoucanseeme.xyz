@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { isLocalizedPage, sitemapLinks } from './src/seo/SitemapLinks.ts';
