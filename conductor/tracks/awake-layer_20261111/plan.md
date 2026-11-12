@@ -19,14 +19,14 @@ Track: `awake-layer_20261111` · Spec: [spec.md](./spec.md) · Workflow: [../../
 - [x] Task: Contact page + `ContactForm` (key present vs absent behaviour; honeypot; progressive enhancement script tested in jsdom) `e63dbc2`
 - [x] Task: Phase Verification & Checkpoint — axe landmark fix `09c1066`; `npm run check` and `npm run test:e2e` exit 0 with CI=true and with CI unset
 
-## Phase 3: SEO & quality
+## Phase 3: SEO & quality [checkpoint: 69e21e7]
 
-- [ ] Task: Sitemap with hreflang + robots (`@astrojs/sitemap` config test)
-- [ ] Task: OG image build script `tools/og/OgImageRenderer.ts` (sharp + SVG text with embedded Fraunces) — Red: dimensions/format/determinism — Green
-- [ ] Task: Guard test over `dist/`: no `€`, no price strings, every page has lang/canonical/hreflang
-- [ ] Task: Playwright e2e: crawl all routes, axe on each, contact form flows (with mocked Web3Forms endpoint in the test harness only)
-- [ ] Task: Lighthouse CI config (`lighthouserc.json`) with budgets for 3 representative pages
-- [ ] Task: Phase Verification & Checkpoint
+- [x] Task: Sitemap with hreflang + robots (`@astrojs/sitemap` config test) `a396700`
+- [x] Task: OG image build script `tools/og/OgImageRenderer.ts` (sharp + SVG text with embedded Fraunces) — Red: dimensions/format/determinism — Green `7854a2a` (text as Fraunces outlines, ADR 0003 `69b4c65`)
+- [x] Task: Guard test over `dist/`: no `€`, no price strings, every page has lang/canonical/hreflang `d153fc7`
+- [x] Task: Playwright e2e: crawl all routes, axe on each, contact form flows (with mocked Web3Forms endpoint in the test harness only) `eff2b1a` (found + fixed fetch receiver bug `7231b1b`; lint fix `b983138`)
+- [x] Task: Lighthouse CI config (`lighthouserc.json`) with budgets for 3 representative pages `69e21e7` — local run (`@lhci/cli` 0.14, Playwright Chromium, mobile): /en/ perf 0.99 · a11y 1 · BP 0.96 · SEO 1; /fr/territoires/dreamland/ 0.98 · 1 · 0.96 · 1; /en/works/arrivee/ 0.99 · 1 · 0.96 · 1
+- [x] Task: Phase Verification & Checkpoint — `npm run check` (213 unit tests, 100% coverage) and `npm run test:e2e` (113 passed: 97 routes axe-clean, guard, contact flows) exit 0 with CI=true and with CI unset
 
 ## Inherited Findings
 
@@ -43,4 +43,14 @@ From `astro-foundation_20261111` (non-blocking):
 - Image alt text = work title (+ EN subtitle on the EN site) until the schema has an alt field.
 - Exhibitions: `year`/`venue`/`dates` added to the schema and the intake generator (facts from product.md); titles are proper names (original FR title on both sites).
 - Publisher identity on the legal page = artist name + contact email (spec).
+- OG text is drawn as Fraunces outlines (opentype.js) instead of SVG `<text>`: Pango/librsvg ignored the font file (ADR 0003).
+- The e2e suite builds a second, keyed variant (`ASTRO_OUT_DIR=dist-e2e-keyed`, `PUBLIC_WEB3FORMS_KEY=e2e-test-key`) served next to `dist/` by a small static server.
+- `opentype.js` pinned to ^1.3.4: the npm proxy's `latest` tag pointed at 0.8.0.
 - Contact without JavaScript: plain POST lands on the Web3Forms result page; the `work` field is filled only by the enhancement script.
+
+## Out-of-scope findings
+
+- `Footer.astro` hardcodes English copy ("all rights reserved", "Legal Notice"/"Mentions Légales") instead of `ui.yaml`; the FR footer shows English text.
+- `SkipLink.astro` text is English on both locales (`ui.yaml` already has `skip_content`).
+- `src/i18n/UIStrings.ts#getUIString` silently falls back (warn + EN/key); pages now use the strict `UiText`, the old helper is unused by pages and could be removed.
+- The root chooser `src/pages/index.astro` has no canonical/hreflang (it is excluded from the sitemap; the guard only requires `lang` there).
