@@ -8,6 +8,7 @@ import { requireBlock } from '../../src/content/PageBlocks.js';
 import { buildPersonJsonLd } from '../../src/domain/JsonLd.js';
 import { tb } from './fixtures.js';
 import { readAnalyticsConfig } from '../../src/analytics/AnalyticsConfig.js';
+import { leakScript } from '../../src/leak/LeakScript.js';
 
 const exhibitions = [
   { slug: 'mpaa-2019', title: { fr: "L'Emprunt, la Citation" }, year: 2019, venue: 'MPAA', dates: { en: 'Dec 2019', fr: 'déc. 2019' } },
@@ -92,6 +93,21 @@ describe('static pages', () => {
     }
     expect(html).toContain('href="mailto:marsbroshok+iknowyoucanseeme@gmail.com"');
     expect(html).toContain('hreflang="fr" href="https://www.iknowyoucanseeme.xyz/fr/mentions-legales/"');
+  });
+
+  it('LegalPage: "Clear the leak" (EN + FR), hidden until the leak script shows it, with a polite status line', async () => {
+    for (const [lang, clear, done] of [
+      ['en', 'Clear the leak', 'The leak is cleared.'],
+      // Text content escapes the apostrophe, attribute values keep it.
+      ['fr', 'Effacer l&#39;infiltration', "L'infiltration est effacée."],
+    ] as const) {
+      const html = await container.renderToString(LegalPage, {
+        props: { lang, copyright: 'c', imageUse: 'i', privacy: 'p', publisher: 'pub', analytics: readAnalyticsConfig(undefined) },
+      });
+      expect(html, lang).toMatch(new RegExp(`<button type="button" class="leak-clear"[^>]*data-leak-clear[^>]*hidden[^>]*>${clear}</button>`));
+      expect(html, lang).toMatch(new RegExp(`<p data-leak-cleared role="status" data-text="${done}"[^>]*></p>`));
+      expect(html, lang).toContain(leakScript());
+    }
   });
 
   it('LegalPage: no analytics sentence when analytics is disabled (the page never claims a counter that is not there)', async () => {
