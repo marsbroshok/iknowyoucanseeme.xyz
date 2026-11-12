@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "Bilingual portfolio of the photographer and ceramicist Alexander Usoltsev (iknowyoucanseeme.xyz), built with Astro.",
-  "main": "index.js",
   "scripts": {
     "dev": "astro dev",
     "test": "vitest run",
@@ -21,7 +20,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

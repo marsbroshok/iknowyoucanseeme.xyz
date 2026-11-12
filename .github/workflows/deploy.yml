@@ -9,8 +9,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # One deployment at a time; a running deployment is never cancelled.
 concurrency:
@@ -27,7 +25,7 @@ jobs:
       PUBLIC_GOATCOUNTER_CODE: ${{ vars.PUBLIC_GOATCOUNTER_CODE }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Lint workflows (actionlint)
         run: |
@@ -35,7 +33,7 @@ jobs:
           ./actionlint -color
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -43,27 +41,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check (types, lint, unit tests with coverage, build)
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      # npm run check ends with `astro build`, so dist/ is built exactly once.
+      - name: Check and build (types, lint, unit tests with coverage, astro build)
         run: npm run check
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build site
-        run: npx astro build
-
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # Only the deploy job can write to Pages and request an OIDC token.
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

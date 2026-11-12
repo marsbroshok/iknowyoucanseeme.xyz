@@ -24,6 +24,7 @@ interface Job {
   needs?: string | string[];
   env?: Record<string, string>;
   environment?: { name: string; url: string };
+  permissions?: Record<string, string>;
   steps: Step[];
 }
 interface Workflow {
@@ -56,26 +57,30 @@ describe('deploy.yml', () => {
     expect('workflow_dispatch' in workflow.on).toBe(true);
   });
 
-  it('has exactly the GitHub Pages permissions and one deployment at a time', () => {
-    expect(workflow.permissions).toEqual({ contents: 'read', pages: 'write', 'id-token': 'write' });
+  it('grants Pages permissions to the deploy job only, and one deployment at a time', () => {
+    expect(workflow.permissions).toEqual({ contents: 'read' });
+    expect(build.permissions).toBeUndefined();
+    expect(deploy.permissions).toEqual({ pages: 'write', 'id-token': 'write' });
     expect(workflow.concurrency).toEqual({ group: 'pages', 'cancel-in-progress': false });
   });
 
-  it('builds in order: checkout, actionlint, node, npm ci, npm run check, astro build, upload dist/', () => {
+  it('builds once, in order: checkout, actionlint, node, npm ci, configure-pages, npm run check (ends with astro build), upload dist/', () => {
     const s = build.steps;
     const order = [
-      stepIndex(s, 'checkout', (x) => x.uses === 'actions/checkout@v4'),
+      stepIndex(s, 'checkout', (x) => x.uses === 'actions/checkout@v7'),
       stepIndex(s, 'actionlint', (x) => /actionlint/.test(x.run ?? '')),
-      stepIndex(s, 'setup-node', (x) => x.uses === 'actions/setup-node@v4'),
+      stepIndex(s, 'setup-node', (x) => x.uses === 'actions/setup-node@v7'),
       stepIndex(s, 'npm ci', (x) => x.run === 'npm ci'),
+      stepIndex(s, 'configure-pages', (x) => x.uses === 'actions/configure-pages@v6'),
       stepIndex(s, 'check', (x) => x.run === 'npm run check'),
-      stepIndex(s, 'configure-pages', (x) => x.uses === 'actions/configure-pages@v5'),
-      stepIndex(s, 'astro build', (x) => x.run === 'npx astro build'),
-      stepIndex(s, 'upload', (x) => x.uses === 'actions/upload-pages-artifact@v3'),
+      stepIndex(s, 'upload', (x) => x.uses === 'actions/upload-pages-artifact@v5'),
     ];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    expect(s[order[7]].with).toEqual({ path: 'dist' });
+    expect(s[order[6]].with).toEqual({ path: 'dist' });
     expect(s[order[2]].with).toMatchObject({ cache: 'npm' });
+    expect(s.filter((x) => /astro build/.test(x.run ?? ''))).toEqual([]);
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')) as { scripts: Record<string, string> };
+    expect(pkg.scripts.check).toMatch(/astro build$/);
   });
 
   it('pins actionlint to a release and runs it on the workflows', () => {
@@ -95,7 +100,7 @@ describe('deploy.yml', () => {
   it('deploys the uploaded artifact to the github-pages environment after the build', () => {
     expect(deploy.needs).toBe('build');
     expect(deploy.environment).toEqual({ name: 'github-pages', url: '${{ steps.deployment.outputs.page_url }}' });
-    expect(deploy.steps).toEqual([{ name: 'Deploy to GitHub Pages', id: 'deployment', uses: 'actions/deploy-pages@v4' }]);
+    expect(deploy.steps).toEqual([{ name: 'Deploy to GitHub Pages', id: 'deployment', uses: 'actions/deploy-pages@v5' }]);
   });
 
   it('runs on hosted Ubuntu runners', () => {
