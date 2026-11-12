@@ -49,7 +49,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 10: The Leak, specimens & exhibition mode**
+- [x] **Track 10: The Leak, specimens & exhibition mode**
   *Link: [./tracks/leak_20261111/index.md](./tracks/leak_20261111/index.md)*
 
 ---
