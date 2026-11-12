@@ -52,6 +52,8 @@
 | pages/ui.yaml | blocks.drift_link | draft | See it in the drift | Voir dans la dérive | spec |
 | pages/ui.yaml | blocks.medium_photo | draft | photograph | photographie | spec |
 | pages/ui.yaml | blocks.medium_ceramic | draft | ceramic | céramique | spec |
+| pages/ui.yaml | blocks.technique_colour_filter | draft | colour filter | filtre coloré | artist_decision_2026_11_12 |
+| pages/ui.yaml | blocks.technique_icm | draft | ICM | ICM | spec |
 | pages/ui.yaml | blocks.work_contact_link | draft | Ask about this work | Demander au sujet de cette œuvre | spec |
 | pages/ui.yaml | blocks.contact_intro | draft | Write to me about a work, an exhibition or anything else. | Écrivez-moi au sujet d'une œuvre, d'une exposition ou d'autre chose. | spec |
 | pages/ui.yaml | blocks.contact_email_only | draft | The best way to reach me is by email. | Le mieux est de m'écrire par email. | spec |

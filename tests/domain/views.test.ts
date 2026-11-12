@@ -22,14 +22,14 @@ const work = (over: Partial<Work> = {}): Work => ({
 describe('buildWorkView', () => {
   it('EN site: FR title + EN subtitle, localized medium, contact link with ?work=', () => {
     const v = buildWorkView(
-      work({ title: { fr: 'Un étranger', en: 'A Stranger' }, size: { w: 30, h: 40, unit: 'cm' }, techniques: ['ICM', 'gel'] }),
+      work({ title: { fr: 'Un étranger', en: 'A Stranger' }, size: { w: 30, h: 40, unit: 'cm' }, techniques: ['ICM', 'colour filter'] }),
       uiText('en'),
     );
     expect(v.title).toBe('Un étranger');
     expect(v.year).toBe(2025);
     expect(v.subtitle).toBe('A Stranger');
     expect(v.displayTitle).toBe('Un étranger (A Stranger)');
-    expect(v.metaLine).toBe('30 × 40 cm · 2025 · photograph · ICM, gel');
+    expect(v.metaLine).toBe('30 × 40 cm · 2025 · photograph · ICM, colour filter');
     expect(v.href).toBe('/en/works/arrivee/');
     expect(v.contactHref).toBe('/en/contact/?work=arrivee');
     expect(v.availabilityLabel).toBe('Contact for availability');
@@ -43,6 +43,12 @@ describe('buildWorkView', () => {
     expect(v.metaLine).toBe('2025 · céramique');
     expect(v.href).toBe('/fr/oeuvres/arrivee/');
     expect(v.contactHref).toBe('/fr/contact/?work=arrivee');
+  });
+
+  it('names declared techniques in the page language (FR pages stay French), and fails the build for an unnamed one', () => {
+    expect(buildWorkView(work({ techniques: ['colour filter'] }), uiText('fr')).metaLine).toBe('2025 · photographie · filtre coloré');
+    expect(buildWorkView(work({ techniques: ['Colour  Filter'] }), uiText('en')).metaLine).toBe('2025 · photograph · colour filter');
+    expect(() => buildWorkView(work({ techniques: ['cyanotype'] }), uiText('fr'))).toThrow('[UiText] Missing UI string "technique_cyanotype"');
   });
 
   it('EN site without EN title shows only the FR title', () => {

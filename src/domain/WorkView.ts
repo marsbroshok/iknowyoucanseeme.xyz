@@ -33,12 +33,23 @@ export interface WorkView {
 }
 
 /**
+ * UI string id of a declared technique (`colour filter` → `technique_colour_filter`):
+ * declared techniques are named in the page language from `ui.yaml`.
+ *
+ * @param technique - Declared technique as written in the work file.
+ * @returns The UI string id.
+ */
+export function techniqueKey(technique: string): string {
+  return `technique_${technique.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+}
+
+/**
  * Builds the display model of a work for one locale.
  *
  * @param work - The work, with its copy merged in (see `withCopy`).
  * @param ui - Strict UI strings of the target locale.
  * @returns The view model.
- * @throws Error when a needed UI string (medium label) is missing.
+ * @throws Error when a needed UI string (medium label, declared technique) is missing.
  */
 export function buildWorkView(work: Work, ui: UiText): WorkView {
   const lang = ui.lang;
@@ -49,7 +60,7 @@ export function buildWorkView(work: Work, ui: UiText): WorkView {
   if (work.size) metaParts.push(`${work.size.w} × ${work.size.h} ${work.size.unit}`);
   metaParts.push(String(work.year));
   metaParts.push(ui.t(`medium_${work.medium}`));
-  if (work.techniques && work.techniques.length > 0) metaParts.push(work.techniques.join(', '));
+  if (work.techniques && work.techniques.length > 0) metaParts.push(work.techniques.map((t) => ui.t(techniqueKey(t))).join(', '));
 
   const href = localizedPath('works', lang, [work.slug]);
   return {

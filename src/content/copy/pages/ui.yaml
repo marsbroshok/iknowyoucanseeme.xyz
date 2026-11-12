@@ -240,6 +240,18 @@ blocks:
     fr: céramique
     sources:
       - spec
+  technique_colour_filter:
+    status: draft
+    en: colour filter
+    fr: filtre coloré
+    sources:
+      - artist_decision_2026_11_12
+  technique_icm:
+    status: draft
+    en: ICM
+    fr: ICM
+    sources:
+      - spec
   work_contact_link:
     status: draft
     en: Ask about this work
