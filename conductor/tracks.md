@@ -29,7 +29,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 6: The Drift: WebGL world core**
+- [x] **Track 6: The Drift: WebGL world core**
   *Link: [./tracks/drift-world_20261111/index.md](./tracks/drift-world_20261111/index.md)*
 
 ---
