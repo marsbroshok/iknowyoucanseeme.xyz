@@ -34,8 +34,6 @@ export interface LensHarness {
   errors: string[];
   /** Draws with a lens (or none) and returns RGBA pixels, bottom row first. */
   draw(lens: HarnessLens | null, tier: QualityTier): number[];
-  /** Sum of the test texture's bytes (to prove the lens never changes it). */
-  textureChecksum(): number;
 }
 
 /** A smooth colour field with a sharp checker and diagonal bars: hue, edges and texture. */
@@ -86,8 +84,7 @@ const half = APPARITION_LONG_EDGE / 2;
 const camera = new OrthographicCamera(-half, half, half, -half, 0.1, 10);
 camera.position.z = 5;
 const scene = new Scene();
-const pixels = testPixels(0);
-const image = texture(pixels);
+const image = texture(testPixels(0));
 const partner = texture(testPixels(37).map((b, i) => (i % 4 === 3 ? b : 255 - b)));
 
 const meshes: Record<QualityTier, ApparitionMesh> = {
@@ -124,9 +121,6 @@ const harness: LensHarness = {
     const out = new Uint8Array(SIZE * SIZE * 4);
     gl.readPixels(0, 0, SIZE, SIZE, gl.RGBA, gl.UNSIGNED_BYTE, out);
     return Array.from(out);
-  },
-  textureChecksum() {
-    return pixels.reduce((a, b) => a + b, 0);
   },
 };
 
