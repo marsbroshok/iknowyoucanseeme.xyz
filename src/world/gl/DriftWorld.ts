@@ -147,9 +147,9 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
 
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
 
-  // The threshold's breathing leak, the gaze and the fragments (decisions in src/world/core).
+  // The threshold's boreal curtain, the gaze and the fragments (decisions in src/world/core).
   const leakCanvas = part<HTMLCanvasElement>(root, '[data-threshold-leak]');
-  let leak: ThresholdLeak | null = threshold.visible ? new ThresholdLeak(leakCanvas, ThresholdPalette.pick(manifest.works, Math.random), win) : null;
+  let leak: ThresholdLeak | null = threshold.visible ? new ThresholdLeak(leakCanvas, ThresholdPalette.pick(manifest.works, Math.random), win, tier) : null;
   const gaze = new GazeDirector(webStorage(win, 'sessionStorage'), Math.random);
   const fragments = new FragmentSurfacer(
     new FragmentCatalog(session.stops, manifest.works, manifest.territories),

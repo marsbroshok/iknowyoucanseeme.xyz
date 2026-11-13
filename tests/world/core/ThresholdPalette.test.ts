@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { BOREAL_THRESHOLD, ThresholdPalette, type PaletteWork } from '../../../src/world/core/ThresholdPalette.js';
+import { BOREAL_THRESHOLD, ThresholdPalette, borealDefines, type PaletteWork } from '../../../src/world/core/ThresholdPalette.js';
 import { SKY } from '../../../src/world/core/PaletteSky.js';
 import { contrast } from '../../../src/design/AccentColor.js';
 
@@ -74,5 +74,10 @@ describe('ThresholdPalette.pick', () => {
         expect([...pool, BOREAL_THRESHOLD.base]).toContain(picked.leak);
       }),
     );
+  });
+
+  it('supplies higher FBM octave count on high tier and lower step count on low tier', () => {
+    expect(borealDefines('high')).toEqual({ BOREAL_OCTAVES: 4 });
+    expect(borealDefines('low')).toEqual({ BOREAL_OCTAVES: 2 });
   });
 });

@@ -1,4 +1,21 @@
+import type { QualityTier } from './DeviceProfile.js';
 import type { ZoneSlug } from './FieldLayout.js';
+
+/** Per-tier FBM octave budget for boreal curtain shaders (`ThresholdLeak` and `BorealGateMesh`). */
+export const BOREAL_QUALITY: Readonly<Record<QualityTier, { octaves: number }>> = {
+  high: { octaves: 4 },
+  low: { octaves: 2 },
+};
+
+/**
+ * GLSL preprocessor defines for boreal curtain shaders on a quality tier.
+ *
+ * @param tier - Quality tier.
+ * @returns `BOREAL_OCTAVES` define map.
+ */
+export function borealDefines(tier: QualityTier): Record<string, number> {
+  return { BOREAL_OCTAVES: BOREAL_QUALITY[tier].octaves };
+}
 
 /** A work as the threshold palette needs it. */
 export interface PaletteWork {
