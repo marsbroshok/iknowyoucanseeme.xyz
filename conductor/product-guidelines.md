@@ -2,12 +2,12 @@
 
 ## Voice & Tone
 
-- **Primary voice:** the voice of the *Dreamland* statement. Quiet, poetic, conceptual, first person used sparingly. Short sentences that leave space.
+- **Primary voice:** the voice of the *Dreamland* exhibition manifesto. Lyrical, philosophical, atmospheric, and measured, with first person used sparingly and cadenced sentences (typically 15–35 words) that breathe naturally.
 - **Ceramics & process:** the same voice, but warmer and more tactile (clay, hands, kiln, glaze, time).
-- **Never:** "quirky", "coffee-fueled", emoji, marketing superlatives, sales language ("buy now", "limited offer"), exclamation marks.
-- **Recurring motifs:** border, threshold, leak, drift, lens, echo, reflection, arrival, strangeness made familiar.
-- **Work fragments:** each work gets a 1–2 line poetic fragment, not a description.
-- **Authentic, simple vocabulary (artist's directive):** neither FR nor EN is the artist's native language. Use only plain words he would actually say in real life. Do NOT use rare, literary or "writerly" words (e.g. *s'amincir*, *gossamer*, *liminal*); a simple phrase beats an elegant one. The artist's own captions are the reference register.
+- **Never:** "quirky", "coffee-fueled", emoji, marketing superlatives, sales language ("buy now", "limited offer"), exclamation marks—and **never choppy, infantile A1 baby-sentences** (*"I live in France. I left my country."*).
+- **Recurring motifs:** border, threshold, leak, drift, lens, echo, reflection, arrival, strangeness made familiar, permeable boundary, boreal curtain.
+- **Work fragments:** each work gets a genuine 1–2 line poetic fragment (7–24 words), never a literal image description or flat 3–4 word label.
+- **Clear, resonant vocabulary ("Simple does not mean dumb" — artist's directive, 2026-11-12):** write in the authentic register of the *Dreamland* manifesto and the artist's 2025–2026 captions. Avoid obscure dictionary jargon (*gossamer*, *ineffable*, *évanescent*), but embrace natural compound clauses, quiet metaphors (*anchor*, *resonant space*, *permeable boundary*, *strange new light*), and mature prose rhythm.
 
 ## Language
 
@@ -19,7 +19,7 @@
 
 - Artist: **Alexander Usoltsev**. Signature/universe: **iknowyoucanseeme** (lowercase, one word).
 - Zones: **Arrival / Arrivée**, **Lens / La Loupe**, **Leak / L'Infiltration**. Awake layer toggle: **Wake up / Se réveiller** and **Drift / Dériver**. Threshold: **Enter / Entrer**. (Final FR wording is subject to native proof.)
-- The gaze line: *"I know you can see me" / « Je sais que tu me vois »*. Used at the threshold and rarely after that.
+- The gaze line: *"I know you can see me" / « Je sais que tu me vois »*. Reserved strictly for the rare Gaze whisper in the fog—never duplicated on the Awake home page or Threshold screen (artist directive, 2026-11-12).
 
 ## Visual Identity
 

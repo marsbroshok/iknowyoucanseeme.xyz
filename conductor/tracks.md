@@ -54,5 +54,20 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 11: Ceramic specimens in 3D (BLOCKED)**
+- [ ] **Track 11: Dreamland manifesto voice rewrite & Gaze de-duplication**
+  *Link: [./tracks/voice-and-gaze-dedup_20261112/index.md](./tracks/voice-and-gaze-dedup_20261112/index.md)*
+
+---
+
+- [ ] **Track 12: Deep-link wake-up entry fix & compact desktop spatial density**
+  *Link: [./tracks/drift-navigation-and-density_20261112/index.md](./tracks/drift-navigation-and-density_20261112/index.md)*
+
+---
+
+- [ ] **Track 13: Boreal light curtain threshold & unmistakable zone transitions**
+  *Link: [./tracks/aurora-thresholds-and-zones_20261112/index.md](./tracks/aurora-thresholds-and-zones_20261112/index.md)*
+
+---
+
+- [ ] **Track 14: Ceramic specimens in 3D (BLOCKED)**
   *Link: [./tracks/ceramics-3d_20261111/index.md](./tracks/ceramics-3d_20261111/index.md)*

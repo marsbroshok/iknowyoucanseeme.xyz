@@ -45,7 +45,7 @@ The hashtag *#iknowyoucanseeme* began with the 2019 group show *L'Emprunt, la Ci
 
 ## The Gaze ("I know you can see me")
 
-The name is a reversal of the gaze: the dream watches back. The world quietly *notices* the visitor. Apparitions turn toward a lingering cursor, and in rare moments a line surfaces: *"I know you can see me" / « Je sais que tu me vois »*. It is used once at the threshold and sparingly after that, never as a gimmick.
+The name is a reversal of the gaze: the dream watches back. The world quietly *notices* the visitor. Apparitions turn toward a lingering cursor, and in rare moments a line surfaces in the fog: *"I know you can see me" / « Je sais que tu me vois »*. Per artist feedback (2026-11-12), it is never repeated on the Awake home page or Threshold screen (which carry the *Dreamland* border line instead)—reserving the phrase strictly for the rare fog whisper so it never feels redundant.
 
 ## Audiences
 
@@ -66,16 +66,16 @@ The name is a reversal of the gaze: the dream watches back. The world quietly *n
 ## Key Features
 
 ### The Threshold (first screen)
-- Near-black night-blue void, one quiet line of text (FR/EN), and a single slowly breathing colour leak.
+- Near-black night-blue void, the *Dreamland* border line (FR/EN), and a shimmering **wall of aurora / boreal lights** (vertical curtains in deep night hues, emerald/teal greens, violets, and pinks representing the permeable border).
 - Clicking **Entrer / Enter** unlocks sound and starts the drift. A small **Se réveiller / Wake up** link to the awake layer is always visible.
 
 ### The Drift (immersive world)
-- Continuous foggy WebGL field navigated by scroll, drag or device tilt; non-linear; works appear as apparitions on approach.
-- Three soft zones mirroring the exhibition:
+- Continuous, compact foggy WebGL field navigated by scroll, drag or device tilt; non-linear; 4–6 works frame the visitor's sightline at varying depths so the field feels intimate rather than sparse.
+- Three distinct zones mirroring the exhibition, separated by shimmering **3D boreal light curtains** and distinct per-zone sky/fog atmospheres + crossing announcements:
   1. **Arrival:** vast atmospheric colour fields (e.g. *Immersion I/II, Solitude, Arrivée*).
   2. **Lens:** sharper, specific flora and fauna (e.g. *Les Reflets I–III, La Frontière s'estompe, Un Étranger*).
-  3. **Leak:** ceramics as specimens; the threshold back to "our world".
-- A faint horizon/compass so visitors are never truly lost.
+  3. **Leak:** ceramics and portraits as specimens; the threshold back to "our world".
+- Clear segmented horizon/zone bar so visitors always see which zone they inhabit and where borders lie.
 - **Lens interaction:** the cursor/finger emulates the artist's camera techniques over works: custom colour filters/gels, mirror fold/kaleidoscope, multiple exposure (blending with another work), fracture & re-collage, light leaks/lens flare, and motion blur/ICM.
 - **Text in the world:** no paragraphs. Fragments of the statement and work fragments surface near works like overheard thoughts, and reading them all reconstructs the statement.
 - **Sound:** generative WebAudio ambience reacting to position, layered with the artist's field recordings; starts only on a threshold click.
