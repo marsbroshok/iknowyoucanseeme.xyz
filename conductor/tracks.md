@@ -64,7 +64,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 13: Boreal light curtain threshold & unmistakable zone transitions**
+- [x] **Track 13: Boreal light curtain threshold & unmistakable zone transitions**
   *Link: [./tracks/aurora-thresholds-and-zones_20261112/index.md](./tracks/aurora-thresholds-and-zones_20261112/index.md)*
 
 ---
