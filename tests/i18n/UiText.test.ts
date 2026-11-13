@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import yaml from 'yaml';
 import { UiText } from '../../src/i18n/UiText.js';
 import { UI_BLOCKS, parseUiBlocks, uiText } from '../../src/i18n/UiCatalog.js';
+import { PageSchema } from '../../src/content/schema/index.js';
+import { requireBlock } from '../../src/content/PageBlocks.js';
 
 const block = (en: string, fr: string) => ({ status: 'draft' as const, en, fr, sources: ['spec'] });
 
@@ -28,9 +31,24 @@ describe('UiCatalog', () => {
     expect(() => parseUiBlocks('slug: nope\n')).toThrow();
   });
 
-  it('loads the real ui.yaml', () => {
+  it('loads the real ui.yaml including artist_practice', () => {
     expect(uiText('fr').t('nav_works')).toBe('Œuvres');
     expect(uiText('en').t('nav_works')).toBe('Works');
+    expect(uiText('en').t('artist_practice')).toBe('Photographer & ceramic artist');
+    expect(uiText('fr').t('artist_practice')).toBe('Photographe et artiste céramiste');
+  });
+
+  it('provides threshold.yaml blocks.line distinct from gaze in both locales', () => {
+    const raw = fs.readFileSync(path.resolve(__dirname, '../../src/content/copy/pages/threshold.yaml'), 'utf8');
+    const threshold = PageSchema.parse(yaml.parse(raw));
+    expect(requireBlock(threshold, 'line', 'en')).toBe(
+      'The border is blurred, the realities are mixing, and the Dreamland is leaking into our world.',
+    );
+    expect(requireBlock(threshold, 'line', 'fr')).toBe(
+      "La frontière se trouble, les réalités se mêlent, et le Dreamland s'infiltre dans notre monde.",
+    );
+    expect(requireBlock(threshold, 'line', 'en')).not.toBe(uiText('en').t('gaze'));
+    expect(requireBlock(threshold, 'line', 'fr')).not.toBe(uiText('fr').t('gaze'));
   });
 
   it('every key used by a component or page exists in ui.yaml', () => {
