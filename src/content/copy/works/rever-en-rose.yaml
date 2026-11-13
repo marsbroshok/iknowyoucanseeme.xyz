@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: A color that changes the view.
-  fr: Une couleur qui change la vue.
+  en: Each step forward leaves a small farewell behind, tinting the known world in shifted colour.
+  fr: Chaque pas en avant laisse derrière lui un discret adieu, teintant le connu d'une lueur déplacée.
   sources:
     - rever-en-rose
     - exhibition_statement_2025_p1

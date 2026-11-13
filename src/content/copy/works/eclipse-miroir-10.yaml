@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: Light torn apart by mirrors.
-  fr: La lumière déchirée par les miroirs.
+  en: Handheld mirrors and dark filters catch the eclipse in-camera, tearing textbook daylight into raw geometry.
+  fr: Miroirs tenus à la main et filtres sombres saisissent l'éclipse, déchirant la lumière en géométrie brute.
   sources:
     - eclipse-miroir-10
     - caption_eclipse

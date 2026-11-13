@@ -64,4 +64,19 @@ describe('Draft contents', () => {
       }
     }
   });
+
+  it('enforces fragment word-count bounds (7..24 words) across all 40 works so flat labels cannot return', () => {
+    const worksCopyDir = path.resolve(__dirname, '../src/content/copy/works');
+    const files = fs.readdirSync(worksCopyDir).filter((f) => f.endsWith('.yaml'));
+    for (const file of files) {
+      const parsed = yaml.parse(fs.readFileSync(path.join(worksCopyDir, file), 'utf8'));
+      const fragment = parsed.fragment;
+      for (const lang of ['en', 'fr'] as const) {
+        const words = String(fragment[lang]).trim().split(/\s+/).filter((w) => w.length > 0);
+        if (words.length < 7 || words.length > 24) {
+          throw new Error(`Work fragment ${file} (${lang}) has ${words.length} words; expected 7..24 words`);
+        }
+      }
+    }
+  });
 });

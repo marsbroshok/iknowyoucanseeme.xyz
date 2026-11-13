@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: Cold stone swallows fire.
-  fr: La pierre froide avale le feu.
+  en: Cold stone swallows solar fire until the surrounding void claims what remains of pure energy.
+  fr: La pierre froide avale le feu solaire jusqu'à ce que le vide reprenne cette pure énergie déplacée.
   sources:
     - eclipse-miroir-11
     - caption_eclipse

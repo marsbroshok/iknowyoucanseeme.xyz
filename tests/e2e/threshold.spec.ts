@@ -158,8 +158,9 @@ test.describe('Gaze and fragments', () => {
     await worldReady(page);
     const said = page.locator('[data-drift-said]');
     await expect(said).toHaveAttribute('aria-live', 'polite');
-    await expect(said).toHaveText('The moment of return.', { timeout: 10_000 });
-    await expect(page.locator('[data-drift-fragment]')).toHaveText('The moment of return.');
+    const arriveeLine = 'When the anchor of a physical shore disappears, arrival begins inside a wash of deep blue.';
+    await expect(said).toHaveText(arriveeLine, { timeout: 10_000 });
+    await expect(page.locator('[data-drift-fragment]')).toHaveText(arriveeLine);
     await expect.poll(async () => (await debug(page)).fragment?.opacity ?? 0).toBeGreaterThan(0.5);
     expect((await debug(page)).fragment?.id).toBe('work:arrivee');
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('iknowyoucanseeme:fragments') ?? '[]'))).toContain('work:arrivee');

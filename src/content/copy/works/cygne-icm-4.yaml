@@ -1,7 +1,7 @@
 fragment:
   status: draft
-  en: Heavy rain in November.
-  fr: Forte pluie en novembre.
+  en: Under a slate November sky, a white neck carves a bright arc through blurred rain.
+  fr: Sous un ciel d'ardoise en novembre, une courbe blanche fend la pluie filée d'un trait lumineux.
   sources:
     - cygne-icm-4
     - caption_4
