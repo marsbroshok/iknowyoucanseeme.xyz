@@ -141,8 +141,9 @@ never removed; while the world is shown it is made `inert`.
   iOS permission prompt). Tab goes to the nearest work, then along the
   path; Enter opens it in a dialog with its links.
 - Deep links: `/{lang}/?w=<slug>` opens the world in front of a work; every
-  work page has a "See it in the drift" link. The address follows the work
-  the visitor stops at.
+  work page has a "See it in the drift" link, which also overrides a stored
+  "Wake up" choice back into the world on WebGL2 devices without Save-Data.
+  The address follows the work the visitor stops at.
 - Lens: pointing at a work (mouse, or a finger while it touches) shows it
   through one of the artist's camera techniques inside a soft circle:
   colour filter, mirror fold, multiple exposure, fracture and collage,
