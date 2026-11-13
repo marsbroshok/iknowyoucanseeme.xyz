@@ -12,7 +12,7 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
     - [x] Green: implement `src/world/core/ZoneGates.ts` and `src/world/core/ZoneCrossing.ts`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `97203e8`
 
-## Phase 2: Boreal Shaders & 3D Zone Portals
+## Phase 2: Boreal Shaders & 3D Zone Portals [checkpoint: afe7a19]
 
 - [x] Task: Aurora Borealis curtain shader on `ThresholdLeak.ts` `1303c5d`
     - [x] Red: Playwright visual pixel-statistics test asserting vertical curtain structure and green + violet + pink chromatic presence on `[data-threshold-leak]`
@@ -20,7 +20,7 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
 - [x] Task: `BorealGateMesh` 3D aurora curtain portals in `src/world/gl/` + wire `ZoneAtmosphere` & `BorealGateMesh` into `DriftWorld.ts` `afe7a19`
     - [x] Red: Playwright WebGL visual/e2e test verifying 3D gate meshes render across zone gaps and soften near the camera
     - [x] Green: implement `src/world/gl/BorealGateMesh.ts` and wire into `DriftWorld.ts`
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `afe7a19`
 
 ## Phase 3: Zone-Crossing Banner & Interactive Zone Strip
 
