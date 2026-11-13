@@ -59,7 +59,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 12: Deep-link wake-up entry fix & compact desktop spatial density**
+- [x] **Track 12: Deep-link wake-up entry fix & compact desktop spatial density**
   *Link: [./tracks/drift-navigation-and-density_20261112/index.md](./tracks/drift-navigation-and-density_20261112/index.md)*
 
 ---
