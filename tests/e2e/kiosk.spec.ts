@@ -152,6 +152,12 @@ test.describe('Exhibition mode (?kiosk=1)', () => {
 
     await jumpClock(page, KIOSK.autoDriftAfterMs + 500);
     await expect.poll(async () => (await debug(page))?.fragment?.id ?? null, { timeout: 30_000 }).not.toBeNull();
+    await jumpClock(page, KIOSK.autoDriftEveryMs);
+    await expect.poll(async () => {
+      await frames(page, 5);
+      const p = (await debug(page))?.pose;
+      return Math.hypot((p?.x ?? 0) - (start?.x ?? 0), (p?.z ?? 0) - (start?.z ?? 0)) > 5;
+    }, { timeout: 30_000 }).toBe(true);
     const settled = (await debug(page))?.pose;
     expect(Math.hypot((settled?.x ?? 0) - (start?.x ?? 0), (settled?.z ?? 0) - (start?.z ?? 0))).toBeGreaterThan(5);
     expect(new URL(page.url()).searchParams.get('w')).toBeNull();

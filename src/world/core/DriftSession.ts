@@ -19,7 +19,7 @@ export const SESSION = {
   /** …and this angle from straight ahead (radians). */
   facingAngle: 0.35,
   /** Apparition curve per tier: [near, far]. */
-  apparition: { high: [8, 38], low: [6, 30] } as Record<QualityTier, [number, number]>,
+  apparition: { high: [10, 42], low: [7, 34] } as Record<QualityTier, [number, number]>,
 } as const;
 
 /** A work's place in this frame. */

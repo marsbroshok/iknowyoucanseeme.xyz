@@ -20,11 +20,13 @@ describe('StageSettings', () => {
     expect(STAGE_SETTINGS.low.antialias).toBe(false);
   });
 
-  it('fogs the night blue so works 42 units away are nearly gone', () => {
+  it('fogs the night blue gently so layered works up to ~30 units remain legible while distant works at 60 units dissolve', () => {
     expect(NIGHT_BLUE).toBe('#0b1030');
+    expect(FOG_DENSITY).toBe(0.03);
     const fogged = (d: number) => 1 - Math.exp(-((FOG_DENSITY * d) ** 2));
-    expect(fogged(5)).toBeLessThan(0.1);
-    expect(fogged(42)).toBeGreaterThan(0.95);
+    expect(fogged(5)).toBeLessThan(0.05);
+    expect(fogged(25)).toBeLessThan(0.5);
+    expect(fogged(60)).toBeGreaterThan(0.95);
   });
 
   it('property: the ratio stays within [1, cap]', () => {

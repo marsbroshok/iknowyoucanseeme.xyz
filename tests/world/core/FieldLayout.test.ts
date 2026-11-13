@@ -6,6 +6,7 @@ const TERRITORIES = ['dreamland', 'the-border-is-thin'];
 const ZONES = ['arrival', 'lens', 'leak'] as const;
 
 const distance = (a: Placement, b: Placement) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+const groundDistance = (a: Placement, b: Placement) => Math.hypot(a.x - b.x, a.z - b.z);
 const bySlug = (a: Placement, b: Placement) => a.slug.localeCompare(b.slug);
 
 /** Random sets of works with unique slugs over both territories. */
@@ -32,6 +33,22 @@ describe('FieldLayout.compute', () => {
     { slug: 'solitude', territory: 'dreamland', zone: 'leak' },
     { slug: 'cygne-icm-1', territory: 'the-border-is-thin' },
   ];
+
+  it('defines compact desktop spatial dimensions that preserve spacing and territory gaps', () => {
+    expect(FIELD).toMatchObject({
+      spacing: 3.2,
+      pitch: 4.6,
+      jitter: 0.7,
+      lateral: 3.4,
+      curveAmplitude: 2.4,
+      curveWavelength: 64,
+      zoneGap: 10,
+      territoryDistance: 48,
+      territoryGap: 30,
+    });
+    expect(FIELD.pitch - 2 * FIELD.jitter).toBeCloseTo(FIELD.spacing, 9);
+    expect(FIELD.territoryDistance - 2 * (FIELD.curveAmplitude + FIELD.lateral)).toBeGreaterThanOrEqual(FIELD.territoryGap);
+  });
 
   it('places every work once, with its territory and zone', () => {
     const { placements } = FieldLayout.compute(sample, TERRITORIES);
@@ -81,15 +98,42 @@ describe('FieldLayout.compute', () => {
     );
   });
 
-  it('property: no two works are closer than the minimum spacing', () => {
+  it('property: no two works are closer than the minimum spacing (ground and 3D)', () => {
     fc.assert(
       fc.property(worksArb, (works) => {
         const { placements } = FieldLayout.compute(works, TERRITORIES);
         for (let i = 0; i < placements.length; i++) {
           for (let j = i + 1; j < placements.length; j++) {
+            expect(groundDistance(placements[i], placements[j])).toBeGreaterThanOrEqual(FIELD.spacing);
             expect(distance(placements[i], placements[j])).toBeGreaterThanOrEqual(FIELD.spacing);
           }
         }
+      }),
+    );
+  });
+
+  it('property: consecutive works in each zone alternate left and right of the path within [0.6, lateral]', () => {
+    fc.assert(
+      fc.property(worksArb, (works) => {
+        const { placements } = FieldLayout.compute(works, TERRITORIES);
+        TERRITORIES.forEach((territory, territoryIndex) => {
+          const anchorX = territoryIndex * FIELD.territoryDistance;
+          for (const zone of [...ZONES, null]) {
+            const ordered = placements
+              .filter((p) => p.territory === territory && p.zone === zone)
+              .sort((a, b) => a.progress - b.progress);
+            ordered.forEach((p, i) => {
+              const offset = p.x - (anchorX + FieldLayout.pathX(p.z));
+              if (i % 2 === 0) {
+                expect(offset).toBeLessThanOrEqual(-0.6);
+                expect(offset).toBeGreaterThanOrEqual(-FIELD.lateral - 1e-9);
+              } else {
+                expect(offset).toBeGreaterThanOrEqual(0.6);
+                expect(offset).toBeLessThanOrEqual(FIELD.lateral + 1e-9);
+              }
+            });
+          }
+        });
       }),
     );
   });
@@ -129,7 +173,10 @@ describe('FieldLayout.compute', () => {
         const { placements } = FieldLayout.compute(works, TERRITORIES);
         for (const a of placements) {
           for (const b of placements) {
-            if (a.territory !== b.territory) expect(distance(a, b)).toBeGreaterThanOrEqual(FIELD.territoryGap);
+            if (a.territory !== b.territory) {
+              expect(groundDistance(a, b)).toBeGreaterThanOrEqual(FIELD.territoryGap);
+              expect(distance(a, b)).toBeGreaterThanOrEqual(FIELD.territoryGap);
+            }
           }
         }
       }),

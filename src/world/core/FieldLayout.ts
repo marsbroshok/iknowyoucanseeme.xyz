@@ -55,23 +55,25 @@ export interface FieldLayoutResult {
 /** Field dimensions, in world units (~ metres). */
 export const FIELD = {
   /** Minimum distance between two works. */
-  spacing: 6,
-  /** Path length per work (1.5 × spacing). */
-  pitch: 9,
-  /** Random shift along the path (± a quarter of the spacing). */
-  jitter: 1.5,
-  /** Random sideways offset from the path (±). */
-  lateral: 7,
+  spacing: 3.2,
+  /** Path length per work (pitch - 2 × jitter = spacing). */
+  pitch: 4.6,
+  /** Random shift along the path (±). */
+  jitter: 0.7,
+  /** Minimum sideways offset from the path so works frame the sightline rather than stacking dead-centre. */
+  minLateral: 0.65,
+  /** Maximum sideways offset from the path. */
+  lateral: 3.4,
   /** Sideways swing of the path itself (±). */
-  curveAmplitude: 6,
+  curveAmplitude: 2.4,
   /** Path length of one full swing. */
-  curveWavelength: 120,
+  curveWavelength: 64,
   /** Empty path between two zones. */
-  zoneGap: 18,
+  zoneGap: 10,
   /** Distance between the paths of two territories. */
-  territoryDistance: 300,
+  territoryDistance: 48,
   /** Guaranteed minimum distance between works of two territories. */
-  territoryGap: 200,
+  territoryGap: 30,
   /** Lowest and highest centre height of a work (eye level ≈ 1.6). */
   minY: 1.3,
   maxY: 2.1,
@@ -81,13 +83,14 @@ export const FIELD = {
  * Deterministic placement of the works in the 3D field (FR2).
  *
  * Every territory has its own straight-ish path running towards -z; the
- * paths lie {@link FIELD.territoryDistance} apart, so territories are
- * distant regions that fog hides from each other. Along a territory's path
+ * paths lie {@link FIELD.territoryDistance} apart, separated by at least
+ * {@link FIELD.territoryGap} across lateral sway. Along a territory's path
  * the zones follow each other (Arrival → Lens → Leak, then works without a
  * zone), separated by {@link FIELD.zoneGap}. Inside a zone the order of the
  * works and their offsets come from {@link SeededRandom} seeded by the slug,
- * so the layout is the same on every build and does not depend on input
- * order.
+ * alternating left and right of the path (`(-1)^(i + 1)` × `[minLateral, lateral]`)
+ * so consecutive works frame the sightline without eclipsing one another and
+ * the layout stays identical across builds regardless of input order.
  *
  * Minimum spacing holds by construction: consecutive works on a path are at
  * least `pitch − 2 × jitter = spacing` apart along z.
@@ -116,11 +119,13 @@ export class FieldLayout {
           const rnd = new SeededRandom(work.slug);
           const progress = cursor + FIELD.pitch * (i + 0.5) + rnd.between(-FIELD.jitter, FIELD.jitter);
           const z = -progress;
+          const side = i % 2 === 0 ? -1 : 1;
+          const lateralOffset = side * rnd.between(FIELD.minLateral, FIELD.lateral);
           placements.push({
             slug: work.slug,
             territory,
             zone,
-            x: anchorX + FieldLayout.pathX(z) + rnd.between(-FIELD.lateral, FIELD.lateral),
+            x: anchorX + FieldLayout.pathX(z) + lateralOffset,
             y: rnd.between(FIELD.minY, FIELD.maxY),
             z,
             progress,

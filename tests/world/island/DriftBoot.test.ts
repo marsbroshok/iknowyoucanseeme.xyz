@@ -242,6 +242,74 @@ describe('bootDrift', () => {
     expect(world.load).not.toHaveBeenCalled();
   });
 
+  it('overrides a stored "Wake up" choice on a valid ?w=<slug> deep link when WebGL2 is available and Save-Data is off', async () => {
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    history.replaceState(null, '', '/en/?w=arrivee');
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(boot?.decision).toMatchObject({ mode: 'world', tier: 'high', reasons: [] });
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('world');
+    expect(world.mounts).toHaveLength(1);
+    expect(world.mounts[0].startSlug).toBe('arrivee');
+    expect($('[data-drift]').hidden).toBe(false);
+    expect($('[data-threshold]').dataset.kind).toBe('short');
+
+    // Also enters in low tier on < 4 GB memory when WebGL2 is present and Save-Data is off, even without storage.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const blocked = windowWith(() => {
+      throw new DOMException('denied', 'SecurityError');
+    });
+    const lowMemWorld = fakeWorld();
+    const lowMemBoot = bootDrift(document, blocked, lowMemWorld.load, () => ({ ...capable, deviceMemory: 2 }), now);
+    await flush();
+    expect(warn).toHaveBeenCalledOnce();
+    expect(lowMemBoot?.decision).toMatchObject({ mode: 'world', tier: 'low', reasons: [] });
+    expect(lowMemWorld.mounts[0].startSlug).toBe('arrivee');
+    history.replaceState(null, '', '/');
+  });
+
+  it('keeps stored "Wake up" when ?w= is unknown, empty, or the manifest is absent', async () => {
+    for (const query of ['/en/?w=unknown', '/en/?w=']) {
+      localStorage.setItem(ModePreference.KEY, 'awake');
+      history.replaceState(null, '', query);
+      const world = fakeWorld();
+      const boot = bootDrift(document, win, world.load, () => capable, now);
+      await flush();
+      expect(boot?.decision.mode).toBe('awake');
+      expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+      expect(world.load).not.toHaveBeenCalled();
+    }
+
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    history.replaceState(null, '', '/en/?w=arrivee');
+    document.getElementById('drift-manifest')?.remove();
+    const missingManifestWorld = fakeWorld();
+    const missingBoot = bootDrift(document, win, missingManifestWorld.load, () => capable, now);
+    await flush();
+    expect(missingBoot?.decision.mode).toBe('awake');
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+    expect(missingManifestWorld.load).not.toHaveBeenCalled();
+    history.replaceState(null, '', '/');
+  });
+
+  it('keeps the awake layer on ?w=arrivee when Save-Data is on or WebGL2 is unavailable', async () => {
+    for (const caps of [
+      { ...capable, saveData: true },
+      { ...capable, webgl2: false },
+    ]) {
+      localStorage.setItem(ModePreference.KEY, 'awake');
+      history.replaceState(null, '', '/en/?w=arrivee');
+      const world = fakeWorld();
+      const boot = bootDrift(document, win, world.load, () => caps, now);
+      await flush();
+      expect(boot?.decision.mode).toBe('awake');
+      expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+      expect(world.load).not.toHaveBeenCalled();
+    }
+    history.replaceState(null, '', '/');
+  });
+
   it('never offers "Drift" without WebGL2', async () => {
     bootDrift(document, win, fakeWorld().load, () => ({ ...capable, webgl2: false }), now);
     await flush();
@@ -535,11 +603,13 @@ describe('bootDrift — exhibition mode (?kiosk=1, FR5)', () => {
 
   it('ignores ?w= on open and when resetting from "Wake up" back to the start of the path', async () => {
     vi.useFakeTimers();
+    localStorage.setItem(ModePreference.KEY, 'awake');
     history.replaceState(null, '', '/en/?kiosk=1&w=arrivee');
     const world = fakeWorld();
     bootDrift(document, win, world.load, () => capable, now);
     await vi.advanceTimersByTimeAsync(0);
     expect(world.mounts[0].startSlug).toBeNull();
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
     history.replaceState(null, '', '/en/?kiosk=1&w=cygne-icm-1');
     $('[data-drift-wake]').dispatchEvent(new Event('pointerdown', { bubbles: true }));
     $('[data-drift-wake]').click();

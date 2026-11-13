@@ -45,6 +45,7 @@ export interface DriftDebugState {
   facing: string | null;
   nearest: string | null;
   loaded: Record<string, string>;
+  works: { slug: string; distance: number; opacity: number; ndc: { x: number; y: number; z: number } }[];
   lens: { slug: string | null; mode: LensMode | null; strength: number; unaltered: boolean; blend: LensBlend | null; modes: readonly LensMode[] };
   threshold: { holding: boolean; visible: boolean; leak: boolean };
   gaze: { turns: GazeTurn[]; lineOpacity: number };
@@ -161,6 +162,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const soundScene = SoundScene.of(session.layout, manifest.works);
   const above = new Vector3();
   const below = new Vector3();
+  const projected = new Vector3();
   /** Screen position (NDC) just below a work, or `null` when it is behind the camera. */
   const screenBelow = (slug: string): { x: number; y: number } | null => {
     const mesh = (meshes.get(slug) as ApparitionMesh).mesh;
@@ -236,15 +238,18 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       (meshes.get(lf.slug) as ApparitionMesh).setLens({ ...rest, modeA: modeIndex(modeA), modeB: modeIndex(modeB), partner: partner ? (meshes.get(partner)?.texture ?? null) : null });
     }
     sound?.frame(soundScene.read(f.state), dt);
-    metrics.frame(f.nearest, f.nearestDistance, dt);
-    leakRecorder.frame(dt, threshold.holding, f.nearest ? { color: work(f.nearest).color, distance: f.nearestDistance } : null);
+    const activeSlug = f.facing ?? f.nearest;
+    const activeDistance = activeSlug ? (f.works.find((w) => w.slug === activeSlug)?.distance ?? f.nearestDistance) : f.nearestDistance;
+    metrics.frame(activeSlug, activeDistance, dt);
+    leakRecorder.frame(dt, threshold.holding, activeSlug ? { color: work(activeSlug).color, distance: activeDistance } : null);
     if (f.plan) streamer.update(f.plan);
     if (f.settled && !kiosk) win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, f.settled));
     if (f.compass) {
       compass.update(f.compass);
-      if (f.nearest) list.setEntry(f.nearest);
+      if (activeSlug) list.setEntry(activeSlug);
     }
     if (debug) {
+      stage.camera.updateMatrixWorld();
       (win as unknown as { __driftDebug: DriftDebugState }).__driftDebug = {
         frames,
         tier,
@@ -252,6 +257,11 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         facing: f.facing,
         nearest: f.nearest,
         loaded: streamer.loaded,
+        works: f.works.map((w) => {
+          const mesh = (meshes.get(w.slug) as ApparitionMesh).mesh;
+          projected.copy(mesh.position).project(stage.camera);
+          return { slug: w.slug, distance: w.distance, opacity: w.opacity, ndc: { x: projected.x, y: projected.y, z: projected.z } };
+        }),
         lens: { slug: lf.slug, mode: lf.mode, strength: lf.strength, unaltered: li.unaltered, blend: lf.blend, modes: director.modes },
         threshold: { holding: threshold.holding, visible: threshold.visible, leak: leak !== null },
         gaze: { turns: g.turns, lineOpacity: g.lineOpacity },

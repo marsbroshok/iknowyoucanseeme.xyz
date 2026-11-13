@@ -67,13 +67,13 @@ export class CopyGuard {
     const lists = this.loadDenyList();
 
     for (const word of lists.en) {
-      if (new RegExp(`\\b${word}\\b`, 'i').test(block.en)) {
+      if (matchesDeniedTerm(block.en, word)) {
         throw new Error(`Literary word in EN: ${word}`);
       }
     }
 
     for (const word of lists.fr) {
-      if (new RegExp(`\\b${word.replace("'", "\\'")}\\b`, 'i').test(block.fr)) {
+      if (matchesDeniedTerm(block.fr, word)) {
         throw new Error(`Literary word in FR: ${word}`);
       }
     }
@@ -96,7 +96,7 @@ export class CopyGuard {
   }
 
   private loadDenyList(): DenyList {
-    if (this.cachedListReady(this.denyList)) {
+    if (this.denyList !== null) {
       return this.denyList;
     }
     if (fs.existsSync(this.configPath)) {
@@ -110,10 +110,27 @@ export class CopyGuard {
     }
     return this.denyList;
   }
+}
 
-  private cachedListReady(list: DenyList | null): list is DenyList {
-    return list !== null;
-  }
+/**
+ * Escapes RegExp metacharacters in a literal deny-list entry.
+ *
+ * @param value - Raw deny-list term.
+ * @returns Escaped pattern safe for interpolation into `new RegExp(...)`.
+ */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Tests whether `text` contains `term` bounded by non-letter Unicode boundaries.
+ *
+ * @param text - Copy text to inspect.
+ * @param term - Deny-list word or phrase.
+ * @returns `true` when `term` appears as a standalone token or phrase.
+ */
+function matchesDeniedTerm(text: string, term: string): boolean {
+  return new RegExp(`(?<!\\p{L})${escapeRegExp(term)}(?!\\p{L})`, 'iu').test(text);
 }
 
 /**
