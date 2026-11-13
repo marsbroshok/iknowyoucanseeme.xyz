@@ -31,6 +31,9 @@ interface DebugState {
   frames: number;
   facing: string | null;
   nearest: string | null;
+  sky: string;
+  region: { territory: string; zone: string | null } | null;
+  gates: { id: string; x: number; z: number; distance: number; part: number; visible: boolean }[];
   loaded: Record<string, string>;
   works: DebugWork[];
 }
@@ -101,6 +104,27 @@ test.describe('Drift world', () => {
     expect(visible.length).toBeGreaterThanOrEqual(4);
     const distances = visible.map((w) => w.distance);
     expect(Math.max(...distances) - Math.min(...distances)).toBeGreaterThan(15);
+    expect(errors).toEqual([]);
+  });
+
+  test('mounts 3D boreal curtain gates at zone/territory borders and shifts sky atmosphere across zones', async ({ page }) => {
+    const errors = watchErrors(page);
+    const skies: string[] = [];
+    for (const [slug, expectedZone] of [
+      ['arrivee', 'arrival'],
+      ['les-reflets-i', 'lens'],
+      ['venise-portrait-5', 'leak'],
+      ['cygne-icm-1', null],
+    ] as const) {
+      await page.goto(`${KEYED}/en/?w=${slug}`);
+      await expect(page.locator('[data-threshold]')).toBeHidden({ timeout: 4_000 });
+      await worldReady(page);
+      const state = await debugState(page);
+      expect(state?.region?.zone ?? null, slug).toBe(expectedZone);
+      expect(state?.gates.map((g) => g.id)).toEqual(['dreamland:lens', 'dreamland:leak', 'the-border-is-thin:entry']);
+      skies.push(state?.sky ?? '');
+    }
+    expect(new Set(skies).size).toBe(4);
     expect(errors).toEqual([]);
   });
 

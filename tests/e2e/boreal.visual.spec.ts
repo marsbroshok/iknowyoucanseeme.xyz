@@ -128,4 +128,54 @@ test.describe('ThresholdLeak aurora borealis shader', () => {
     expect(meanDiff / totalPixels).toBeGreaterThan(2.0);
     expect(errors).toEqual([]);
   });
+
+  test('BorealGateMesh renders 3D vertical aurora curtains across zone gaps on both tiers and parts smoothly within 2.5m of the camera', async ({ page }) => {
+    const errors: string[] = [];
+    await openBorealHarness(page, errors);
+
+    for (const tier of ['high', 'low'] as const) {
+      const far = await page.evaluate(
+        ([t]) => (window as unknown as { __boreal: { drawGate(z: number, tier: string): { pixels: number[] } } }).__boreal.drawGate(7.5, t),
+        [tier] as const,
+      );
+      const stats = curtainStats(far.pixels);
+      expect(stats.spanRatio, `${tier} 3D gate span`).toBeGreaterThan(0.65);
+      expect(stats.dx, `${tier} 3D gate ray detail`).toBeGreaterThan(1.5);
+      expect(stats.dx, `${tier} 3D gate vertical anisotropy`).toBeGreaterThan(stats.dy * 1.2);
+      expect(stats.green, `${tier} 3D gate green`).toBeGreaterThan(300);
+      expect(stats.violet, `${tier} 3D gate violet`).toBeGreaterThan(250);
+      expect(stats.pink, `${tier} 3D gate pink`).toBeGreaterThan(250);
+    }
+
+    // Compare central sightline glow at z = 5.5m (outside partRadius = 2.5m) vs z = 0.8m (inside partRadius):
+    const mid = await page.evaluate(() =>
+      (window as unknown as { __boreal: { drawGate(z: number, tier: string): { pixels: number[] } } }).__boreal.drawGate(5.5, 'high'),
+    );
+    const near = await page.evaluate(() =>
+      (window as unknown as { __boreal: { drawGate(z: number, tier: string): { pixels: number[] } } }).__boreal.drawGate(0.8, 'high'),
+    );
+    // Base #072622 has luma ~ 29; subtract background luma (pixel at top-left corner y=252, x=4) to measure pure additive curtain light!
+    const bgLuma = (p: number[]) => luma(p, (SIZE - 4) * SIZE + 4);
+    const regionGlow = (p: number[], x0: number, x1: number) => {
+      const bg = bgLuma(p);
+      let sum = 0;
+      let count = 0;
+      for (let y = Math.floor(SIZE * 0.35); y < Math.floor(SIZE * 0.72); y++) {
+        for (let x = Math.floor(SIZE * x0); x < Math.floor(SIZE * x1); x++) {
+          sum += Math.max(0, luma(p, y * SIZE + x) - bg);
+          count++;
+        }
+      }
+      return sum / count;
+    };
+
+    const midCenterGlow = regionGlow(mid.pixels, 0.38, 0.62);
+    const nearCenterGlow = regionGlow(near.pixels, 0.38, 0.62);
+    expect(midCenterGlow).toBeGreaterThan(12);
+    expect(nearCenterGlow).toBeLessThan(midCenterGlow * 0.55);
+
+    const shaderErrs = await page.evaluate(() => (window as unknown as { __boreal: { errors: string[] } }).__boreal.errors);
+    expect(shaderErrs).toEqual([]);
+    expect(errors).toEqual([]);
+  });
 });
