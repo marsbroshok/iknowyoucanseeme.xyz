@@ -2,7 +2,7 @@
 
 Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · Workflow: [../../workflow.md](../../workflow.md)
 
-## Phase 1: Pure Boreal Palettes, Zone Atmospheres, Gates & Crossing Logic
+## Phase 1: Pure Boreal Palettes, Zone Atmospheres, Gates & Crossing Logic [checkpoint: 97203e8]
 
 - [x] Task: Boreal `ThresholdPalette` & `ZoneAtmosphere` + contrast-guarded `PaletteSky` `3d0939e`
     - [x] Red: unit + `fast-check` property tests verifying distinct region base colours, boreal green/violet/pink stops, and contrast ≥ 4.6:1 against `SKY.dimText` for every region and arbitrary work hex colour
@@ -10,7 +10,7 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
 - [x] Task: `ZoneGates` placement & `ZoneCrossing` state machine `97203e8`
     - [x] Red: unit + property tests (`ZoneGates` places portals inside every `zoneGap` and territory entry without colliding with any work placement; `ZoneCrossing` fires on region changes, suppresses duplicate fires inside hysteresis band, expires after duration)
     - [x] Green: implement `src/world/core/ZoneGates.ts` and `src/world/core/ZoneCrossing.ts`
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `97203e8`
 
 ## Phase 2: Boreal Shaders & 3D Zone Portals
 
