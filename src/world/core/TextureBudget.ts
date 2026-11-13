@@ -32,8 +32,8 @@ const MB = 1024 * 1024;
 
 /** Limits per tier: phones (`low`) get smaller full textures and less memory. */
 export const TIER_BUDGETS: Readonly<Record<QualityTier, TierBudget>> = {
-  high: { radius: 42, fullRadius: 9, budgetBytes: 192 * MB, fullVariant: 'high' },
-  low: { radius: 32, fullRadius: 7, budgetBytes: 64 * MB, fullVariant: 'mid' },
+  high: { radius: 44, fullRadius: 11, budgetBytes: 192 * MB, fullVariant: 'high' },
+  low: { radius: 35, fullRadius: 8, budgetBytes: 64 * MB, fullVariant: 'mid' },
 };
 
 /** Changes needed to go from the loaded textures to a plan. */

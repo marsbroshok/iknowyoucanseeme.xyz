@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DriftSession, SESSION } from '../../../src/world/core/DriftSession.js';
 import { DRIFT } from '../../../src/world/core/DriftController.js';
+import { TIER_BUDGETS } from '../../../src/world/core/TextureBudget.js';
 import { sampleManifest } from '../fixtures.js';
 
 const still = { thrust: 0, turn: 0 };
@@ -41,6 +42,17 @@ describe('DriftSession', () => {
 
   it('lists the works in path order for keyboard cycling', () => {
     expect(new DriftSession(sampleManifest, 'low', null).stops.map((s) => s.slug)).toEqual(['arrivee', 'cygne-icm-1']);
+  });
+
+  it('aligns apparition curve depth with texture streaming radii on both tiers while keeping memory budgets capped', () => {
+    expect(SESSION.apparition).toEqual({ high: [10, 42], low: [7, 34] });
+    for (const tier of ['high', 'low'] as const) {
+      const [near, far] = SESSION.apparition[tier];
+      expect(TIER_BUDGETS[tier].fullRadius).toBeGreaterThanOrEqual(near);
+      expect(TIER_BUDGETS[tier].radius).toBeGreaterThanOrEqual(far);
+    }
+    expect(TIER_BUDGETS.high.budgetBytes).toBe(192 * 1024 * 1024);
+    expect(TIER_BUDGETS.low.budgetBytes).toBe(64 * 1024 * 1024);
   });
 
   it('fades works by distance: the near one shows, the far territory does not', () => {

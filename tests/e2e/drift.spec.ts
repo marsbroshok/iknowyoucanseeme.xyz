@@ -20,11 +20,19 @@ const SLUGS = fs
   .map((f) => f.replace(/\.yaml$/, ''))
   .sort();
 
+interface DebugWork {
+  slug: string;
+  distance: number;
+  opacity: number;
+  ndc: { x: number; y: number; z: number };
+}
+
 interface DebugState {
   frames: number;
   facing: string | null;
   nearest: string | null;
   loaded: Record<string, string>;
+  works: DebugWork[];
 }
 const debugState = (page: Page) => page.evaluate(() => (window as unknown as { __driftDebug?: DebugState }).__driftDebug ?? null);
 
@@ -73,6 +81,26 @@ test.describe('Drift world', () => {
         return Math.max(...channels.map((c) => c.stdev));
       }, { timeout: 10_000 })
       .toBeGreaterThan(8);
+    expect(errors).toEqual([]);
+  });
+
+  test('desktop (1440×900) Arrival start pose frames at least 4 simultaneously visible works at staggered depths', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${KEYED}/en/`);
+    await page.locator('[data-threshold-enter]').click({ timeout: 15_000 });
+    await expect(page.locator('[data-threshold]')).toBeHidden({ timeout: 4_000 });
+    await worldReady(page);
+    await expect(page.locator('[data-drift-compass]')).toContainText('Arrival');
+
+    const state = await debugState(page);
+    expect(state).not.toBeNull();
+    const visible = (state?.works ?? []).filter(
+      (w) => w.opacity > 0.12 && w.ndc.z > -1 && w.ndc.z < 1 && Math.abs(w.ndc.x) <= 1 && Math.abs(w.ndc.y) <= 1,
+    );
+    expect(visible.length).toBeGreaterThanOrEqual(4);
+    const distances = visible.map((w) => w.distance);
+    expect(Math.max(...distances) - Math.min(...distances)).toBeGreaterThan(15);
     expect(errors).toEqual([]);
   });
 

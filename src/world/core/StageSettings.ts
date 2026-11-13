@@ -14,8 +14,8 @@ export const NIGHT_BLUE = '#0b1030';
 /** Camera height above the ground (eye level). */
 export const EYE_HEIGHT = 1.6;
 
-/** Exponential-squared fog density: ~85 % fogged at 30 units, ~97 % at 42. */
-export const FOG_DENSITY = 0.045;
+/** Exponential-squared fog density: ~43 % fogged at 25 units, ~96 % at 60. */
+export const FOG_DENSITY = 0.03;
 
 /** Vertical field of view (degrees) and clipping planes of the camera. */
 export const CAMERA = { fov: 60, near: 0.1, far: 160 } as const;
