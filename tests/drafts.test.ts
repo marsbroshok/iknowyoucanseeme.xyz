@@ -2,7 +2,7 @@ import { describe, it } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
-import { checkVocabularyAndTypography } from '../src/tools/CopyGuard.js';
+import { checkVocabularyAndTypography, checkNarrativeCadence } from '../src/tools/CopyGuard.js';
 
 function findTextBlocks(obj: unknown): Record<string, unknown>[] {
   let blocks: Record<string, unknown>[] = [];
@@ -47,5 +47,21 @@ describe('Draft contents', () => {
     }
     
     walkDir(copyDir);
+  });
+
+  it('enforces Dreamland manifesto narrative cadence (>= 10 words/sentence average) on about, territories, and zones', () => {
+    const copyDir = path.resolve(__dirname, '../src/content/copy');
+    const about = yaml.parse(fs.readFileSync(path.join(copyDir, 'pages/about.yaml'), 'utf8'));
+    for (const key of ['bio', 'origin'] as const) {
+      checkNarrativeCadence(about.blocks[key]);
+    }
+
+    for (const subdir of ['territories', 'zones'] as const) {
+      const dir = path.join(copyDir, subdir);
+      for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.yaml'))) {
+        const parsed = yaml.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+        checkNarrativeCadence(parsed.statement);
+      }
+    }
   });
 });
