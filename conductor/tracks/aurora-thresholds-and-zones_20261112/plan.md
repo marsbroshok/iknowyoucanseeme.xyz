@@ -34,4 +34,4 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
 
 From `drift-navigation-and-density_20261112` review (non-blocking; do first):
 
-- [ ] Task: `src/world/island/DriftBoot.ts`: extract `DeviceProfile.canAutoEnterDeepLink(caps)` so all device-capability policy stays in `DeviceProfile` rather than splitting `saveData` across `DriftBoot` and `DeviceProfile`; and pass the already-parsed manifest from boot into `enter()` when present to avoid parsing `#drift-manifest` twice.
+- [x] Task: `src/world/island/DriftBoot.ts`: extract `DeviceProfile.canAutoEnterDeepLink(caps)` so all device-capability policy stays in `DeviceProfile` rather than splitting `saveData` across `DriftBoot` and `DeviceProfile`; and pass the already-parsed manifest from boot into `enter()` when present to avoid parsing `#drift-manifest` twice. `db0e479`
