@@ -28,6 +28,49 @@ describe('CopyGuard', () => {
       en: 'Normal english.',
       sources: ['x']
     })).toThrow(/literary word in fr: s'amincir/i);
+
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Un souffle évanescent traverse la brume.',
+      en: 'Normal english.',
+      sources: ['x']
+    })).toThrow(/literary word in fr: évanescent/i);
+
+    expect(() => checkVocabularyAndTypography({
+      status: 'draft',
+      fr: 'Évanescent, le reflet disparaît.',
+      en: 'Normal english.',
+      sources: ['x']
+    })).toThrow(/literary word in fr: évanescent/i);
+  });
+
+  it('uses Unicode letter boundaries and escapes regex metacharacters in deny-list terms', () => {
+    const customYaml = path.join(os.tmpdir(), `custom-deny-${process.pid}.yaml`);
+    fs.writeFileSync(customYaml, 'en:\n  - c.f.\nfr:\n  - mer\n', 'utf-8');
+    try {
+      const guard = new CopyGuard(customYaml);
+      // Substrings adjacent to Unicode letters (é-mer-ger, a-mèr-e) must not trigger "mer"
+      expect(() =>
+        guard.checkVocabularyAndTypography({
+          status: 'draft',
+          fr: 'Une forme semble émerger doucement.',
+          en: 'A plain cafa word.',
+          sources: [],
+        }),
+      ).not.toThrow();
+
+      // Exact regex-escaped term "c.f." must trigger, whereas "cXfX" above did not
+      expect(() =>
+        guard.checkVocabularyAndTypography({
+          status: 'draft',
+          fr: 'Une phrase simple.',
+          en: 'See c.f. here.',
+          sources: [],
+        }),
+      ).toThrow(/literary word in en: c\.f\./i);
+    } finally {
+      fs.unlinkSync(customYaml);
+    }
   });
 
   it('works when deny-list file is missing or omits locale keys', () => {
