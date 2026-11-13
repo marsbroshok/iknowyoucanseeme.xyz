@@ -117,6 +117,27 @@ export class DriftSession {
   }
 
   /**
+   * Moves the visitor cleanly to the entry of a laid-out region (interactive
+   * zone strip, FR4), looking down its path past its boreal curtain portal,
+   * and schedules an immediate compass and texture-plan refresh on the next frame.
+   *
+   * @param region - Target region from `layout.regions`; unknown regions are ignored.
+   */
+  jumpToRegion(region: Region): void {
+    const index = this.layout.regions.indexOf(region);
+    if (index < 0) return;
+    if (index === 0) {
+      this.state = this.controller.initial(this.layout.start);
+    } else {
+      const z = region.start.z + 2;
+      const anchorX = region.start.x - FieldLayout.pathX(region.start.z);
+      this.state = this.controller.initial({ x: anchorX + FieldLayout.pathX(z), z, yaw: 0 });
+    }
+    this.sincePlan = Number.POSITIVE_INFINITY;
+    this.sinceCompass = Number.POSITIVE_INFINITY;
+  }
+
+  /**
    * Next work for Tab / Shift+Tab (see `DriftController.cycle`).
    *
    * @param current - Focused work, or `null`.

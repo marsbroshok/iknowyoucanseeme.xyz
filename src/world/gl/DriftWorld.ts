@@ -6,9 +6,11 @@ import { TIER_BUDGETS } from '../core/TextureBudget.js';
 import { CAMERA, EYE_HEIGHT } from '../core/StageSettings.js';
 import { CompassBearing } from '../core/CompassBearing.js';
 import { ZoneAtmosphere } from '../core/ZoneAtmosphere.js';
+import { ZoneCrossing } from '../core/ZoneCrossing.js';
 import { ZoneGates } from '../core/ZoneGates.js';
 import { TextureStreamer } from '../stream/TextureStreamer.js';
 import { HorizonCompass } from '../island/HorizonCompass.js';
+import { ZoneBanner } from '../island/ZoneBanner.js';
 import { WorkList } from '../island/WorkList.js';
 import { FocusOverlay } from '../island/FocusOverlay.js';
 import { DriftAnalytics } from '../island/DriftAnalytics.js';
@@ -137,7 +139,10 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       zones: Object.fromEntries(manifest.zones.map((z) => [z.slug, z.title])),
     },
     halfFov(),
+    (region) => session.jumpToRegion(region),
   );
+  const crossing = ZoneCrossing.fromManifest(session.layout.regions, manifest);
+  const zoneBanner = new ZoneBanner(root);
 
   const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'), undefined, { kiosk });
   const open = (slug: string) => overlay.open(work(slug));
@@ -228,6 +233,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     stage.setPose(f.state);
     stage.setSkyColor(f.sky);
     for (const gm of gateMeshes) gm.update(f.state.x, EYE_HEIGHT, f.state.z, portalTime);
+    zoneBanner.update(crossing.update(f.state, threshold.holding, dt));
     if (leak && !threshold.visible) {
       leak.dispose();
       leak = null;
@@ -306,10 +312,14 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     restart() {
       overlay.close();
       kioskStop = null;
+      crossing.reset();
+      zoneBanner.clear();
       session.restart();
     },
     unmount() {
       leak?.dispose();
+      zoneBanner.clear();
+      compass.detach();
       whisper.fragment(null, false);
       whisper.gaze(0, false);
       whisper.specimen(null);

@@ -128,6 +128,89 @@ test.describe('Drift world', () => {
     expect(errors).toEqual([]);
   });
 
+  test('crossing Arrival → Lens triggers the Fraunces [data-zone-banner] and updates the active zone pill; clicking region pills jumps cleanly', async ({ page }) => {
+    test.setTimeout(60_000);
+    const errors = watchErrors(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${KEYED}/en/`);
+    await expect(page.locator('[data-threshold]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('[data-zone-banner]')).toBeHidden();
+
+    await page.locator('[data-threshold-enter]').click();
+    await worldReady(page);
+
+    const banner = page.locator('[data-zone-banner]');
+    const bannerTitle = page.locator('[data-zone-banner-title]');
+    const bannerSubtitle = page.locator('[data-zone-banner-subtitle]');
+    await expect(banner).toBeVisible();
+    await expect(bannerTitle).toHaveText('Dreamland · Arrival');
+    await expect(bannerSubtitle).toContainText('arrival into the vast atmospheric colour fields');
+    const bannerStyles = await banner.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const titleCs = getComputedStyle(el.querySelector('[data-zone-banner-title]') as Element);
+      return { pointerEvents: cs.pointerEvents, titleFont: titleCs.fontFamily };
+    });
+    expect(bannerStyles.pointerEvents).toBe('none');
+    expect(bannerStyles.titleFont).toContain('Fraunces');
+
+    const activePill = page.locator('[data-zone-pill][aria-current="true"]');
+    await expect(activePill).toHaveText('Dreamland · Arrival');
+
+    // Drift forward along the path across the Arrival → Lens boreal portal.
+    await page.mouse.move(640, 400);
+    await expect
+      .poll(
+        async () => {
+          await page.mouse.wheel(0, 600);
+          return (await debugState(page))?.region?.zone ?? null;
+        },
+        { timeout: 20_000, intervals: [120] },
+      )
+      .toBe('lens');
+
+    await expect(banner).toBeVisible();
+    await expect(bannerTitle).toHaveText('Dreamland · Lens');
+    await expect(bannerSubtitle).toContainText('sharpens our perception');
+    await expect(activePill).toHaveText('Dreamland · Lens');
+
+    // Banner expires cleanly after ~3.0 seconds.
+    await expect(banner).toBeHidden({ timeout: 6_000 });
+
+    // Clicking region pills jumps cleanly to Leak and to The border is thin.
+    await page.getByRole('button', { name: 'Dreamland · Leak' }).click();
+    await expect.poll(async () => (await debugState(page))?.region?.zone ?? null).toBe('leak');
+    await expect(banner).toBeVisible();
+    await expect(bannerTitle).toHaveText('Dreamland · Leak');
+    await expect(activePill).toHaveText('Dreamland · Leak');
+
+    await page.getByRole('button', { name: 'The border is thin' }).click();
+    await expect.poll(async () => (await debugState(page))?.region?.territory ?? null).toBe('the-border-is-thin');
+    await expect(banner).toBeVisible();
+    await expect(bannerTitle).toHaveText('The border is thin');
+    await expect(activePill).toHaveText('The border is thin');
+    expect(errors).toEqual([]);
+  });
+
+  test('axe reports 0 violations while [data-zone-banner] is visible in English and French', async ({ page }) => {
+    const errors = watchErrors(page);
+    for (const [lang, lensPill, expectedTitle] of [
+      ['en', 'Dreamland · Lens', 'Dreamland · Lens'],
+      ['fr', 'Dreamland · La Loupe', 'Dreamland · La Loupe'],
+    ] as const) {
+      await page.goto(`${KEYED}/${lang}/?w=arrivee`);
+      await expect(page.locator('[data-threshold]')).toBeHidden({ timeout: 4_000 });
+      await worldReady(page);
+      await page.getByRole('button', { name: lensPill }).click();
+      const banner = page.locator('[data-zone-banner]');
+      await expect(banner).toBeVisible();
+      await expect(page.locator('[data-zone-banner-title]')).toHaveText(expectedTitle);
+      // Wait for banner plateau (opacity === 1) so full visual state is audited by axe.
+      await expect.poll(() => banner.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThanOrEqual(0.99);
+      expect((await new AxeBuilder({ page }).analyze()).violations, lang).toEqual([]);
+    }
+    expect(errors).toEqual([]);
+  });
+
   test('the production build mounts the world too, without the debug hook', async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto('/fr/');
