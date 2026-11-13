@@ -4,9 +4,9 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
 
 ## Phase 1: Pure Boreal Palettes, Zone Atmospheres, Gates & Crossing Logic
 
-- [ ] Task: Boreal `ThresholdPalette` & `ZoneAtmosphere` + contrast-guarded `PaletteSky`
-    - [ ] Red: unit + `fast-check` property tests verifying distinct region base colours, boreal green/violet/pink stops, and contrast ≥ 4.6:1 against `SKY.dimText` for every region and arbitrary work hex colour
-    - [ ] Green: implement `src/world/core/ZoneAtmosphere.ts`, extend `ThresholdPalette.ts` and `PaletteSky.ts`
+- [x] Task: Boreal `ThresholdPalette` & `ZoneAtmosphere` + contrast-guarded `PaletteSky` `3d0939e`
+    - [x] Red: unit + `fast-check` property tests verifying distinct region base colours, boreal green/violet/pink stops, and contrast ≥ 4.6:1 against `SKY.dimText` for every region and arbitrary work hex colour
+    - [x] Green: implement `src/world/core/ZoneAtmosphere.ts`, extend `ThresholdPalette.ts` and `PaletteSky.ts`
 - [ ] Task: `ZoneGates` placement & `ZoneCrossing` state machine
     - [ ] Red: unit + property tests (`ZoneGates` places portals inside every `zoneGap` and territory entry without colliding with any work placement; `ZoneCrossing` fires on region changes, suppresses duplicate fires inside hysteresis band, expires after duration)
     - [ ] Green: implement `src/world/core/ZoneGates.ts` and `src/world/core/ZoneCrossing.ts`
@@ -35,3 +35,7 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
 From `drift-navigation-and-density_20261112` review (non-blocking; do first):
 
 - [x] Task: `src/world/island/DriftBoot.ts`: extract `DeviceProfile.canAutoEnterDeepLink(caps)` so all device-capability policy stays in `DeviceProfile` rather than splitting `saveData` across `DriftBoot` and `DeviceProfile`; and pass the already-parsed manifest from boot into `enter()` when present to avoid parsing `#drift-manifest` twice. `db0e479`
+
+## Assumptions & Domain Invariants Ledger
+
+- **Boreal stop modulation & contrast rounding margin (`ThresholdPalette.ts`, `PaletteSky.ts`):** `BOREAL_THRESHOLD.tintMix = 0.12` blends 12% of the chosen Arrival work's brightest palette colour into the emerald (`#12b886`), violet (`#6d3ccf`), and pink (`#d9468f`) anchors so every arbitrary 24-bit work palette preserves strict green (`G > B && G > R`), violet (`B > R && R > G`), and pink (`R > B && B > G`) channel dominance. `PaletteSky.targetFor` uses `SKY.minContrast = 4.65` so 8-bit hex rounding during exponential `PaletteSky.update` smoothing across region transitions stays strictly `≥ 4.6:1` against `SKY.dimText`.
