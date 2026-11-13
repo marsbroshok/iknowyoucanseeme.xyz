@@ -1,6 +1,7 @@
 ---
 /**
- * Awake home `/{lang}/`: signature, the threshold line, one entry block per
+ * Awake home `/{lang}/`: artist name (`<h1>`), the Dreamland closing border
+ * line (`threshold.yaml` `blocks.line`), artist practice, one entry block per
  * territory (statement excerpt + three works) and links to About,
  * Exhibitions and Contact. Meaningful on its own; with a world manifest the
  * drift world enhances it progressively (DriftIsland, plus a "Drift" button
@@ -9,6 +10,7 @@
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { TerritoryTeaserView } from '../../domain/TerritoryView.js';
 import type { WorldManifest } from '../../world/core/WorldManifest.js';
+import { ARTIST_NAME } from '../../content/Publisher.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import BaseLayout from '../BaseLayout.astro';
@@ -18,18 +20,19 @@ import DriftIsland from '../DriftIsland.astro';
 interface Props {
   lang: Locale;
   territories: readonly TerritoryTeaserView[];
+  thresholdLine: string;
   /** Works for the drift world; without it the page is awake-only. */
   world?: WorldManifest;
 }
 
-const { lang, territories, world } = Astro.props;
+const { lang, territories, thresholdLine, world } = Astro.props;
 const ui = uiText(lang);
 ---
-<BaseLayout lang={lang} routeKey="home" title="iknowyoucanseeme · Alexander Usoltsev" description={ui.t('desc_home')}>
+<BaseLayout lang={lang} routeKey="home" title={`${ARTIST_NAME} · iknowyoucanseeme`} description={ui.t('desc_home')}>
   <section class="home-intro">
-    <h1>iknowyoucanseeme</h1>
-    <p class="threshold-line">{ui.t('gaze')}</p>
-    <p class="artist">Alexander Usoltsev</p>
+    <h1>{ARTIST_NAME}</h1>
+    <p class="threshold-line">{thresholdLine}</p>
+    <p class="artist">{ui.t('artist_practice')}</p>
     {world && <p><button type="button" class="drift-start" data-drift-start hidden>{ui.t('drift')}</button></p>}
   </section>
 
@@ -55,7 +58,7 @@ const ui = uiText(lang);
       <li><a href={localizedPath('contact', lang)}>{ui.t('nav_contact')}</a></li>
     </ul>
   </div>
-  {world && <DriftIsland slot="world" lang={lang} manifest={world} />}
+  {world && <DriftIsland slot="world" lang={lang} manifest={world} thresholdLine={thresholdLine} />}
 </BaseLayout>
 
 <style>
@@ -72,6 +75,7 @@ const ui = uiText(lang);
     font-size: var(--text-xl);
     font-style: italic;
     margin-top: var(--space-2);
+    max-width: 40rem;
   }
   .artist {
     font-family: var(--font-mono);

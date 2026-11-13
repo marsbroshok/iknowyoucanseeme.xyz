@@ -5,7 +5,7 @@
  * docs/adr/0011: Tone.js is imported only after the visitor's gesture), help text (and the lens
  * caption, a live region naming the lens in use), the horizon
  * compass, the keyboard work list, the focus dialog, the threshold (the
- * gaze line, the breathing leak's canvas and Enter), the world's text (gaze
+ * Dreamland border line, the breathing leak's canvas and Enter), the world's text (gaze
  * line and fragments, mirrored into a polite live region) and the
  * build-time world manifest. It is
  * rendered hidden; `bootDrift` shows it on capable devices after first
@@ -24,9 +24,10 @@ import { LENS_MODES } from '../world/core/LensMode.js';
 interface Props {
   lang: Locale;
   manifest: WorldManifest;
+  thresholdLine: string;
 }
 
-const { lang, manifest } = Astro.props;
+const { lang, manifest, thresholdLine } = Astro.props;
 const ui = uiText(lang);
 /** Lens names in the page language, for the live caption (LensAnnouncer). */
 const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui.t(`lens_${m}`)])));
@@ -64,7 +65,7 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   </dialog>
   <div class="drift-threshold" data-threshold hidden>
     <canvas class="drift-threshold-leak" data-threshold-leak aria-hidden="true"></canvas>
-    <p class="drift-threshold-line">{ui.t('gaze')}</p>
+    <p class="drift-threshold-line">{thresholdLine}</p>
     <button type="button" class="drift-enter" data-threshold-enter hidden>{ui.t('enter')}</button>
   </div>
 </section>
@@ -287,6 +288,7 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-threshold-line {
     margin: 0;
+    max-width: 36rem;
     font-family: var(--font-sans);
     font-size: var(--text-xl);
     font-weight: 300;

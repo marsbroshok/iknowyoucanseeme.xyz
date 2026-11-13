@@ -1,11 +1,21 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'yaml';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import HomePage from '../../src/components/pages/HomePage.astro';
 import { buildTerritoryTeaser } from '../../src/domain/TerritoryView.js';
 import { uiText } from '../../src/i18n/UiCatalog.js';
+import { PageSchema } from '../../src/content/schema/index.js';
+import { requireBlock } from '../../src/content/PageBlocks.js';
 import { fixtureWork, tb } from './fixtures.js';
 import { sampleManifest } from '../world/fixtures.js';
 import { scriptBytes } from '../../src/tools/DistGuard.js';
+
+const thresholdPage = PageSchema.parse(
+  yaml.parse(fs.readFileSync(path.resolve(__dirname, '../../src/content/copy/pages/threshold.yaml'), 'utf8')),
+);
+const thresholdLineOf = (lang: 'en' | 'fr') => requireBlock(thresholdPage, 'line', lang);
 
 const works = [
   fixtureWork(),
@@ -27,15 +37,25 @@ describe('HomePage', () => {
 
   const render = (lang: 'en' | 'fr') =>
     container.renderToString(HomePage, {
-      props: { lang, territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText(lang))) },
+      props: {
+        lang,
+        territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText(lang))),
+        thresholdLine: thresholdLineOf(lang),
+      },
       request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
     });
 
-  it('renders signature, threshold line, both territory blocks with 3 works max, and page links (EN)', async () => {
+  it('renders artist h1, single signature, threshold border line, artist practice, territories, and never duplicates gaze (EN)', async () => {
     const html = await render('en');
     expect(html).toContain('<html lang="en"');
-    expect(html).toMatch(/<h1[^>]*>iknowyoucanseeme<\/h1>/);
-    expect(html).toContain('I know you can see me');
+    expect(html).toMatch(/<h1[^>]*>Alexander Usoltsev<\/h1>/);
+    expect(html).toContain(thresholdLineOf('en'));
+    expect(html).toContain('Photographer &amp; ceramic artist');
+    expect(html).not.toContain('I know you can see me');
+    expect(html).not.toContain('Je sais que tu me vois');
+    const bodyHtml = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html)?.[1] ?? '';
+    const visibleText = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+    expect(visibleText.match(/iknowyoucanseeme/g)).toHaveLength(1);
     expect(html).toContain('href="/en/territories/dreamland/"');
     expect(html).toContain('href="/en/territories/the-border-is-thin/"');
     expect(html).toContain('A dream. More.');
@@ -51,10 +71,17 @@ describe('HomePage', () => {
     expect(html.match(/<nav\b/g)).toHaveLength(1);
   });
 
-  it('renders the French home with French copy and FR links', async () => {
+  it('renders the French home with Alexander Usoltsev h1, single signature, French border line, and no gaze duplication', async () => {
     const html = await render('fr');
     expect(html).toContain('<html lang="fr"');
-    expect(html).toContain('Je sais que tu me vois');
+    expect(html).toMatch(/<h1[^>]*>Alexander Usoltsev<\/h1>/);
+    expect(html).toContain("La frontière se trouble, les réalités se mêlent, et le Dreamland s'infiltre dans notre monde.".replace("'", '&#39;'));
+    expect(html).toContain('Photographe et artiste céramiste');
+    expect(html).not.toContain('Je sais que tu me vois');
+    expect(html).not.toContain('I know you can see me');
+    const bodyHtml = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html)?.[1] ?? '';
+    const visibleText = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
+    expect(visibleText.match(/iknowyoucanseeme/g)).toHaveLength(1);
     expect(html).toContain("La frontière s'efface".replace("'", '&#39;'));
     expect(html).toContain('href="/fr/a-propos/"');
     expect(html).toContain('href="/fr/expositions/"');
@@ -65,7 +92,12 @@ describe('HomePage', () => {
   describe('with the drift world', () => {
     const renderWorld = (lang: 'en' | 'fr') =>
       container.renderToString(HomePage, {
-        props: { lang, territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText(lang))), world: { ...sampleManifest, lang } },
+        props: {
+          lang,
+          territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText(lang))),
+          thresholdLine: thresholdLineOf(lang),
+          world: { ...sampleManifest, lang },
+        },
         request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
       });
 
@@ -106,12 +138,40 @@ describe('HomePage', () => {
       const fragment = 'Avant </script><script>alert(1)</script> & après <!-- fin';
       const world = { ...sampleManifest, works: sampleManifest.works.map((w, i) => (i === 0 ? { ...w, fragment } : w)) };
       const html = await container.renderToString(HomePage, {
-        props: { lang: 'fr', territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText('fr'))), world },
+        props: {
+          lang: 'fr',
+          territories: territories.map((t) => buildTerritoryTeaser(t, works, uiText('fr'))),
+          thresholdLine: thresholdLineOf('fr'),
+          world,
+        },
         request: new Request('https://www.iknowyoucanseeme.xyz/fr/'),
       });
       const json = /<script type="application\/json" id="drift-manifest">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
       expect(JSON.parse(json).works[0].fragment).toBe(fragment);
       expect(html).not.toContain('<script>alert(1)');
+    });
+
+    it('renders threshold border line on [data-threshold] and reserves gaze strictly for [data-drift-gaze]', async () => {
+      for (const [lang, gaze, otherGaze] of [
+        ['en', 'I know you can see me', 'Je sais que tu me vois'],
+        ['fr', 'Je sais que tu me vois', 'I know you can see me'],
+      ] as const) {
+        const html = await renderWorld(lang);
+        const thresholdBlock = /<div class="drift-threshold"[^>]*data-threshold[^>]*>([\s\S]*?)<\/div>/.exec(html)?.[1] ?? '';
+        const expectedLine = thresholdLineOf(lang).replace("'", '&#39;');
+        expect(thresholdBlock, lang).toContain(expectedLine);
+        expect(thresholdBlock, lang).not.toContain(gaze);
+        expect(thresholdBlock, lang).not.toContain(otherGaze);
+
+        const mainBlock = /<main\b[^>]*>([\s\S]*?)<\/main>/.exec(html)?.[1] ?? '';
+        expect(mainBlock, lang).not.toContain(gaze);
+        expect(mainBlock, lang).not.toContain(otherGaze);
+
+        const gazeElements = [...html.matchAll(/<p[^>]*data-drift-gaze[^>]*>([\s\S]*?)<\/p>/g)];
+        expect(gazeElements, lang).toHaveLength(1);
+        expect(gazeElements[0][1], lang).toBe(gaze);
+        expect(html.split(gaze).length - 1, lang).toBe(1);
+      }
     });
 
     it('names the six lenses in the page language and explains the lens controls (live caption)', async () => {

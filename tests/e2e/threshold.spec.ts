@@ -1,6 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { soundOff } from './soundOff.js';
+import { loadPageBlocks } from './uiBlocks.js';
+
+const THRESHOLD_LINE = loadPageBlocks('threshold').line;
 
 /**
  * The threshold, the gaze and the fragments in Chromium (keyed build with
@@ -45,7 +48,9 @@ test.describe('Threshold', () => {
     const threshold = page.locator('[data-threshold]');
     await expect(threshold).toBeVisible({ timeout: 15_000 });
     await expect(threshold).toHaveAttribute('data-kind', 'full');
-    await expect(threshold.locator('.drift-threshold-line')).toHaveText('I know you can see me');
+    await expect(threshold.locator('.drift-threshold-line')).toHaveText(THRESHOLD_LINE.en);
+    await expect(threshold).not.toContainText('I know you can see me');
+    await expect(threshold).not.toContainText('Je sais que tu me vois');
     await expect(page.locator('[data-threshold-enter]')).toBeFocused();
     await expect(page.locator('[data-drift-wake]')).toBeVisible();
     await worldReady(page);
@@ -62,6 +67,8 @@ test.describe('Threshold', () => {
     await recordEntered(page);
     await page.goto(`${KEYED}/fr/`);
     await expect(page.locator('[data-threshold-enter]')).toBeFocused({ timeout: 15_000 });
+    await expect(page.locator('[data-threshold] .drift-threshold-line')).toHaveText(THRESHOLD_LINE.fr);
+    await expect(page.locator('[data-threshold]')).not.toContainText('Je sais que tu me vois');
     await expect(page.locator('[data-threshold-enter]')).toHaveText('Entrer');
     await page.keyboard.press('Shift+Tab');
     await expect(page.locator('[data-drift-wake]')).toBeFocused();
@@ -110,11 +117,22 @@ test.describe('Threshold', () => {
 test.describe('Without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('visitors see the awake page, never the threshold', async ({ page }) => {
-    await page.goto(`${KEYED}/en/`);
-    await expect(page.locator('main h1')).toBeVisible();
-    await expect(page.locator('[data-threshold]')).toBeHidden();
-    await expect(page.locator('[data-drift]')).toBeHidden();
+  test('visitors see the awake page with Alexander Usoltsev h1, single signature, and no gaze duplication', async ({ page }) => {
+    for (const [lang, line, practice] of [
+      ['en', THRESHOLD_LINE.en, 'Photographer & ceramic artist'],
+      ['fr', THRESHOLD_LINE.fr, 'Photographe et artiste céramiste'],
+    ] as const) {
+      await page.goto(`${KEYED}/${lang}/`);
+      await expect(page.locator('main h1')).toHaveText('Alexander Usoltsev');
+      await expect(page.locator('main .threshold-line')).toHaveText(line);
+      await expect(page.locator('main .artist')).toHaveText(practice);
+      await expect(page.locator('main')).not.toContainText('I know you can see me');
+      await expect(page.locator('main')).not.toContainText('Je sais que tu me vois');
+      const awakeText = await page.locator('header, main, footer').evaluateAll((els) => els.map((e) => e.textContent ?? '').join(' '));
+      expect(awakeText.match(/iknowyoucanseeme/g)).toHaveLength(1);
+      await expect(page.locator('[data-threshold]')).toBeHidden();
+      await expect(page.locator('[data-drift]')).toBeHidden();
+    }
   });
 });
 
