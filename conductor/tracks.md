@@ -54,7 +54,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 11: Dreamland manifesto voice rewrite & Gaze de-duplication**
+- [x] **Track 11: Dreamland manifesto voice rewrite & Gaze de-duplication**
   *Link: [./tracks/voice-and-gaze-dedup_20261112/index.md](./tracks/voice-and-gaze-dedup_20261112/index.md)*
 
 ---
