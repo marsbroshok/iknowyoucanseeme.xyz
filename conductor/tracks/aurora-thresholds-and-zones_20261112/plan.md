@@ -29,3 +29,9 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
     - [ ] Green: implement `ZoneBanner` + upgraded `HorizonCompass` + CSS in `DriftIsland.astro` + any `ui.yaml` labels (EN + FR)
 - [ ] Task: Record ADR for Boreal Threshold & Zone Portals, update `README.md` and `docs/perf.md`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Inherited Findings
+
+From `drift-navigation-and-density_20261112` review (non-blocking; do first):
+
+- [ ] Task: `src/world/island/DriftBoot.ts`: extract `DeviceProfile.canAutoEnterDeepLink(caps)` so all device-capability policy stays in `DeviceProfile` rather than splitting `saveData` across `DriftBoot` and `DeviceProfile`; and pass the already-parsed manifest from boot into `enter()` when present to avoid parsing `#drift-manifest` twice.
