@@ -110,8 +110,8 @@ export function bootDrift(
   const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
   const kiosk = isKiosk(win.location.search);
-  const deepLinked = kiosk ? null : linkedWorkSlug(doc, win.location.search);
-  const deepLinkEnter = deepLinked !== null && !caps.saveData && DeviceProfile.decide(caps, 'world').mode === 'world';
+  const resolved = !kiosk && DeviceProfile.canAutoEnterDeepLink(caps) ? resolveDeepLink(doc, win.location.search) : { manifest: null, slug: null };
+  const deepLinkEnter = resolved.slug !== null;
   if (deepLinkEnter) preference.write('world');
   const decision = DeviceProfile.decide(caps, kiosk || deepLinkEnter ? 'world' : preference.read());
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
@@ -140,7 +140,7 @@ export function bootDrift(
     starts.find((b) => !b.hidden)?.focus();
   };
 
-  const enter = (manual = false): void => {
+  const enter = (manual = false, preloadedManifest: WorldManifest | null = null): void => {
     if (state !== 'awake') return;
     state = 'loading';
     const entered = (detail: EnteredDetail) => {
@@ -159,7 +159,7 @@ export function bootDrift(
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
       .then((module) => {
-        const manifest = readManifest(doc);
+        const manifest = preloadedManifest ?? readManifest(doc);
         const startSlug = kiosk ? null : DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
         return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk });
       })
@@ -184,7 +184,7 @@ export function bootDrift(
   starts.forEach((b) =>
     b.addEventListener('click', () => {
       if (!kiosk) preference.write('world');
-      enter(true);
+      enter(true, resolved.manifest);
     }),
   );
 
@@ -197,30 +197,32 @@ export function bootDrift(
   }
 
   showStarts(caps.webgl2 && decision.mode === 'awake');
-  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter());
+  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter(false, resolved.manifest));
   return {
     decision,
     get threshold() {
       return threshold;
     },
-    enter: () => enter(),
+    enter: () => enter(false, resolved.manifest),
     leave,
     sound,
   };
 }
 
 /**
- * Known work slug from `?w=<slug>` when the manifest is present on the page,
- * or `null` when `?w=` is absent, empty, unknown, or the manifest is missing.
+ * Parses the page manifest when `?w=<slug>` is present so boot can check
+ * whether the slug is known and hand the parsed manifest straight to `enter()`.
  *
  * @param doc - The document.
  * @param search - `location.search`.
- * @returns Known work slug or `null`.
+ * @returns The parsed manifest (when read) and the matched work slug, or `null`s.
  */
-function linkedWorkSlug(doc: Document, search: string): string | null {
-  if (!new URLSearchParams(search).get(DeepLink.PARAM) || !doc.getElementById('drift-manifest')) return null;
+function resolveDeepLink(doc: Document, search: string): { manifest: WorldManifest | null; slug: string | null } {
+  if (!new URLSearchParams(search).get(DeepLink.PARAM) || !doc.getElementById('drift-manifest')) {
+    return { manifest: null, slug: null };
+  }
   const manifest = readManifest(doc);
-  return DeepLink.parse(search, new Set(manifest.works.map((w) => w.slug)));
+  return { manifest, slug: DeepLink.parse(search, new Set(manifest.works.map((w) => w.slug))) };
 }
 
 /**

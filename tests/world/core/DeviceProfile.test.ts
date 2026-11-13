@@ -127,4 +127,23 @@ describe('DeviceProfile.decide', () => {
       }),
     );
   });
+
+  describe('canAutoEnterDeepLink', () => {
+    it('allows deep-link auto-entry on WebGL2 devices without Save-Data, even with < 4 GB memory or < 4 cores', () => {
+      expect(DeviceProfile.canAutoEnterDeepLink(laptop)).toBe(true);
+      expect(DeviceProfile.canAutoEnterDeepLink({ ...laptop, deviceMemory: 2, hardwareConcurrency: 2, coarsePointer: true })).toBe(true);
+      expect(DeviceProfile.canAutoEnterDeepLink({ ...laptop, saveData: true })).toBe(false);
+      expect(DeviceProfile.canAutoEnterDeepLink({ ...laptop, webgl2: false })).toBe(false);
+    });
+
+    it('property: requires WebGL2 and Save-Data off, and implies decide(caps, "world").mode === "world"', () => {
+      fc.assert(
+        fc.property(capabilities, (caps) => {
+          const allowed = DeviceProfile.canAutoEnterDeepLink(caps);
+          expect(allowed).toBe(caps.webgl2 && !caps.saveData);
+          if (allowed) expect(DeviceProfile.decide(caps, 'world').mode).toBe('world');
+        }),
+      );
+    });
+  });
 });

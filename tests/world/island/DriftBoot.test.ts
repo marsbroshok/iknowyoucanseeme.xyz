@@ -269,6 +269,18 @@ describe('bootDrift', () => {
     history.replaceState(null, '', '/');
   });
 
+  it('parses #drift-manifest at most once when booting on a ?w=<slug> deep link and entering the world', async () => {
+    history.replaceState(null, '', '/en/?w=arrivee');
+    const parseSpy = vi.spyOn(JSON, 'parse');
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(world.mounts).toHaveLength(1);
+    expect(world.mounts[0].startSlug).toBe('arrivee');
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    history.replaceState(null, '', '/');
+  });
+
   it('keeps stored "Wake up" when ?w= is unknown, empty, or the manifest is absent', async () => {
     for (const query of ['/en/?w=unknown', '/en/?w=']) {
       localStorage.setItem(ModePreference.KEY, 'awake');
