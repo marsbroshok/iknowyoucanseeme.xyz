@@ -22,13 +22,13 @@ Track: `aurora-thresholds-and-zones_20261112` · Spec: [spec.md](./spec.md) · W
     - [x] Green: implement `src/world/gl/BorealGateMesh.ts` and wire into `DriftWorld.ts`
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `afe7a19`
 
-## Phase 3: Zone-Crossing Banner & Interactive Zone Strip
+## Phase 3: Zone-Crossing Banner & Interactive Zone Strip [checkpoint: 8d507bd]
 
 - [x] Task: Centered `Fraunces` zone-crossing banner (`[data-zone-banner]`) & upgraded interactive `HorizonCompass` strip `e5f889f`
     - [x] Red: unit tests for `HorizonCompass` region pills + click callbacks and `ZoneBanner` view updates; Playwright e2e tests verifying crossing Arrival → Lens triggers `[data-zone-banner]`, clicking a zone pill jumps to that zone, and axe reports 0 violations while the banner is visible (EN + FR)
     - [x] Green: implement `ZoneBanner` + upgraded `HorizonCompass` + CSS in `DriftIsland.astro` + any `ui.yaml` labels (EN + FR)
-- [ ] Task: Record ADR for Boreal Threshold & Zone Portals, update `README.md` and `docs/perf.md`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Record ADR for Boreal Threshold & Zone Portals, update `README.md` and `docs/perf.md` `8d507bd`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `8d507bd`
 
 ## Inherited Findings
 
