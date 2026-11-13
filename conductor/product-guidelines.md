@@ -7,7 +7,7 @@
 - **Never:** "quirky", "coffee-fueled", emoji, marketing superlatives, sales language ("buy now", "limited offer"), exclamation marks—and **never choppy, infantile A1 baby-sentences** (*"I live in France. I left my country."*).
 - **Recurring motifs:** border, threshold, leak, drift, lens, echo, reflection, arrival, strangeness made familiar, permeable boundary, boreal curtain.
 - **Work fragments:** each work gets a genuine 1–2 line poetic fragment (7–24 words), never a literal image description or flat 3–4 word label.
-- **Clear, resonant vocabulary ("Simple does not mean dumb" — artist's directive, 2026-11-12):** write in the authentic register of the *Dreamland* manifesto and the artist's 2025–2026 captions. Avoid obscure dictionary jargon (*gossamer*, *ineffable*, *évanescent*), but embrace natural compound clauses, quiet metaphors (*anchor*, *resonant space*, *permeable boundary*, *strange new light*), and mature prose rhythm.
+- **Clear, resonant vocabulary ("Simple does not mean dumb" — artist's directive, 2026-11-12):** write in the authentic register of the *Dreamland* manifesto and the artist's 2025–2026 captions. Avoid obscure dictionary jargon (*gossamer*, *ineffable*, *évanescent*), but embrace natural compound clauses, quiet metaphors (*anchor*, *resonant space*, *permeable boundary*, *strange new light*), and mature prose rhythm. Automated `CopyGuard` checks enforce this manifesto cadence (EN ≤ 38 words and FR ≤ 42 words per sentence; ≥ 10 words average sentence length across narrative prose blocks so telegraphic baby-talk cannot pass).
 
 ## Language
 

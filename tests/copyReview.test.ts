@@ -7,6 +7,21 @@ import path from 'path';
 import os from 'os';
 
 describe('copyReview script', () => {
+  it('keeps committed docs/copy/REVIEW.md and docs/copy/instagram-bio.md synchronized', () => {
+    const committedPath = path.resolve(__dirname, '../docs/copy/REVIEW.md');
+    const freshPath = path.resolve(os.tmpdir(), `fresh_review_${process.pid}.md`);
+    try {
+      generateReviewSheet(freshPath);
+      expect(fs.readFileSync(committedPath, 'utf8')).toBe(fs.readFileSync(freshPath, 'utf8'));
+    } finally {
+      if (fs.existsSync(freshPath)) fs.unlinkSync(freshPath);
+    }
+
+    const bio = fs.readFileSync(path.resolve(__dirname, '../docs/copy/instagram-bio.md'), 'utf8');
+    expect(bio).toContain('Dreamland');
+    expect(bio).toContain('Photographe et artiste céramiste');
+  });
+
   it('generates the review sheet markdown', () => {
     const outPath = path.resolve(os.tmpdir(), 'temp_review.md');
     generateReviewSheet(outPath);

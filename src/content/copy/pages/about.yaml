@@ -5,20 +5,53 @@ title:
 blocks:
   bio:
     status: draft
-    en: I am a photographer and ceramic artist. I live in France. I left my country. Since then I ask myself what home is.
-    fr: Je suis photographe et céramiste. Je vis en France. J'ai quitté mon pays. Depuis, je me demande ce qu'est un chez-soi.
+    en: >-
+      Having changed countries and settled in France, I work across photography
+      and ceramics from a quiet question: what becomes of home when the anchor
+      of a physical place disappears? Using the camera as an instrument of
+      transformation—custom filters, mirrors, and multiple exposures—alongside
+      clay shaped by hand, I explore the internal landscape of the dream, where
+      memory and present reality gradually merge.
+    fr: >-
+      Ayant changé de pays pour vivre en France, je travaille entre la
+      photographie et la céramique autour d'une question silencieuse : que
+      devient le chez-soi lorsque l'ancrage d'un lieu physique disparaît ? À
+      travers des filtres sur mesure, des miroirs, des expositions multiples et
+      l'argile façonnée entre mes mains, j'explore le paysage intérieur du rêve,
+      cet espace perméable où la mémoire et le présent se mêlent.
     sources:
       - product_guidelines
       - exhibition_statement
   origin:
     status: draft
-    en: This project began in 2019. I gave black and white portraits to an AI. It hallucinated colours and showed its biases. The name iknowyoucanseeme comes from there.
-    fr: Ce projet a commencé en 2019. J'ai donné des portraits en noir et blanc à une IA. Elle a halluciné des couleurs et montré ses biais. Le nom iknowyoucanseeme vient de là.
+    en: >-
+      The signature iknowyoucanseeme began in Paris in December 2019 during the
+      group exhibition L'Emprunt, la Citation, when I entrusted black-and-white
+      portraits to a computer-vision model that hallucinated missing colours in
+      real time. Where its training data fell short—inventing lipstick on bare
+      lips or staining dark skin blue—the machine exposed its own biases, and
+      that mechanical gaze later reversed into a dreamscape that quietly watches
+      back.
+    fr: >-
+      La signature iknowyoucanseeme est née à Paris en décembre 2019 lors de
+      l'exposition collective L'Emprunt, la Citation, lorsque j'ai confié des
+      portraits en noir et blanc à une intelligence artificielle. En hallucinant
+      les couleurs en temps réel — inventant du rouge à lèvres ou teintant de
+      bleu les mains à la peau sombre —, la machine révélait ses propres biais.
+      Ce regard d'abord mécanique s'est depuis inversé dans mon travail :
+      désormais, c'est le paysage du rêve lui-même qui nous observe en silence.
     sources:
       - origin-2019.yaml
   exhibitions:
     status: draft
-    en: Past exhibitions include L'Emprunt, la Citation (MPAA, 2019) and Dreamland (Atelier 51, 16–30 Oct 2025).
-    fr: Mes expositions passées incluent L'Emprunt, la Citation (MPAA, 2019) et Dreamland (Atelier 51, 16–30 oct. 2025).
+    en: >-
+      Selected works have been presented in Paris, beginning with the group
+      exhibition L'Emprunt, la Citation at MPAA in December 2019 and unfolding
+      in the solo exhibition Dreamland at Atelier 51 (16–30 October 2025).
+    fr: >-
+      Ces recherches ont été présentées à Paris, d'abord lors de l'exposition
+      collective L'Emprunt, la Citation à la MPAA en décembre 2019, puis lors de
+      l'exposition personnelle Dreamland à l'Atelier 51 du 16 au 30 octobre
+      2025.
     sources:
       - product_guidelines

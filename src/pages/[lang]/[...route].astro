@@ -61,13 +61,14 @@ const zones = (await Promise.all((await getCollection('zones')).map(withCopy))).
 const exhibitions = (await getCollection('exhibitions')).map((e) => e.data);
 
 /** A copy page entry; throws when the file is missing. */
-async function copyPage(slug: 'about' | 'legal' | 'contact') {
+async function copyPage(slug: 'about' | 'legal' | 'contact' | 'threshold') {
   const entry = await getEntry('pages', slug);
   if (!entry) throw new Error(`[route] Missing copy page "${slug}"`);
   return entry.data;
 }
 const about = await copyPage('about');
 const legal = await copyPage('legal');
+const threshold = await copyPage('threshold');
 const aboutTitle = about.title?.[lang];
 if (!aboutTitle) throw new Error(`[route] Missing ${lang} title in about.yaml`);
 
@@ -114,7 +115,12 @@ function territoryFor(slug: string) {
 }
 ---
 {page.kind === 'home' && (
-  <HomePage lang={lang} territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))} world={world} />
+  <HomePage
+    lang={lang}
+    territories={territories.map((t) => buildTerritoryTeaser(t, works, ui))}
+    thresholdLine={requireBlock(threshold, 'line', lang)}
+    world={world}
+  />
 )}
 {page.kind === 'territory' && (
   <TerritoryPage

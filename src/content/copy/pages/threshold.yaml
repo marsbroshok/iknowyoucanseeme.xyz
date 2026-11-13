@@ -6,3 +6,9 @@ blocks:
     fr: Le Seuil
     sources:
       - spec
+  line:
+    status: draft
+    en: "The border is blurred, the realities are mixing, and the Dreamland is leaking into our world."
+    fr: "La frontière se trouble, les réalités se mêlent, et le Dreamland s'infiltre dans notre monde."
+    sources:
+      - exhibition_statement_2025_p1

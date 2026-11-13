@@ -516,3 +516,9 @@ blocks:
     fr: "esquisse {n} · argile · {year}"
     sources:
       - spec
+  artist_practice:
+    status: draft
+    en: "Photographer & ceramic artist"
+    fr: "Photographe et artiste céramiste"
+    sources:
+      - product
