@@ -177,8 +177,11 @@ never removed; while the world is shown it is made `inert`.
   validated by Zod schemas (`src/content/schema/`). The build fails on
   invalid content.
 - **Texts (copy):** separate files in `src/content/copy/` (FR + EN side by
-  side, see `docs/adr/0001-separate-copy-files.md`). Plain words only; the
-  copy guard rejects words from `content-config/vocabulary-deny.yaml`.
+  side, see `docs/adr/0001-separate-copy-files.md`), written in the *Dreamland*
+  manifesto register. `CopyGuard` (`src/tools/CopyGuard.ts`) rejects words from
+  `content-config/vocabulary-deny.yaml`, enforces sentence bounds (EN ≤ 38,
+  FR ≤ 42 words) and French typography, and requires ≥ 10 words per sentence on
+  average across narrative prose blocks so telegraphic prose cannot pass.
 - **Images:** web masters (≤ 2400 px) in `src/assets/works/<slug>/`. Print
   masters never enter git.
 

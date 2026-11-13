@@ -1,9 +1,9 @@
 # Instagram Bio Proposal
 
-**EN (109 chars):**
-Artist, photographer & ceramic maker living in France.
-Exploring the internal landscape of the dream.
+**EN (125 chars):**
+Photographer & ceramic artist in France.
+Where the border thins and the internal landscape of Dreamland leaks into our world.
 
-**FR (119 chars):**
-Artiste, photographe et céramiste vivant en France.
-Explorant le paysage intérieur du rêve.
+**FR (125 chars):**
+Photographe et artiste céramiste en France.
+Là où la frontière se trouble et où le paysage intérieur du Dreamland s'infiltre.
