@@ -177,6 +177,26 @@ test.describe('Drift world', () => {
     await worldReady(page);
   });
 
+  test('"See it in the drift" from a work page overrides a stored "Wake up" preference and opens directly on that work', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${KEYED}/en/`);
+    await worldReady(page);
+    await page.locator('[data-drift-wake]').click();
+    await expect(page.locator('[data-drift]')).toBeHidden();
+    await expect(page.locator('html')).not.toHaveClass(/drift-active/);
+    expect(await page.evaluate(() => localStorage.getItem('iknowyoucanseeme:mode'))).toBe('awake');
+
+    await page.goto(`${KEYED}/en/works/arrivee/`);
+    await page.locator('[data-drift-link]').click();
+    await expect(page.locator('html')).toHaveClass(/drift-active/);
+    await expect(page.locator('[data-drift]')).toBeVisible();
+    await expect(page.locator('[data-drift-start]')).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem('iknowyoucanseeme:mode'))).toBe('world');
+    await worldReady(page);
+    expect((await debugState(page))?.facing).toBe('arrivee');
+    expect(errors).toEqual([]);
+  });
+
   test('axe passes with the world mounted, and with a work open in the focus dialog', async ({ page }) => {
     for (const lang of ['en', 'fr']) {
       await page.goto(`${KEYED}/${lang}/?w=arrivee`);

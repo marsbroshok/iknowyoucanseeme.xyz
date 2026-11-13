@@ -61,7 +61,9 @@ export interface DriftBootHandle {
 /**
  * Boots the drift on the home page (small script, loaded with the page):
  * decides between world and awake layer (FR1), wires the "Wake up" and
- * "Drift" controls, opens the world on the threshold (full on a first
+ * "Drift" controls, overrides a stored `'awake'` choice when a valid known
+ * `?w=<slug>` deep link arrives on a WebGL2 device without Save-Data, opens
+ * the world on the threshold (full on a first
  * visit, short for a returning or deep-linked one; "Drift" skips it, being
  * itself the gesture) and emits `entered` on the world layer (bubbling,
  * detail {@link EnteredDetail}), and loads the Three.js world only after
@@ -108,7 +110,10 @@ export function bootDrift(
   const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
   const kiosk = isKiosk(win.location.search);
-  const decision = DeviceProfile.decide(caps, kiosk ? 'world' : preference.read());
+  const deepLinked = kiosk ? null : linkedWorkSlug(doc, win.location.search);
+  const deepLinkEnter = deepLinked !== null && !caps.saveData && DeviceProfile.decide(caps, 'world').mode === 'world';
+  if (deepLinkEnter) preference.write('world');
+  const decision = DeviceProfile.decide(caps, kiosk || deepLinkEnter ? 'world' : preference.read());
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
   let state: 'awake' | 'loading' | 'world' = 'awake';
   let handle: WorldHandle | null = null;
@@ -202,6 +207,20 @@ export function bootDrift(
     leave,
     sound,
   };
+}
+
+/**
+ * Known work slug from `?w=<slug>` when the manifest is present on the page,
+ * or `null` when `?w=` is absent, empty, unknown, or the manifest is missing.
+ *
+ * @param doc - The document.
+ * @param search - `location.search`.
+ * @returns Known work slug or `null`.
+ */
+function linkedWorkSlug(doc: Document, search: string): string | null {
+  if (!new URLSearchParams(search).get(DeepLink.PARAM) || !doc.getElementById('drift-manifest')) return null;
+  const manifest = readManifest(doc);
+  return DeepLink.parse(search, new Set(manifest.works.map((w) => w.slug)));
 }
 
 /**
