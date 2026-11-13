@@ -4,8 +4,8 @@ import { SOUND_ZONES, SoundZones, type SoundZone, type ZoneWeights } from './Sou
 
 /** Shape of the zone weights in the field. */
 export const ZONE_FIELD = {
-  /** Distance (m) over which a zone's weight falls by a factor e relative to the nearest zone. */
-  falloff: 8,
+  /** Distance (m) over which a zone's weight falls by a factor e relative to the nearest zone (calibrated to compact FIELD zoneGap = 10, territoryGap = 30). */
+  falloff: 2.5,
 } as const;
 
 /**
