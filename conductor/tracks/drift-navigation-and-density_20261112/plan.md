@@ -12,11 +12,11 @@ Track: `drift-navigation-and-density_20261112` · Spec: [spec.md](./spec.md) · 
 
 ## Phase 2: Compact Field Layout & Visibility Depth
 
-- [~] Task: Compact `FieldLayout` geometry & alternating sightline framing (`src/world/core/FieldLayout.ts`)
-    - [~] Red: unit + `fast-check` property tests for updated `FIELD` constants, alternating left/right sightline framing, pairwise minimum spacing ≥ `FIELD.spacing`, and cross-territory minimum distance ≥ `FIELD.territoryGap`
-    - [ ] Green: implement updated `FIELD` constants and alternating lateral framing in `FieldLayout.ts`
-- [ ] Task: Tune fog density & apparition curve for multi-work depth (`src/world/core/StageSettings.ts`, `src/world/gl/DriftWorld.ts`)
-    - [ ] Red: unit tests for `StageSettings` + desktop Playwright e2e test asserting ≥ 4 works are simultaneously visible inside the `1440×900` viewport at Arrival start
+- [x] Task: Compact `FieldLayout` geometry & alternating sightline framing (`src/world/core/FieldLayout.ts`) `944a9f6`
+    - [x] Red: unit + `fast-check` property tests for updated `FIELD` constants, alternating left/right sightline framing, pairwise minimum spacing ≥ `FIELD.spacing`, and cross-territory minimum distance ≥ `FIELD.territoryGap`
+    - [x] Green: implement updated `FIELD` constants and alternating lateral framing in `FieldLayout.ts`
+- [~] Task: Tune fog density & apparition curve for multi-work depth (`src/world/core/StageSettings.ts`, `src/world/gl/DriftWorld.ts`)
+    - [~] Red: unit tests for `StageSettings` + desktop Playwright e2e test asserting ≥ 4 works are simultaneously visible inside the `1440×900` viewport at Arrival start
     - [ ] Green: tune `FOG_DENSITY`, `ApparitionCurve`, and streaming radius while keeping `TextureBudget` caps intact
 - [ ] Task: Update `docs/perf.md` if frame/bundle metrics shift and verify 60 fps
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
@@ -30,3 +30,4 @@ From `voice-and-gaze-dedup_20261112` review (non-blocking; do first):
 ## Assumptions & Domain Invariants Ledger
 
 - **Deep-link capability vs manual `[data-drift-start]` override (`DriftBoot.ts`):** `DeviceProfile.decide(caps, 'world')` intentionally permits `saveData: true` when the visitor explicitly clicks `[data-drift-start]` on the Awake page (`DeviceProfile.test.ts` / `DriftBoot.test.ts`). For `?w=<slug>` deep links, `bootDrift` requires `!caps.saveData && DeviceProfile.decide(caps, 'world').mode === 'world'` so WebGL2 devices without Save-Data (including `< 4 GB` / `< 4` core devices in the `low` tier) override a stored `'awake'` choice, while Save-Data and WebGL2-incapable devices remain safely on the Awake layer.
+- **Alternating sightline band & sound zone falloff (`FieldLayout.ts`, `ZoneField.ts`):** Consecutive works in each zone alternate sides (`(-1)^(i + 1)`) with seeded lateral offsets in `[0.65, 3.4]` (strictly inside `[0.6, lateral]`), and `ZONE_FIELD.falloff` is calibrated from `8` m to `2.5` m (`0.25 × zoneGap`) so compact zones (`zoneGap = 10`) and territories (`territoryDistance = 48`) maintain pure per-territory ambience without cross-territory bleed.
