@@ -10,7 +10,7 @@ Track: `drift-navigation-and-density_20261112` · Spec: [spec.md](./spec.md) · 
     - [x] Green: implement in `DriftBoot.ts` and verify all existing `drift.spec.ts` / `kiosk.spec.ts` / `sound.spec.ts` tests pass
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `60350d1`
 
-## Phase 2: Compact Field Layout & Visibility Depth
+## Phase 2: Compact Field Layout & Visibility Depth [checkpoint: 5b57850]
 
 - [x] Task: Compact `FieldLayout` geometry & alternating sightline framing (`src/world/core/FieldLayout.ts`) `944a9f6`
     - [x] Red: unit + `fast-check` property tests for updated `FIELD` constants, alternating left/right sightline framing, pairwise minimum spacing ≥ `FIELD.spacing`, and cross-territory minimum distance ≥ `FIELD.territoryGap`
@@ -19,7 +19,7 @@ Track: `drift-navigation-and-density_20261112` · Spec: [spec.md](./spec.md) · 
     - [x] Red: unit tests for `StageSettings` + desktop Playwright e2e test asserting ≥ 4 works are simultaneously visible inside the `1440×900` viewport at Arrival start
     - [x] Green: tune `FOG_DENSITY`, `ApparitionCurve`, and streaming radius while keeping `TextureBudget` caps intact
 - [x] Task: Update `docs/perf.md` if frame/bundle metrics shift and verify 60 fps `5b57850`
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `5b57850`
 
 ## Inherited Findings
 
