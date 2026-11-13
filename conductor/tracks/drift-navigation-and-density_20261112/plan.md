@@ -20,3 +20,9 @@ Track: `drift-navigation-and-density_20261112` · Spec: [spec.md](./spec.md) · 
     - [ ] Green: tune `FOG_DENSITY`, `ApparitionCurve`, and streaming radius while keeping `TextureBudget` caps intact
 - [ ] Task: Update `docs/perf.md` if frame/bundle metrics shift and verify 60 fps
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Inherited Findings
+
+From `voice-and-gaze-dedup_20261112` review (non-blocking; do first):
+
+- [ ] Task: `src/tools/CopyGuard.ts`: JS `\b` is ASCII-only so French deny-list entries starting with a diacritic (e.g. `évanescent`) do not match after whitespace; switch to Unicode letter boundaries `(?<!\p{L})…(?!\p{L})` with `/iu` (escaping regex metacharacters cleanly) and add a unit test confirming `évanescent` after a space fails; also inline `cachedListReady` if present.
