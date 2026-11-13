@@ -1,5 +1,6 @@
 import type { CompassReading } from '../core/CompassBearing.js';
 import type { Region } from '../core/FieldLayout.js';
+import { ZoneAtmosphere } from '../core/ZoneAtmosphere.js';
 
 /** Display names of territories and zones in the page language. */
 export interface CompassLabels {
@@ -13,25 +14,30 @@ const SPREAD = 0.46;
 const MIN_GAP = 0.2;
 
 /**
- * The faint horizon line of the world (FR4, "never truly lost"): the name
- * of the zone or territory the visitor is in, and a marker for every other
- * region placed along the line by its direction. Regions outside the view
- * are pinned to the nearer edge with an arrow; markers that would overlap
- * are stacked on rows below the line, the nearest region on top.
- *
- * The current name sits in a polite live region and only changes when the
- * visitor crosses into another region, so screen readers are not flooded.
+ * Segmented zone progression bar and directional horizon line of the world
+ * (FR4, "never truly lost"):
+ * 1. Polite live region (`.drift-compass-here`) announcing region changes once
+ *    per crossing for screen-reader visitors.
+ * 2. Directional horizon line (`.drift-horizon`) placing non-current regions
+ *    by camera bearing (`‹ …` / `… ›` when outside the field of view).
+ * 3. Interactive progression strip (`.drift-zones`) rendering every region as a
+ *    `<button type="button" data-zone-pill>` tinted by its {@link ZoneAtmosphere}
+ *    accent, highlighting the active zone pill and allowing visitors to jump
+ *    cleanly to any zone or territory.
  */
 export class HorizonCompass {
+  private readonly root: HTMLElement;
   private readonly here: HTMLElement;
   private readonly markers = new Map<Region, { element: HTMLElement; label: string }>();
+  private readonly pills = new Map<Region, { button: HTMLButtonElement; onClick: () => void }>();
   private currentLabel = '';
 
   /**
-   * @param root - Empty container rendered by the page.
-   * @param regions - Regions of the field.
-   * @param labels - Names in the page language.
+   * @param root - Empty container rendered by the page (`[data-drift-compass]`).
+   * @param regions - Regions of the field in progression order.
+   * @param labels - Localized territory and zone names.
    * @param halfFov - Half the horizontal field of view (radians).
+   * @param onSelect - Optional callback invoked when a visitor clicks a region pill.
    * @throws Error when a region has no label.
    */
   constructor(
@@ -39,26 +45,54 @@ export class HorizonCompass {
     regions: readonly Region[],
     private readonly labels: CompassLabels,
     private readonly halfFov: number,
+    private readonly onSelect?: (region: Region) => void,
   ) {
+    this.root = root;
     const doc = root.ownerDocument;
     this.here = doc.createElement('p');
     this.here.className = 'drift-compass-here';
     this.here.setAttribute('aria-live', 'polite');
+
     const line = doc.createElement('div');
     line.className = 'drift-horizon';
+    line.setAttribute('aria-hidden', 'true');
+
+    const strip = doc.createElement('div');
+    strip.className = 'drift-zones';
+    const groupLabel = root.dataset.zonesLabel;
+    if (groupLabel) {
+      strip.setAttribute('role', 'group');
+      strip.setAttribute('aria-label', groupLabel);
+    }
+
     for (const region of regions) {
+      const label = this.nameOf(region);
       const element = doc.createElement('span');
       element.className = 'drift-marker';
       element.hidden = true;
-      element.textContent = this.nameOf(region);
+      element.textContent = label;
       line.append(element);
-      this.markers.set(region, { element, label: element.textContent });
+      this.markers.set(region, { element, label });
+
+      const button = doc.createElement('button');
+      button.type = 'button';
+      button.className = 'drift-zone-pill';
+      button.dataset.zonePill = '';
+      button.dataset.territory = region.territory;
+      button.dataset.zone = region.zone ?? '';
+      button.dataset.active = 'false';
+      button.style.setProperty('--zone-accent', ZoneAtmosphere.forRegion(region).accent);
+      button.textContent = label;
+      const onClick = () => this.onSelect?.(region);
+      button.addEventListener('click', onClick);
+      strip.append(button);
+      this.pills.set(region, { button, onClick });
     }
-    root.replaceChildren(this.here, line);
+    root.replaceChildren(this.here, line, strip);
   }
 
   /**
-   * Shows a compass reading.
+   * Shows a compass reading across the live announcer, horizon line, and zone pills.
    *
    * @param reading - Output of `CompassBearing.read`.
    */
@@ -69,6 +103,12 @@ export class HorizonCompass {
       this.here.textContent = label;
     }
     for (const [region, marker] of this.markers) marker.element.hidden = region === reading.current;
+    for (const [region, { button }] of this.pills) {
+      const active = region === reading.current;
+      button.dataset.active = String(active);
+      if (active) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+    }
     const rows: number[][] = [];
     for (const { region, bearing } of [...reading.others].sort((a, b) => a.distance - b.distance)) {
       const { element, label: name } = this.markers.get(region) as { element: HTMLElement; label: string };
@@ -82,6 +122,14 @@ export class HorizonCompass {
       element.style.setProperty('--row', String(row));
       element.textContent = side === 'right' ? `${name} ›` : side === 'left' ? `‹ ${name}` : name;
     }
+  }
+
+  /** Removes pill click listeners and clears the compass container. */
+  detach(): void {
+    for (const { button, onClick } of this.pills.values()) button.removeEventListener('click', onClick);
+    this.pills.clear();
+    this.markers.clear();
+    this.root.replaceChildren();
   }
 
   /**

@@ -12,6 +12,20 @@ describe('parseManifest', () => {
     expect(parseManifest(JSON.parse(JSON.stringify({ ...sampleManifest, works: [leak] }))).works[0].specimen).toBe('spécimen 01 · Venise · 2025');
   });
 
+  it('accepts a zone excerpt string or null and normalizes omitted excerpt to null', () => {
+    const withExcerpt = {
+      ...sampleManifest,
+      zones: [
+        { slug: 'arrival', title: 'Arrivée', excerpt: 'Une arrivée dans le rêve.' },
+        { slug: 'lens', title: 'La Loupe' },
+      ],
+    };
+    expect(parseManifest(JSON.parse(JSON.stringify(withExcerpt))).zones).toEqual([
+      { slug: 'arrival', title: 'Arrivée', excerpt: 'Une arrivée dans le rêve.' },
+      { slug: 'lens', title: 'La Loupe', excerpt: null },
+    ]);
+  });
+
   it.each([
     ['not an object', 42, /manifest must be an object/],
     ['a wrong language', { ...sampleManifest, lang: 'de' }, /lang/],
@@ -34,6 +48,8 @@ describe('parseManifest', () => {
     ['a territory without title', { ...sampleManifest, territories: [{ slug: 'dreamland', sentences: [] }] }, /territories\[0\]\.title/],
     ['a territory without sentences', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland' }] }, /territories\[0\]\.sentences must be an array/],
     ['an empty sentence', { ...sampleManifest, territories: [{ slug: 'dreamland', title: 'Dreamland', sentences: [''] }] }, /territories\[0\]\.sentences\[0\]/],
+    ['a non-string zone excerpt', { ...sampleManifest, zones: [{ slug: 'arrival', title: 'Arrivée', excerpt: 42 }] }, /zones\[0\]\.excerpt/],
+    ['an empty zone excerpt', { ...sampleManifest, zones: [{ slug: 'arrival', title: 'Arrivée', excerpt: '' }] }, /zones\[0\]\.excerpt/],
   ])('rejects %s', (_label, input, message) => {
     expect(() => parseManifest(input)).toThrow(message);
   });

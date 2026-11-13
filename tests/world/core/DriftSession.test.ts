@@ -89,6 +89,55 @@ describe('DriftSession', () => {
     expect(parseInt(sky.slice(5, 7), 16)).toBeGreaterThan(0x30);
   });
 
+  it('shifts sky base atmosphere distinctly across Arrival, Lens, Leak, and The border is thin', () => {
+    const multiZoneManifest = {
+      ...sampleManifest,
+      works: [
+        { ...sampleManifest.works[0], slug: 'w-arrival', zone: 'arrival' as const, color: '#081a34' },
+        { ...sampleManifest.works[0], slug: 'w-lens', zone: 'lens' as const, color: '#072622' },
+        { ...sampleManifest.works[0], slug: 'w-leak', zone: 'leak' as const, color: '#240d2b' },
+        { ...sampleManifest.works[1], slug: 'w-border', color: '#180e38' },
+      ],
+    };
+    const skies = ['w-arrival', 'w-lens', 'w-leak', 'w-border'].map((slug) => {
+      const s = new DriftSession(multiZoneManifest, 'high', slug);
+      return s.frame(still, 1 / 60).sky;
+    });
+    expect(skies).toEqual(['#081a34', '#072622', '#240d2b', '#180e38']);
+  });
+
+  it('jumpToRegion moves cleanly to any region entry, refreshes compass and texture plan immediately, and ignores unknown regions', () => {
+    const multiZoneManifest = {
+      ...sampleManifest,
+      works: [
+        { ...sampleManifest.works[0], slug: 'w-arrival', zone: 'arrival' as const },
+        { ...sampleManifest.works[0], slug: 'w-lens', zone: 'lens' as const },
+        { ...sampleManifest.works[0], slug: 'w-leak', zone: 'leak' as const },
+        { ...sampleManifest.works[1], slug: 'w-border' },
+      ],
+    };
+    const s = new DriftSession(multiZoneManifest, 'high', null);
+    s.frame(still, 1 / 60);
+    // Mid-interval frame normally emits null compass and null plan.
+    expect(s.frame(still, 1 / 60).compass).toBeNull();
+
+    // Unknown region object is ignored without disturbing state.
+    const before = s.state;
+    s.jumpToRegion({ territory: 'unknown', zone: null, start: { x: 99, z: 99 }, end: { x: 99, z: 80 }, center: { x: 99, z: 89.5 } });
+    expect(s.state).toBe(before);
+
+    for (const targetRegion of [...s.layout.regions].reverse()) {
+      s.jumpToRegion(targetRegion);
+      expect(s.state.vx).toBe(0);
+      expect(s.state.vz).toBe(0);
+      expect(s.state.target).toBeNull();
+      const next = s.frame(still, 1 / 60);
+      expect(next.region).toBe(targetRegion);
+      expect(next.compass?.current).toBe(targetRegion);
+      expect(next.plan).not.toBeNull();
+    }
+  });
+
   it('is not facing anything when looking away', () => {
     const s = new DriftSession(sampleManifest, 'high', 'arrivee');
     let f = s.frame({ thrust: 0, turn: DRIFT.maxYawSpeed }, 1 / 60);

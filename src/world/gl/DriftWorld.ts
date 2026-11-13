@@ -3,9 +3,14 @@ import { DriftSession } from '../core/DriftSession.js';
 import { DeepLink } from '../core/DeepLink.js';
 import { InputAccumulator } from '../core/InputAccumulator.js';
 import { TIER_BUDGETS } from '../core/TextureBudget.js';
-import { CAMERA } from '../core/StageSettings.js';
+import { CAMERA, EYE_HEIGHT } from '../core/StageSettings.js';
+import { CompassBearing } from '../core/CompassBearing.js';
+import { ZoneAtmosphere } from '../core/ZoneAtmosphere.js';
+import { ZoneCrossing } from '../core/ZoneCrossing.js';
+import { ZoneGates } from '../core/ZoneGates.js';
 import { TextureStreamer } from '../stream/TextureStreamer.js';
 import { HorizonCompass } from '../island/HorizonCompass.js';
+import { ZoneBanner } from '../island/ZoneBanner.js';
 import { WorkList } from '../island/WorkList.js';
 import { FocusOverlay } from '../island/FocusOverlay.js';
 import { DriftAnalytics } from '../island/DriftAnalytics.js';
@@ -34,6 +39,7 @@ import { SoundScene } from '../../sound/core/SoundScene.js';
 import type { SoundFeed } from '../../sound/core/SoundDirector.js';
 import { LeakRecorder } from '../../leak/LeakRecorder.js';
 import { ApparitionMesh } from './ApparitionMesh.js';
+import { BorealGateMesh } from './BorealGateMesh.js';
 import { WorkTextureLoader } from './WorkTextureLoader.js';
 import { WorldStage } from './WorldStage.js';
 
@@ -42,6 +48,9 @@ export interface DriftDebugState {
   frames: number;
   tier: string;
   pose: { x: number; z: number; yaw: number };
+  sky: string;
+  region: { territory: string; zone: string | null } | null;
+  gates: { id: string; x: number; z: number; distance: number; part: number; visible: boolean }[];
   facing: string | null;
   nearest: string | null;
   loaded: Record<string, string>;
@@ -87,6 +96,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const canvas = part<HTMLCanvasElement>(root, '[data-drift-canvas]');
   const stage = new WorldStage(canvas, tier, win.devicePixelRatio);
   const session = new DriftSession(manifest, tier, startSlug);
+  stage.setSkyColor(ZoneAtmosphere.forRegion(CompassBearing.regionAt(session.state, session.layout.regions)).base);
   const work = (slug: string) => session.work(slug) as NonNullable<ReturnType<DriftSession['work']>>;
 
   const meshes = new Map<string, ApparitionMesh>();
@@ -96,6 +106,13 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     meshes.set(p.slug, mesh);
     stage.scene.add(mesh.mesh);
   }
+
+  const gates = ZoneGates.compute(session.layout);
+  const gateMeshes = gates.map((g) => {
+    const gm = new BorealGateMesh(g, tier);
+    stage.scene.add(gm.mesh);
+    return gm;
+  });
 
   const loader = new WorkTextureLoader();
   const streamer = new TextureStreamer<Texture>({
@@ -122,7 +139,10 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       zones: Object.fromEntries(manifest.zones.map((z) => [z.slug, z.title])),
     },
     halfFov(),
+    (region) => session.jumpToRegion(region),
   );
+  const crossing = ZoneCrossing.fromManifest(session.layout.regions, manifest);
+  const zoneBanner = new ZoneBanner(root);
 
   const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'), undefined, { kiosk });
   const open = (slug: string) => overlay.open(work(slug));
@@ -147,9 +167,9 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
 
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
 
-  // The threshold's breathing leak, the gaze and the fragments (decisions in src/world/core).
+  // The threshold's boreal curtain, the gaze and the fragments (decisions in src/world/core).
   const leakCanvas = part<HTMLCanvasElement>(root, '[data-threshold-leak]');
-  let leak: ThresholdLeak | null = threshold.visible ? new ThresholdLeak(leakCanvas, ThresholdPalette.pick(manifest.works, Math.random), win) : null;
+  let leak: ThresholdLeak | null = threshold.visible ? new ThresholdLeak(leakCanvas, ThresholdPalette.pick(manifest.works, Math.random), win, tier) : null;
   const gaze = new GazeDirector(webStorage(win, 'sessionStorage'), Math.random);
   const fragments = new FragmentSurfacer(
     new FragmentCatalog(session.stops, manifest.works, manifest.territories),
@@ -199,6 +219,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   canvas.addEventListener('click', onCanvasClick);
 
   let frames = 0;
+  let portalTime = 0;
   const debug = import.meta.env.PUBLIC_DRIFT_DEBUG === 'true';
   stage.start((dt) => {
     keys.poll(acc, dt);
@@ -208,8 +229,11 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     const held = threshold.holding || overlay.isOpen;
     const f = session.frame(held ? { thrust: 0, turn: 0 } : input, dt);
     frames++;
+    portalTime += Math.min(Math.max(dt, 0), 0.1);
     stage.setPose(f.state);
     stage.setSkyColor(f.sky);
+    for (const gm of gateMeshes) gm.update(f.state.x, EYE_HEIGHT, f.state.z, portalTime);
+    zoneBanner.update(crossing.update(f.state, threshold.holding, dt));
     if (leak && !threshold.visible) {
       leak.dispose();
       leak = null;
@@ -254,6 +278,12 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
         frames,
         tier,
         pose: { x: f.state.x, z: f.state.z, yaw: f.state.yaw },
+        sky: f.sky,
+        region: f.region ? { territory: f.region.territory, zone: f.region.zone } : null,
+        gates: gates.map((g, i) => {
+          const distance = ZoneGates.distanceToCurtain(f.state, g);
+          return { id: g.id, x: g.x, z: g.z, distance, part: ZoneGates.partFactor(distance), visible: gateMeshes[i].mesh.visible };
+        }),
         facing: f.facing,
         nearest: f.nearest,
         loaded: streamer.loaded,
@@ -282,10 +312,14 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     restart() {
       overlay.close();
       kioskStop = null;
+      crossing.reset();
+      zoneBanner.clear();
       session.restart();
     },
     unmount() {
       leak?.dispose();
+      zoneBanner.clear();
+      compass.detach();
       whisper.fragment(null, false);
       whisper.gaze(0, false);
       whisper.specimen(null);
@@ -295,6 +329,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       stage.dispose();
       streamer.dispose();
       for (const mesh of meshes.values()) mesh.dispose();
+      for (const gm of gateMeshes) gm.dispose();
       canvas.removeEventListener('click', onCanvasClick);
       wheel.detach();
       drag.detach();

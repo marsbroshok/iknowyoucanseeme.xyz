@@ -402,6 +402,12 @@ blocks:
     fr: Les œuvres autour de vous
     sources:
       - spec
+  drift_zones_label:
+    status: draft
+    en: Zones and territories
+    fr: Zones et territoires
+    sources:
+      - spec
   drift_tilt:
     status: draft
     en: Move with the phone

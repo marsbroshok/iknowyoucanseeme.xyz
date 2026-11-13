@@ -44,8 +44,12 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     <p>{ui.t('drift_lens_help')}</p>
     <p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names={lensNames}></p>
   </div>
-  <div class="drift-compass" data-drift-compass></div>
   <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
+  <div class="drift-compass" data-drift-compass data-zones-label={ui.t('drift_zones_label')}></div>
+  <div class="drift-zone-banner" data-zone-banner hidden>
+    <p class="drift-zone-banner-title" data-zone-banner-title></p>
+    <p class="drift-zone-banner-subtitle" data-zone-banner-subtitle></p>
+  </div>
   <p class="drift-gaze" data-drift-gaze aria-hidden="true">{ui.t('gaze')}</p>
   <p class="drift-fragment" data-drift-fragment aria-hidden="true"></p>
   <p class="drift-specimen" data-drift-specimen aria-hidden="true"></p>
@@ -169,21 +173,24 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     pointer-events: none;
   }
   .drift-compass-here {
-    margin: 0 auto var(--space-2);
-    width: max-content;
-    max-width: 90vw;
-    padding: var(--space-1) var(--space-2);
-    background: rgb(11 16 48 / 0.72);
-    text-align: center;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .drift-horizon {
     position: relative;
-    height: 4.5rem;
-    border-top: 1px solid rgb(240 240 245 / 0.25);
+    height: 2.5rem;
+    border-top: 1px solid rgb(240 240 245 / 0.2);
+    pointer-events: none;
   }
   .drift-marker {
     position: absolute;
-    top: calc(var(--space-1) + var(--row, 0) * 1.4rem);
+    top: calc(var(--space-1) + var(--row, 0) * 1.2rem);
     left: calc(var(--x, 0.5) * 100%);
     transform: translateX(-50%);
     white-space: nowrap;
@@ -197,6 +204,86 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-marker[data-side='right'] {
     transform: translateX(-100%);
+  }
+  .drift-zones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+    pointer-events: auto;
+  }
+  .drift .drift-zone-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgb(160 165 181 / 0.45);
+    background: rgb(7 11 34 / 0.84);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    transition: border-color var(--motion-duration) var(--motion-easing), color var(--motion-duration) var(--motion-easing), background-color var(--motion-duration) var(--motion-easing);
+  }
+  .drift .drift-zone-pill::before {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--zone-accent, var(--text-secondary));
+    opacity: 0.45;
+    transform: scale(0.75);
+    transition: opacity var(--motion-duration) var(--motion-easing), transform var(--motion-duration) var(--motion-easing);
+  }
+  .drift .drift-zone-pill[data-active='true'] {
+    border-color: var(--zone-accent, var(--text-primary));
+    background: rgb(11 16 48 / 0.94);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--zone-accent, var(--text-primary));
+  }
+  .drift .drift-zone-pill[data-active='true']::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .drift-zone-banner {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    transform: translate(-50%, -50%);
+    width: min(34rem, 88vw);
+    padding: var(--space-3) var(--space-4);
+    background: rgb(7 11 34 / 0.9);
+    border-block: 1px solid var(--zone-accent, var(--text-secondary));
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgb(3 5 18 / 0.65);
+    text-align: center;
+    pointer-events: none;
+  }
+  .drift-zone-banner[hidden] {
+    display: none;
+  }
+  .drift-zone-banner-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--zone-accent, var(--text-primary));
+  }
+  .drift-zone-banner-subtitle {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.45;
+    color: var(--text-primary);
+  }
+  .drift-zone-banner-subtitle[hidden] {
+    display: none;
   }
   .drift-focus {
     max-width: min(40rem, 92vw);
@@ -289,6 +376,10 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   .drift-threshold-line {
     margin: 0;
     max-width: 36rem;
+    padding: var(--space-2) var(--space-3);
+    background: rgb(7 11 34 / 0.62);
+    border-radius: 4px;
+    text-shadow: 0 1px 12px rgb(7 11 34 / 0.95);
     font-family: var(--font-sans);
     font-size: var(--text-xl);
     font-weight: 300;

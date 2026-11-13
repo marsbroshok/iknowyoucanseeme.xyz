@@ -109,6 +109,9 @@ describe('HomePage', () => {
       expect(html).toContain('data-territory="dreamland"');
       expect(html).toContain('>Wake up</button>');
       expect(html).toContain('aria-label="Works around you"');
+      expect(html).toContain('data-zone-banner');
+      expect(html).toContain('data-zones-label="Zones and territories"');
+      expect(html.indexOf('data-drift-compass')).toBeGreaterThan(html.indexOf('data-drift-works'));
       expect(html).toMatch(/<canvas[^>]*data-drift-canvas[^>]*aria-hidden="true"/);
     });
 

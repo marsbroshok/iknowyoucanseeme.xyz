@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { HorizonCompass } from '../../../src/world/island/HorizonCompass.js';
 import { CompassBearing } from '../../../src/world/core/CompassBearing.js';
+import { ZoneAtmosphere } from '../../../src/world/core/ZoneAtmosphere.js';
 import type { Region } from '../../../src/world/core/FieldLayout.js';
 
 const region = (territory: string, zone: Region['zone'], z0: number, z1: number, x = 0): Region => ({
@@ -87,5 +88,43 @@ describe('HorizonCompass', () => {
     const empty = new HorizonCompass(root, [], labels, 1);
     empty.update({ current: null, others: [] });
     expect((root.querySelector('.drift-compass-here') as HTMLElement).textContent).toBe('');
+    expect(root.querySelectorAll('[data-zone-pill]')).toHaveLength(0);
+  });
+
+  it('renders a segmented progression strip of <button type="button"> pills tinted by zone accent and marks the active region', () => {
+    root.dataset.zonesLabel = 'Zones et territoires';
+    const selected: Region[] = [];
+    const interactive = new HorizonCompass(root, regions, labels, Math.PI / 3, (r) => selected.push(r));
+
+    const strip = root.querySelector('.drift-zones') as HTMLElement;
+    expect(strip.getAttribute('role')).toBe('group');
+    expect(strip.getAttribute('aria-label')).toBe('Zones et territoires');
+
+    const pills = [...root.querySelectorAll<HTMLButtonElement>('[data-zone-pill]')];
+    expect(pills.map((p) => p.type)).toEqual(['button', 'button', 'button']);
+    expect(pills.map((p) => p.textContent)).toEqual(['Dreamland · Arrivée', 'Dreamland · La Loupe', 'La frontière est mince']);
+    expect(pills.map((p) => p.style.getPropertyValue('--zone-accent'))).toEqual(regions.map((r) => ZoneAtmosphere.forRegion(r).accent));
+
+    interactive.update(CompassBearing.read({ x: 0, z: -10, yaw: 0 }, regions));
+    expect(pills[0].getAttribute('aria-current')).toBe('true');
+    expect(pills[0].dataset.active).toBe('true');
+    expect(pills[1].hasAttribute('aria-current')).toBe(false);
+    expect(pills[1].dataset.active).toBe('false');
+
+    interactive.update(CompassBearing.read({ x: 0, z: -70, yaw: 0 }, regions));
+    expect(pills[0].hasAttribute('aria-current')).toBe(false);
+    expect(pills[0].dataset.active).toBe('false');
+    expect(pills[1].getAttribute('aria-current')).toBe('true');
+    expect(pills[1].dataset.active).toBe('true');
+
+    pills[2].click();
+    pills[1].click();
+    expect(selected).toEqual([regions[2], regions[1]]);
+
+    // Clicking without an onSelect callback is a safe no-op, and detach() cleans up.
+    pills[0].click();
+    compass.update(CompassBearing.read({ x: 0, z: -10, yaw: 0 }, regions));
+    interactive.detach();
+    expect(root.children).toHaveLength(0);
   });
 });

@@ -8,8 +8,8 @@ Budgets (`conductor/product-guidelines.md`, track `drift-world_20261111`):
 
 | Part | Gzipped | Budget | When it loads |
 |---|---|---|---|
-| Boot module (home pages only) | 6.2 KB | 8 KB | with the page (module script) |
-| World chunk (Three.js + scene code + lens + threshold, gaze, fragments, specimens) | 136.1 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
+| Boot module (home pages only) | 6.3 KB | 8 KB | with the page (module script) |
+| World chunk (Three.js + scene code + lens + boreal threshold & 3D portals, gaze, fragments, specimens) | 140.2 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
 | Sound chunk (Tone.js + generative ambience) | 64.3 KB | — | dynamic import after the visitor's gesture |
 
 Re-measured 2026-11-12 after track `lens_20261111`: the lens (six shaders,
@@ -25,6 +25,11 @@ the 2 KB inline budget of `DistGuard`).
 Re-measured 2026-11-13 after track `drift-navigation-and-density_20261112`
 (including sound, leak/kiosk, and deep-link Wake-up override): boot 6.2 KB gz,
 world 136.1 KB gz, sound 64.3 KB gz.
+
+Re-measured 2026-11-13 after track `aurora-thresholds-and-zones_20261112`
+(multi-ribbon boreal Threshold curtain, per-zone atmospheres, 3D `BorealGateMesh`
+portals, `ZoneBanner`, and interactive `HorizonCompass` strip): boot 6.3 KB gz,
+world 140.2 KB gz (+4.1 KB gz), sound 64.3 KB gz.
 
 Other pages load no JavaScript file. Devices that get the awake layer
 (Save-Data, no WebGL2, < 4 GB or < 4 cores; reduced motion does not route,
@@ -43,10 +48,10 @@ start of Dreamland with steady wheel input and a few turns, counting
 
 | Run | Viewport | Tier | fps (mean) | p95 frame | worst frame |
 |---|---|---|---|---|---|
-| Desktop | 1440 × 900, DPR 1 | high | 59.8 | 16.8 ms | 50.0 ms |
-| Emulated phone (Pixel 7 profile) | 412 × 839, DPR 2.6 → capped 1.25 | low | 60.0 | 16.7 ms | 16.8 ms |
+| Desktop | 1440 × 900, DPR 1 | high | 59.8 | 16.8 ms | 50.1 ms |
+| Emulated phone (Pixel 7 profile) | 412 × 839, DPR 2.6 → capped 1.25 | low | 60.0 | 16.8 ms | 16.8 ms |
 
-### With the lens active (measured 2026-11-13, compact field)
+### With the lens active (measured 2026-11-13, compact field + boreal portals)
 
 Same machine and command. The visitor stands in front of *Arrivée*; for
 10 s the pointer (mouse, or a held finger on the emulated phone) circles
@@ -55,10 +60,10 @@ drawn. The lens was on the work in every measured frame.
 
 | Run | Tier | fps (mean) | p95 frame | worst frame |
 |---|---|---|---|---|
-| Desktop, lens on (mouse) | high (12 blur samples, 3 ghosts, fracture) | 60.0 | 16.7 ms | 16.8 ms |
+| Desktop, lens on (mouse) | high (12 blur samples, 3 ghosts, fracture) | 60.0 | 16.8 ms | 16.8 ms |
 | Emulated phone, lens on (finger) | low (5 samples, 1 ghost, no fracture) | 60.0 | 16.7 ms | 16.8 ms |
-| Desktop, drift only (same run) | high | 59.8 | 16.8 ms | 50.0 ms |
-| Emulated phone, drift only (same run) | low | 60.0 | 16.7 ms | 16.8 ms |
+| Desktop, drift only (same run) | high | 59.8 | 16.8 ms | 50.1 ms |
+| Emulated phone, drift only (same run) | low | 60.0 | 16.8 ms | 16.8 ms |
 
 The display refresh caps the rate at 60 fps, so both runs are at the cap.
 The emulated phone uses the same laptop GPU: it checks the `low` tier code
@@ -92,3 +97,7 @@ in at the next release review.
   works return early); the `low` tier compiles a cheaper variant (5 blur
   samples instead of 12, 1 flare ghost instead of 3, no fracture). One
   shader program per tier is shared by all works.
+- Boreal curtains (`ThresholdLeak` and `BorealGateMesh`, ADR 0013) scale FBM
+  ray octaves by tier (`4` on `high`, `2` on `low`), share one `32 × 1` unit
+  plane across all 3D portals, cull portals beyond `72` units, and release the
+  Threshold's WebGL context as soon as the Threshold closes.

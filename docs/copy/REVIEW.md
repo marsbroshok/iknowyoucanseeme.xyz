@@ -80,6 +80,7 @@
 | pages/ui.yaml | blocks.drift_layer_label | draft | The drift | La dérive | spec |
 | pages/ui.yaml | blocks.drift_help | draft | Scroll or drag to move. Arrow keys move too. Tab goes to the next work, Enter opens it. | Faites défiler ou glissez pour avancer. Les flèches aussi. Tab va à l'œuvre suivante, Entrée l'ouvre. | spec |
 | pages/ui.yaml | blocks.drift_works_label | draft | Works around you | Les œuvres autour de vous | spec |
+| pages/ui.yaml | blocks.drift_zones_label | draft | Zones and territories | Zones et territoires | spec |
 | pages/ui.yaml | blocks.drift_tilt | draft | Move with the phone | Bouger avec le téléphone | spec |
 | pages/ui.yaml | blocks.drift_open_work | draft | See the work page | Voir la page de l'œuvre | spec |
 | pages/ui.yaml | blocks.drift_lens_help | draft | Point at a work to see it through a lens. L or a long press changes the lens. Hold Shift or tap with two fingers to see the photo as it is. | Pointez une œuvre pour la voir à travers une loupe. L ou un appui long change de loupe. Maintenez Maj ou touchez avec deux doigts pour voir la photo telle quelle. | spec |

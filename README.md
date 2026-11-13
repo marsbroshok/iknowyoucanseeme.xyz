@@ -84,9 +84,11 @@ loaded only after the first paint and only when the world is shown
 (≤ 250 KB gzipped, checked by `tests/e2e/bundle.spec.ts`). The awake HTML is
 never removed; while the world is shown it is made `inert`.
 
-- Threshold: a first visit opens on a night-blue void with the *Dreamland*
-  closing border line (`pages/threshold.yaml` `blocks.line`), one slowly breathing colour
-  leak (from an Arrival work) and **Enter / Entrer** (focused; Enter or Space
+- Threshold: a first visit opens on a deep night-indigo void with the *Dreamland*
+  closing border line (`pages/threshold.yaml` `blocks.line`), a shimmering
+  multi-ribbon **aurora borealis curtain** (`ThresholdPalette` + `ThresholdLeak`:
+  vertical folds of emerald-green, violet and magenta-pink modulated subtly by an
+  Arrival work's palette) and **Enter / Entrer** (focused; Enter or Space
   works). "Wake up / Se réveiller" stays visible above it. Returning
   visitors (`localStorage`) and deep links get a short threshold: while
   sound is on it still waits for Enter (the click unlocks audio); muted, it
@@ -96,6 +98,17 @@ never removed; while the world is shown it is made `inert`.
   lets it fade by itself. "Drift" on the awake page skips it. Entering
   dispatches a bubbling `entered` event (`detail: { gesture, returning }`)
   on the world layer. Without JavaScript the awake page shows as before.
+- Zones and portals: each region carries its own nocturnal sky and fog
+  atmosphere (`ZoneAtmosphere` + contrast-guarded `PaletteSky`: ultramarine-teal
+  in Arrival, emerald-pine in Lens, plum-rose in Leak, boreal violet-indigo in
+  *The border is thin*), separated by translucent **3D boreal light curtains**
+  (`ZoneGates` + `BorealGateMesh`) across every zone gap and territory entry
+  that part smoothly near the camera. Crossing into a region reveals a centered
+  `Fraunces` title and excerpt card (`ZoneCrossing` + `ZoneBanner`,
+  `[data-zone-banner]`) for 3 s and updates the segmented bottom zone strip
+  (`HorizonCompass`), whose `<button type="button">` pills also let visitors
+  jump cleanly to any zone or territory (`DriftSession.jumpToRegion`). Design
+  notes: `docs/adr/0013-boreal-threshold-and-zone-portals.md`.
 - Sound: a generative ambience per zone (Arrival: a filtered sea and slow
   drones; Lens: brighter, with glints as works approach; Leak: a low dry
   pulse and a faint hum; the border is thin: wind, slow bends and a low

@@ -9,9 +9,9 @@ export const sampleManifest: WorldManifest = {
     { slug: 'the-border-is-thin', title: 'La frontière est mince', sentences: [] },
   ],
   zones: [
-    { slug: 'arrival', title: 'Arrivée' },
-    { slug: 'lens', title: 'La Loupe' },
-    { slug: 'leak', title: "L'Infiltration" },
+    { slug: 'arrival', title: 'Arrivée', excerpt: "Le parcours s'ouvre dans les champs colorés." },
+    { slug: 'lens', title: 'La Loupe', excerpt: 'Ce passage précise le regard.' },
+    { slug: 'leak', title: "L'Infiltration", excerpt: "Le Dreamland s'infiltre dans notre monde." },
   ],
   works: [
     {

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import sharp from 'sharp';
 import { soundOff } from './soundOff.js';
 import { loadPageBlocks } from './uiBlocks.js';
 
@@ -111,6 +112,62 @@ test.describe('Threshold', () => {
       await worldReady(page);
       expect((await new AxeBuilder({ page }).analyze()).violations, lang).toEqual([]);
     }
+  });
+
+  test('renders a vertical multi-hue aurora borealis curtain (green, violet, and pink ribbons) on [data-threshold-leak]', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(`${KEYED}/en/`);
+    await expect(page.locator('[data-threshold-leak]')).toHaveAttribute('data-leak', 'on', { timeout: 15_000 });
+    await worldReady(page);
+
+    const png = await page.locator('[data-threshold-leak]').screenshot();
+    const { data, info } = await sharp(png).raw().toBuffer({ resolveWithObject: true });
+    const { width, height, channels } = info;
+    const lumAt = (x: number, y: number) => {
+      const idx = (y * width + x) * channels;
+      return 0.2126 * data[idx] + 0.7152 * data[idx + 1] + 0.0722 * data[idx + 2];
+    };
+
+    let dx = 0;
+    let dy = 0;
+    let steps = 0;
+    let green = 0;
+    let violet = 0;
+    let pink = 0;
+    let minX = width;
+    let maxX = 0;
+
+    for (let y = Math.floor(height * 0.08); y < Math.floor(height * 0.92); y++) {
+      for (let x = 0; x < width; x++) {
+        // Skip the central typography / button zone so only pure [data-threshold-leak] canvas pixels are measured.
+        if (Math.abs(x - width / 2) < 340 && Math.abs(y - height / 2) < 110) continue;
+        const idx = (y * width + x) * channels;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        if (lum > 18) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+        }
+        if (g > r + 20 && g >= b + 6 && g > 36) green++;
+        if (b > r + 18 && r > g + 8 && b > 40) violet++;
+        if (r > b + 12 && b > g + 12 && r > 44) pink++;
+
+        if (x + 6 < width && y + 6 < Math.floor(height * 0.92) && !(Math.abs(x + 6 - width / 2) < 340 && Math.abs(y + 6 - height / 2) < 110)) {
+          dx += Math.abs(lum - lumAt(x + 6, y));
+          dy += Math.abs(lum - lumAt(x, y + 6));
+          steps++;
+        }
+      }
+    }
+
+    expect(maxX - minX).toBeGreaterThan(width * 0.75);
+    expect(dx / steps).toBeGreaterThan(1.5);
+    expect(dx / steps).toBeGreaterThan((dy / steps) * 1.25);
+    expect(green).toBeGreaterThan(2000);
+    expect(violet).toBeGreaterThan(2000);
+    expect(pink).toBeGreaterThan(2000);
   });
 });
 

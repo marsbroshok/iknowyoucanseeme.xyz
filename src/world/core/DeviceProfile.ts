@@ -81,6 +81,18 @@ export class DeviceProfile {
   }
 
   /**
+   * Whether a valid `?w=<slug>` deep link may automatically enter the world
+   * (overriding a stored `'awake'` choice or low-memory / few-cores defaults):
+   * requires WebGL2 and Save-Data off.
+   *
+   * @param caps - Device capabilities.
+   * @returns `true` when the device may auto-enter on a deep link.
+   */
+  static canAutoEnterDeepLink(caps: DeviceCapabilities): boolean {
+    return caps.webgl2 && !caps.saveData;
+  }
+
+  /**
    * Every capability reason against the world, in a stable order.
    *
    * @param caps - Device capabilities.

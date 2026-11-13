@@ -2,11 +2,12 @@ import { ApparitionCurve } from './ApparitionCurve.js';
 import { CompassBearing, type CompassReading } from './CompassBearing.js';
 import type { QualityTier } from './DeviceProfile.js';
 import { DRIFT, DriftController, type CycleStop, type DriftInput, type DriftState } from './DriftController.js';
-import { FieldLayout, type FieldLayoutResult, type Placement } from './FieldLayout.js';
+import { FieldLayout, type FieldLayoutResult, type Placement, type Region } from './FieldLayout.js';
 import { PaletteSky } from './PaletteSky.js';
 import { SettleDetector } from './SettleDetector.js';
 import { TIER_BUDGETS, TextureBudget, type Lod, type TextureCandidate } from './TextureBudget.js';
 import type { ManifestWork, WorldManifest } from './WorldManifest.js';
+import { ZoneAtmosphere } from './ZoneAtmosphere.js';
 
 /** Session timing and thresholds. */
 export const SESSION = {
@@ -35,6 +36,8 @@ export interface FrameResult {
   works: WorkFrame[];
   /** Sky and fog colour. */
   sky: string;
+  /** Active region containing or nearest to the camera, or `null` without works. */
+  region: Region | null;
   /** New texture plan, or `null` when not due this frame. */
   plan: Record<string, Lod> | null;
   /** New compass reading, or `null` when not due this frame. */
@@ -61,7 +64,7 @@ export class DriftSession {
   state: DriftState;
   private readonly controller = new DriftController();
   private readonly curve: ApparitionCurve;
-  private readonly sky = new PaletteSky();
+  private readonly sky: PaletteSky;
   private readonly settle = new SettleDetector();
   private readonly works: Map<string, ManifestWork>;
   private sincePlan = Number.POSITIVE_INFINITY;
@@ -89,6 +92,8 @@ export class DriftSession {
     const start = this.controller.initial(this.layout.start);
     const linked = this.layout.placements.find((p) => p.slug === startSlug);
     this.state = linked ? this.controller.initial(this.controller.viewPoseFor(start, linked)) : start;
+    const startRegion = CompassBearing.regionAt(this.state, this.layout.regions);
+    this.sky = new PaletteSky(ZoneAtmosphere.forRegion(startRegion).base);
   }
 
   /**
@@ -109,6 +114,27 @@ export class DriftSession {
   focus(slug: string): void {
     const placement = this.layout.placements.find((p) => p.slug === slug);
     if (placement) this.state = this.controller.focus(this.state, this.controller.viewPoseFor(this.state, placement));
+  }
+
+  /**
+   * Moves the visitor cleanly to the entry of a laid-out region (interactive
+   * zone strip, FR4), looking down its path past its boreal curtain portal,
+   * and schedules an immediate compass and texture-plan refresh on the next frame.
+   *
+   * @param region - Target region from `layout.regions`; unknown regions are ignored.
+   */
+  jumpToRegion(region: Region): void {
+    const index = this.layout.regions.indexOf(region);
+    if (index < 0) return;
+    if (index === 0) {
+      this.state = this.controller.initial(this.layout.start);
+    } else {
+      const z = region.start.z + 2;
+      const anchorX = region.start.x - FieldLayout.pathX(region.start.z);
+      this.state = this.controller.initial({ x: anchorX + FieldLayout.pathX(z), z, yaw: 0 });
+    }
+    this.sincePlan = Number.POSITIVE_INFINITY;
+    this.sinceCompass = Number.POSITIVE_INFINITY;
   }
 
   /**
@@ -166,7 +192,8 @@ export class DriftSession {
       return { slug: p.slug, distance, opacity: this.curve.opacity(distance) };
     });
     const nearest = works.reduce((best, w) => (w.distance < best.distance ? w : best), { slug: '', distance: Number.POSITIVE_INFINITY, opacity: 0 });
-    const sky = this.sky.update(this.works.get(nearest.slug)?.color ?? null, nearest.distance, dt);
+    const region = CompassBearing.regionAt(this.state, this.layout.regions);
+    const sky = this.sky.update(this.works.get(nearest.slug)?.color ?? null, nearest.distance, dt, ZoneAtmosphere.forRegion(region).base);
 
     this.sincePlan += dt;
     this.sinceCompass += dt;
@@ -182,7 +209,7 @@ export class DriftSession {
     }
     const facing = this.facing(works);
     const settled = this.settle.update(facing, Math.hypot(this.state.vx, this.state.vz), dt);
-    return { state: this.state, works, sky, plan, compass, facing, nearest: nearest.slug || null, nearestDistance: nearest.distance, settled };
+    return { state: this.state, works, sky, region, plan, compass, facing, nearest: nearest.slug || null, nearestDistance: nearest.distance, settled };
   }
 
   /**
