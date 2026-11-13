@@ -32,8 +32,8 @@ export class CompassBearing {
    * @returns Current region and headings to the others.
    */
   static read(pose: ViewPose, regions: readonly Region[]): CompassReading {
-    if (regions.length === 0) return { current: null, others: [] };
-    const current = regions.reduce((best, r) => (CompassBearing.toSegment(pose, r) < CompassBearing.toSegment(pose, best) ? r : best));
+    const current = CompassBearing.regionAt(pose, regions);
+    if (!current) return { current: null, others: [] };
     const forward = { x: -Math.sin(pose.yaw), z: -Math.cos(pose.yaw) };
     const right = { x: Math.cos(pose.yaw), z: -Math.sin(pose.yaw) };
     const others = regions
@@ -45,6 +45,19 @@ export class CompassBearing {
         return { region, bearing, distance: Math.hypot(vx, vz) };
       });
     return { current, others };
+  }
+
+  /**
+   * Region whose path segment lies closest to a ground point, or `null` when
+   * `regions` is empty.
+   *
+   * @param p - Ground point.
+   * @param regions - Regions of the field.
+   * @returns Nearest region or `null`.
+   */
+  static regionAt(p: GroundPoint, regions: readonly Region[]): Region | null {
+    if (regions.length === 0) return null;
+    return regions.reduce((best, r) => (CompassBearing.toSegment(p, r) < CompassBearing.toSegment(p, best) ? r : best));
   }
 
   /**

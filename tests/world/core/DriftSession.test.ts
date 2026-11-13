@@ -89,6 +89,23 @@ describe('DriftSession', () => {
     expect(parseInt(sky.slice(5, 7), 16)).toBeGreaterThan(0x30);
   });
 
+  it('shifts sky base atmosphere distinctly across Arrival, Lens, Leak, and The border is thin', () => {
+    const multiZoneManifest = {
+      ...sampleManifest,
+      works: [
+        { ...sampleManifest.works[0], slug: 'w-arrival', zone: 'arrival' as const, color: '#081a34' },
+        { ...sampleManifest.works[0], slug: 'w-lens', zone: 'lens' as const, color: '#072622' },
+        { ...sampleManifest.works[0], slug: 'w-leak', zone: 'leak' as const, color: '#240d2b' },
+        { ...sampleManifest.works[1], slug: 'w-border', color: '#180e38' },
+      ],
+    };
+    const skies = ['w-arrival', 'w-lens', 'w-leak', 'w-border'].map((slug) => {
+      const s = new DriftSession(multiZoneManifest, 'high', slug);
+      return s.frame(still, 1 / 60).sky;
+    });
+    expect(skies).toEqual(['#081a34', '#072622', '#240d2b', '#180e38']);
+  });
+
   it('is not facing anything when looking away', () => {
     const s = new DriftSession(sampleManifest, 'high', 'arrivee');
     let f = s.frame({ thrust: 0, turn: DRIFT.maxYawSpeed }, 1 / 60);
