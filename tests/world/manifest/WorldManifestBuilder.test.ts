@@ -9,7 +9,7 @@ const territories = [
   { slug: 'the-border-is-thin', title: { en: 'The border is thin', fr: 'La frontière est mince' } },
 ];
 const zones = [
-  { slug: 'arrival', title: { en: 'Arrival', fr: 'Arrivée' } },
+  { slug: 'arrival', title: { en: 'Arrival', fr: 'Arrivée' }, statement: tb('The journey begins in deep blue. More follows.', "Le parcours s'ouvre dans le bleu. Suite.") },
   { slug: 'lens', title: { en: 'Lens', fr: 'La Loupe' } },
   { slug: 'leak', title: { en: 'Leak', fr: "L'Infiltration" } },
 ];
@@ -34,7 +34,11 @@ describe('buildWorldManifest', () => {
       { slug: 'dreamland', title: 'Dreamland', sentences: ['A journey is a cycle.', 'Home is the dream.'] },
       { slug: 'the-border-is-thin', title: 'The border is thin', sentences: [] },
     ]);
-    expect(m.zones.map((z) => z.title)).toEqual(['Arrival', 'Lens', 'Leak']);
+    expect(m.zones).toEqual([
+      { slug: 'arrival', title: 'Arrival', excerpt: 'The journey begins in deep blue.' },
+      { slug: 'lens', title: 'Lens', excerpt: null },
+      { slug: 'leak', title: 'Leak', excerpt: null },
+    ]);
     expect(m.works[0]).toEqual({
       slug: 'arrivee',
       territory: 'dreamland',

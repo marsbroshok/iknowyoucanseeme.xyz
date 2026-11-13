@@ -45,12 +45,17 @@ export interface ManifestTerritory extends ManifestName {
   sentences: string[];
 }
 
+/** A zone in the page language, with its opening statement sentence for crossing banners (FR4). */
+export interface ManifestZone extends ManifestName {
+  excerpt: string | null;
+}
+
 /** Everything the world reads from the page (`<script type="application/json" id="drift-manifest">`). */
 export interface WorldManifest {
   lang: 'en' | 'fr';
   /** Territories in layout order (the first holds the start). */
   territories: ManifestTerritory[];
-  zones: ManifestName[];
+  zones: ManifestZone[];
   works: ManifestWork[];
 }
 
@@ -69,7 +74,7 @@ export function parseManifest(input: unknown): WorldManifest {
   const m = object(input, 'manifest');
   if (m.lang !== 'en' && m.lang !== 'fr') throw new Error('[manifest] lang must be "en" or "fr"');
   const territories = array(m.territories, 'territories').map((t, i) => territory(t, `territories[${i}]`));
-  const zones = array(m.zones, 'zones').map((z, i) => name(z, `zones[${i}]`));
+  const zones = array(m.zones, 'zones').map((z, i) => zone(z, `zones[${i}]`));
   const known = new Set(territories.map((t) => t.slug));
   const works = array(m.works, 'works').map((w, i) => work(w, `works[${i}]`, known));
   return { lang: m.lang, territories, zones, works };
@@ -113,6 +118,12 @@ function picture(input: unknown, path: string): ManifestImage {
 function territory(input: unknown, path: string): ManifestTerritory {
   const t = object(input, path);
   return { ...name(t, path), sentences: array(t.sentences, `${path}.sentences`).map((s, i) => text(s, `${path}.sentences[${i}]`)) };
+}
+
+function zone(input: unknown, path: string): ManifestZone {
+  const z = object(input, path);
+  const excerpt = z.excerpt === undefined || z.excerpt === null ? null : text(z.excerpt, `${path}.excerpt`);
+  return { ...name(z, path), excerpt };
 }
 
 function name(input: unknown, path: string): ManifestName {

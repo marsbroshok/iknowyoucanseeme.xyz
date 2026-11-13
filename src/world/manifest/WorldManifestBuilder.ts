@@ -54,7 +54,7 @@ export async function buildWorldManifest(sources: ManifestSources): Promise<Worl
   return {
     lang: ui.lang,
     territories: sources.territories.map((t) => ({ slug: t.slug, title: titleOf(t, ui), sentences: splitSentences(t.statement?.[ui.lang] ?? '') })),
-    zones: sources.zones.map((z) => ({ slug: z.slug, title: titleOf(z, ui) })),
+    zones: sources.zones.map((z) => ({ slug: z.slug, title: titleOf(z, ui), excerpt: splitSentences(z.statement?.[ui.lang] ?? '')[0] ?? null })),
     works,
   };
 }
