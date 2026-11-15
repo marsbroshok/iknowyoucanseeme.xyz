@@ -24,7 +24,12 @@ Track: `awake-navigation_20261114` · Spec: [spec.md](./spec.md) · Workflow: [.
 
 ## Inherited Findings
 
-*(Populated automatically from `ux-sociological-survey_20261114` upon Track 14 merge.)*
+From `ux-sociological-survey_20261114` empirical telemetry & review (address in this track):
+
+- [ ] Task: Align Awake touch targets, header inset, and `tests/e2e/uxSurvey.spec.ts` mid-chain assertions:
+    - `.site-header .signature` (`21 px`), `.site-header nav a` (`18 px`), `.site-header nav a[hreflang]` (`16.81 × 18 px` — failing BOTH axes!), `footer a` (`18 px`), `.works-index nav a` (`20 px`), and `WorkPage` CTAs (`[data-drift-link]`, `.work a[href*="contact"]`, `18–20 px`) all failed `24×24 px` WCAG 2.5.8 AA and `44×44 px` coarse comfort. Enforce `min-inline-size: 24px; min-block-size: 24px` (and `min-inline-size: 2.75rem; min-block-size: 2.75rem` under `@media (pointer: coarse)`) on all interactive links/labels across `Header`, `Footer`, `WorksIndexPage`, `WorkPage`, `TerritoryPage`, and `HomePage` `[data-awake-resume]`.
+    - Align `.site-header` inner container left/right edge with `.page` (`max-width: 72rem; margin: 0 auto; padding-inline: var(--space-3)`) so `uxSurveyCollector`'s `headerPageInsetDeltaPx` drops from `144–384 px` to `<= 2 px`.
+    - Match `tests/e2e/uxSurveyCollector.ts` selectors (`[data-header-drift]`, `.works-index nav a[href="#all-works"]`, `.works-index input[name="medium-filter"]`, `article.work .work-breadcrumb`, `i / N` sequence text, `article.work .prev-next img`, `TerritoryPage` `id="zone-<slug>"` + `a[href^="#zone-"]` + Drift link + sibling territory link, and `[data-awake-resume]`) and update `tests/e2e/uxSurvey.spec.ts` from the Track 14 baseline assertions (`passedCount === 0`, `worksCountRestoredAfterReset === 28`, `awakeModeDriftClicksFromNonHome === 2`, `headerPageInsetDeltaPx > 100`, `numericScore < 40`) to assert the post-Track-15 mid-chain state (`5 / 8` Awake wayfinding checks `true`: `globalDriftEntry`, `reversibleWorksFilter`, `workBreadcrumbAndContext`, `territoryContinuity`, `awakeWakeContinuity`; `worksCountRestoredAfterReset === 40`; `awakeModeDriftClicksFromNonHome === 1`; `headerPageInsetDeltaPx <= 2`).
 
 ## Assumptions & Domain Invariants Ledger
 

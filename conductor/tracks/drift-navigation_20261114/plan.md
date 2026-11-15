@@ -24,7 +24,13 @@ Track: `drift-navigation_20261114` · Spec: [spec.md](./spec.md) · Workflow: [.
 
 ## Inherited Findings
 
-*(Populated automatically from `ux-sociological-survey_20261114` and `awake-navigation_20261114` merges.)*
+From `ux-sociological-survey_20261114` empirical telemetry & review (address in this track):
+
+- [ ] Task: Address touch-tablet `.drift-top` width, French `.drift-zones` 4-row / `820px` 2-row wrapping, `FocusOverlay` link target height, and cross-viewport `uxSurvey.spec.ts` assertions:
+    - On touch hardware (`hasTouch + isMobile`), `TiltControl` unhides `[data-drift-tilt]` (`"Move with the phone"` / `"Bouger avec le téléphone"`) inside `.drift-top`, widening `.drift-top` to `437 px` (EN) / `538 px` (FR) and causing collisions even on `820×1180` tablets (`4,489 px²` FR) as well as `375×667`/`390×844` phones (`20,580–21,120 px²`). Keep `[data-drift-onboarding]` strictly clear of `.drift-top` across `320px–1920px` and ensure `.drift-top` fits cleanly within `375 px` without horizontal overflow.
+    - French `.drift-zones` wrapped onto 4 stacked rows on `375×667`/`390×844` (`228 px` tall; `55.11%` total HUD coverage on `fr:375×667`) and 2 rows on `fr:820×1180`: make `.drift-zones` single-row horizontal scroll (`flex-wrap: nowrap; overflow-x: auto; touch-action: pan-x`) across all viewports up to at least `1024px` (or universally) so `zoneStripRowCount === 1` on every viewport including `fr:820×1180`, and keep total peer HUD viewport coverage `<= 25%` even on `fr:375×667`.
+    - `FocusOverlay` action links (`[data-focus-work]`, `[data-focus-contact]`) measured `20 px` tall: style them as tactile pill controls with `min-inline-size: 24px; min-block-size: 24px` (`min-inline-size: 2.75rem; min-block-size: 2.75rem` on `@media (pointer: coarse)`) so `auditTouchTargets` reaches `100%` (`0` violations) across all 10 `(locale × viewport)` combinations.
+    - In `tests/e2e/uxSurvey.spec.ts`, verify `collectWayfindingSnapshot` on `en:390×844` (`coarse`) and `fr:1440×900` (`fine`) in addition to `en:1440×900` and `fr:390×844` so responsive media queries cannot hide `[data-header-drift]`, `WorkStepper`, or `LensToggle` on the opposite viewport class.
 
 ## Assumptions & Domain Invariants Ledger
 
