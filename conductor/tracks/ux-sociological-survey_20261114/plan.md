@@ -2,12 +2,12 @@
 
 Track: `ux-sociological-survey_20261114` · Spec: [spec.md](./spec.md) · Workflow: [../../workflow.md](../../workflow.md)
 
-## Phase 1: Pure Sociological Persona Model & UX Ergonomics / Wayfinding Audit Engine
+## Phase 1: Pure Sociological Persona Model & UX Ergonomics / Wayfinding Audit Engine [checkpoint: c916f37]
 
 - [x] Task: `VisitorPersonas` & `NavigationAudit` pure domain modules `c916f37`
     - [x] Red: unit + `fast-check` property tests in `tests/ux/VisitorPersonas.test.ts` and `tests/ux/NavigationAudit.test.ts` (7 sociological personas, bounding-box overlap & viewport occlusion math, WCAG 2.5.8 / coarse-pointer touch target checks, 8 wayfinding capability checks, bounded `0–100` scoring, and monotonicity property test)
     - [x] Green: implement `src/ux/VisitorPersonas.ts` and `src/ux/NavigationAudit.ts` (one primary unit per file, strict TypeScript + TSDoc, 100% coverage)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) `c916f37`
 
 ## Phase 2: Empirical Multi-Viewport Playwright Survey & Senior UI/UX Synthesis
 
