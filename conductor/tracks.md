@@ -69,5 +69,20 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 14: Ceramic specimens in 3D (BLOCKED)**
+- [ ] **Track 14: Multi-persona sociological UI/UX visitor survey & senior UX expert synthesis**
+  *Link: [./tracks/ux-sociological-survey_20261114/index.md](./tracks/ux-sociological-survey_20261114/index.md)*
+
+---
+
+- [ ] **Track 15: Awake layer wayfinding, persistent Drift bridge, zero-JS curatorial filters & work context navigation**
+  *Link: [./tracks/awake-navigation_20261114/index.md](./tracks/awake-navigation_20261114/index.md)*
+
+---
+
+- [ ] **Track 16: Drift world mobile/desktop ergonomics, guided work stepper, rich in-place Focus dialog & tactile Lens/help controls**
+  *Link: [./tracks/drift-navigation_20261114/index.md](./tracks/drift-navigation_20261114/index.md)*
+
+---
+
+- [ ] **Track 17: Ceramic specimens in 3D (BLOCKED)**
   *Link: [./tracks/ceramics-3d_20261111/index.md](./tracks/ceramics-3d_20261111/index.md)*
