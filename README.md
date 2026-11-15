@@ -172,14 +172,19 @@ never removed; while the world is shown it is made `inert`.
   `tests/visual/` (`docs/adr/0008-lens-techniques-and-shader-harness.md`);
   refresh them after a deliberate change with
   `npx playwright test tests/e2e/lens.visual.spec.ts --update-snapshots`.
-- Code: pure logic in `src/world/core/`, `src/sound/core/`, `src/leak/`
-  and `src/kiosk/`, DOM in
+- Code: pure logic in `src/world/core/`, `src/sound/core/`, `src/leak/`,
+  `src/kiosk/` and `src/ux/`, DOM in
   `src/world/island/` and `src/sound/island/`, Tone.js only in
   `src/sound/engine/` (unit-tested in Node with `node-web-audio-api` and
   `Tone.Offline`; on Linux `npm run check` needs the ALSA library,
   `libasound2`), GPU code only in `src/world/gl/` (verified by Playwright, see
   `docs/adr/0006-webgl-code-verified-in-browser.md`; module scripts on the
   home pages: `docs/adr/0007-home-pages-load-world-modules.md`).
+- UX survey & synthesis: 7-persona sociological browser telemetry and
+  cross-layer wayfinding blueprint in
+  [`docs/ux/sociological-survey.md`](docs/ux/sociological-survey.md),
+  [`docs/ux/senior-ux-synthesis.md`](docs/ux/senior-ux-synthesis.md), and
+  `docs/adr/0014-sociological-ux-survey-and-wayfinding-architecture.md`.
 - Test-only flag: building with `PUBLIC_DRIFT_DEBUG=true` exposes read-only
   state as `window.__driftDebug` for the e2e suite (only the e2e "keyed"
   build sets it; production builds do not contain the code).
