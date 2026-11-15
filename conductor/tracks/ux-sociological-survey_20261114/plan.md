@@ -11,8 +11,8 @@ Track: `ux-sociological-survey_20261114` · Spec: [spec.md](./spec.md) · Workfl
 
 ## Phase 2: Empirical Multi-Viewport Playwright Survey & Senior UI/UX Synthesis
 
-- [ ] Task: Playwright multi-persona UX survey probe (`tests/e2e/uxSurvey.spec.ts`)
-    - [ ] Red/Green: implement `tests/e2e/uxSurvey.spec.ts` measuring real DOM geometry, HUD overlap at `375×667` / `390×844` vs `1440×900` / `1920×1080`, touch targets, Awake `:target` filter behavior, Awake→Drift hop counts, and Drift HUD / `FocusOverlay` wayfinding state across EN & FR, feeding snapshots into `NavigationAudit`
+- [x] Task: Playwright multi-persona UX survey probe (`tests/e2e/uxSurvey.spec.ts`) `2785c7b`
+    - [x] Red/Green: implement `tests/e2e/uxSurvey.spec.ts` measuring real DOM geometry, HUD overlap at `375×667` / `390×844` vs `1440×900` / `1920×1080`, touch targets, Awake `:target` filter behavior, Awake→Drift hop counts, and Drift HUD / `FocusOverlay` wayfinding state across EN & FR, feeding snapshots into `NavigationAudit`
 - [ ] Task: Sociological Survey Report, Senior UX Expert Synthesis & ADR
     - [ ] Write `docs/ux/sociological-survey.md` (empirical findings & lived session walkthroughs across all 7 visitor archetypes with exact viewport measurements)
     - [ ] Write `docs/ux/senior-ux-synthesis.md` (prioritized `P0`/`P1`/`P2` Senior UI/UX architecture synthesis mapped to Awake Track 15 & Drift Track 16 invariants)
@@ -27,3 +27,4 @@ From `aurora-thresholds-and-zones_20261112` review (non-blocking context):
 ## Assumptions & Domain Invariants Ledger
 
 - **Persona weight budget & monotonic UX rubric (`src/ux/VisitorPersonas.ts`, `src/ux/NavigationAudit.ts`):** Each of the 7 sociological visitor personas allocates strictly positive integer weights (`>= 2`) across 3 ergonomic pillars (`hudCollisionFree`, `viewportClearance`, `touchTargetComfort`) and the 8 wayfinding capability checks summing to `100`. `viewportCoverageRatio` computes exact geometric union area clipped to the viewport (`0` penalty up to `25%` HUD coverage, ramping linearly over a `40%` span), `auditTouchTargets` enforces `24×24` CSS px (WCAG 2.5.8 AA) on fine pointers and `44×44` CSS px on coarse pointers, and `detectRectOverlaps` measures strictly positive interior bounding-box intersections—guaranteeing bounded `[0, 100]` persona scores and strict/weak monotonicity across all `fast-check` properties.
+- **Playwright pointer emulation & forward-compatible HUD collector (`tests/e2e/uxSurveyCollector.ts`):** Mobile (`375×667`, `390×844`) and Tablet (`820×1180`) browser contexts enable `hasTouch: true` and `isMobile: true` so `@media (pointer: coarse)`, `TiltControl` button visibility, and `CapabilityProbe` match physical touch devices; `collectDriftHudRects` inspects peer visible HUD containers inside `[data-drift]` (unwrapping pass-through full-viewport wrappers if introduced) so Track 16 can reuse the collector unchanged.
