@@ -13,10 +13,10 @@ Track: `ux-sociological-survey_20261114` · Spec: [spec.md](./spec.md) · Workfl
 
 - [x] Task: Playwright multi-persona UX survey probe (`tests/e2e/uxSurvey.spec.ts`) `2785c7b`
     - [x] Red/Green: implement `tests/e2e/uxSurvey.spec.ts` measuring real DOM geometry, HUD overlap at `375×667` / `390×844` vs `1440×900` / `1920×1080`, touch targets, Awake `:target` filter behavior, Awake→Drift hop counts, and Drift HUD / `FocusOverlay` wayfinding state across EN & FR, feeding snapshots into `NavigationAudit`
-- [ ] Task: Sociological Survey Report, Senior UX Expert Synthesis & ADR
-    - [ ] Write `docs/ux/sociological-survey.md` (empirical findings & lived session walkthroughs across all 7 visitor archetypes with exact viewport measurements)
-    - [ ] Write `docs/ux/senior-ux-synthesis.md` (prioritized `P0`/`P1`/`P2` Senior UI/UX architecture synthesis mapped to Awake Track 15 & Drift Track 16 invariants)
-    - [ ] Record sequential ADR in `docs/adr/` (including `Context`, `Decision`, and `Considered & Rejected Alternatives`), update `README.md` architecture index if needed, and mark `metadata.json` `"completed"`
+- [x] Task: Sociological Survey Report, Senior UX Expert Synthesis & ADR `c70e226`
+    - [x] Write `docs/ux/sociological-survey.md` (empirical findings & lived session walkthroughs across all 7 visitor archetypes with exact viewport measurements)
+    - [x] Write `docs/ux/senior-ux-synthesis.md` (prioritized `P0`/`P1`/`P2` Senior UI/UX architecture synthesis mapped to Awake Track 15 & Drift Track 16 invariants)
+    - [x] Record sequential ADR in `docs/adr/` (including `Context`, `Decision`, and `Considered & Rejected Alternatives`), update `README.md` architecture index if needed, and mark `metadata.json` `"completed"`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Inherited Findings
