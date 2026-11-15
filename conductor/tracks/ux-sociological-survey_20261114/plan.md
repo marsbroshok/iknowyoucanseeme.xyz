@@ -4,9 +4,9 @@ Track: `ux-sociological-survey_20261114` · Spec: [spec.md](./spec.md) · Workfl
 
 ## Phase 1: Pure Sociological Persona Model & UX Ergonomics / Wayfinding Audit Engine
 
-- [ ] Task: `VisitorPersonas` & `NavigationAudit` pure domain modules
-    - [ ] Red: unit + `fast-check` property tests in `tests/ux/VisitorPersonas.test.ts` and `tests/ux/NavigationAudit.test.ts` (7 sociological personas, bounding-box overlap & viewport occlusion math, WCAG 2.5.8 / coarse-pointer touch target checks, 8 wayfinding capability checks, bounded `0–100` scoring, and monotonicity property test)
-    - [ ] Green: implement `src/ux/VisitorPersonas.ts` and `src/ux/NavigationAudit.ts` (one primary unit per file, strict TypeScript + TSDoc, 100% coverage)
+- [x] Task: `VisitorPersonas` & `NavigationAudit` pure domain modules `c916f37`
+    - [x] Red: unit + `fast-check` property tests in `tests/ux/VisitorPersonas.test.ts` and `tests/ux/NavigationAudit.test.ts` (7 sociological personas, bounding-box overlap & viewport occlusion math, WCAG 2.5.8 / coarse-pointer touch target checks, 8 wayfinding capability checks, bounded `0–100` scoring, and monotonicity property test)
+    - [x] Green: implement `src/ux/VisitorPersonas.ts` and `src/ux/NavigationAudit.ts` (one primary unit per file, strict TypeScript + TSDoc, 100% coverage)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Empirical Multi-Viewport Playwright Survey & Senior UI/UX Synthesis
@@ -26,4 +26,4 @@ From `aurora-thresholds-and-zones_20261112` review (non-blocking context):
 
 ## Assumptions & Domain Invariants Ledger
 
-*(Implementer appends assumptions made during execution here.)*
+- **Persona weight budget & monotonic UX rubric (`src/ux/VisitorPersonas.ts`, `src/ux/NavigationAudit.ts`):** Each of the 7 sociological visitor personas allocates strictly positive integer weights (`>= 2`) across 3 ergonomic pillars (`hudCollisionFree`, `viewportClearance`, `touchTargetComfort`) and the 8 wayfinding capability checks summing to `100`. `viewportCoverageRatio` computes exact geometric union area clipped to the viewport (`0` penalty up to `25%` HUD coverage, ramping linearly over a `40%` span), `auditTouchTargets` enforces `24×24` CSS px (WCAG 2.5.8 AA) on fine pointers and `44×44` CSS px on coarse pointers, and `detectRectOverlaps` measures strictly positive interior bounding-box intersections—guaranteeing bounded `[0, 100]` persona scores and strict/weak monotonicity across all `fast-check` properties.
