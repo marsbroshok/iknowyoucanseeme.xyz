@@ -33,7 +33,18 @@ const ui = uiText(lang);
     <h1>{ARTIST_NAME}</h1>
     <p class="threshold-line">{thresholdLine}</p>
     <p class="artist">{ui.t('artist_practice')}</p>
-    {world && <p><button type="button" class="drift-start" data-drift-start hidden>{ui.t('drift')}</button></p>}
+    {world && (
+      <p class="home-drift-actions">
+        <button type="button" class="drift-start" data-drift-start hidden>{ui.t('drift')}</button>
+        <a
+          class="awake-resume"
+          href={localizedPath('works', lang)}
+          data-awake-resume
+          data-resume-template={ui.t('awake_resume_work')}
+          hidden
+        ></a>
+      </p>
+    )}
   </section>
 
   <section class="home-territories" aria-labelledby="territories-heading">
@@ -110,8 +121,17 @@ const ui = uiText(lang);
     padding: 0;
     margin: 0 0 var(--space-3);
   }
-  .drift-start {
+  .home-drift-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
     margin-top: var(--space-3);
+  }
+  .home-drift-actions:not(:has(:not([hidden]))) {
+    display: none;
+  }
+  .drift-start {
     font: inherit;
     font-family: var(--font-mono);
     font-size: var(--text-sm);
@@ -120,12 +140,45 @@ const ui = uiText(lang);
     border: 1px solid var(--text-secondary);
     border-radius: 2px;
     padding: var(--space-2) var(--space-3);
-    min-height: 44px;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(44px, 2.75rem);
     cursor: pointer;
   }
-  .drift-start:focus-visible {
+  .drift-start:focus-visible,
+  .awake-resume:focus-visible {
     outline: 2px solid var(--text-primary);
     outline-offset: 2px;
+  }
+  .awake-resume {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--accent);
+    padding: var(--space-2) var(--space-3);
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    border: 1px solid var(--text-secondary);
+    border-radius: 2px;
+    text-decoration: none;
+  }
+  .awake-resume:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+  .awake-resume[hidden] {
+    display: none;
+  }
+  @media (pointer: coarse) {
+    .awake-resume,
+    .home-links a,
+    .territory-teaser h3 a,
+    .territory-teaser p a {
+      display: inline-flex;
+      align-items: center;
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
   }
   .home-links ul {
     display: flex;
@@ -133,5 +186,11 @@ const ui = uiText(lang);
     gap: var(--space-3);
     list-style: none;
     padding: 0;
+  }
+  .home-links a {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
   }
 </style>

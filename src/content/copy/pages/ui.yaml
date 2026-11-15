@@ -528,3 +528,9 @@ blocks:
     fr: "Photographe et artiste céramiste"
     sources:
       - product
+  awake_resume_work:
+    status: draft
+    en: "Open the work page · {title}"
+    fr: "Ouvrir la page de l'œuvre · {title}"
+    sources:
+      - spec
