@@ -4,12 +4,12 @@ Budgets (`conductor/product-guidelines.md`, track `drift-world_20261111`):
 ≥ 60 fps on a 2020+ laptop, ≥ 40 fps on a mid-range phone (tier `low`), and
 ≤ 250 KB gzipped for the world's JavaScript, loaded after first paint.
 
-## Bundle (measured 2026-11-13, `tests/e2e/bundle.spec.ts`)
+## Bundle (measured 2026-11-16, `tests/e2e/bundle.spec.ts`)
 
 | Part | Gzipped | Budget | When it loads |
 |---|---|---|---|
-| Boot module (home pages only) | 6.3 KB | 8 KB | with the page (module script) |
-| World chunk (Three.js + scene code + lens + boreal threshold & 3D portals, gaze, fragments, specimens) | 140.2 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
+| Boot module (home pages only) | 6.8 KB | 8 KB | with the page (module script) |
+| World chunk (Three.js + scene code + lens + boreal threshold & 3D portals, gaze, fragments, specimens, spatial HUD dock & rich focus overlay) | 142.0 KB | 250 KB | dynamic import after load + frame + idle, only when the world is shown |
 | Sound chunk (Tone.js + generative ambience) | 64.3 KB | — | dynamic import after the visitor's gesture |
 
 Re-measured 2026-11-12 after track `lens_20261111`: the lens (six shaders,
@@ -30,6 +30,12 @@ Re-measured 2026-11-13 after track `aurora-thresholds-and-zones_20261112`
 (multi-ribbon boreal Threshold curtain, per-zone atmospheres, 3D `BorealGateMesh`
 portals, `ZoneBanner`, and interactive `HorizonCompass` strip): boot 6.3 KB gz,
 world 140.2 KB gz (+4.1 KB gz), sound 64.3 KB gz.
+
+Re-measured 2026-11-16 after tracks `awake-navigation_20261114` and
+`drift-navigation_20261114` (`?drift=1` intent boot & Awake work-resume link,
+pointer-aware `DriftHelp` onboarding/controls sheet, `WorkStepper`, tactile
+`LensToggle` pill, and curatorial `FocusOverlay` in-place stepping): boot 6.8 KB gz,
+world 142.0 KB gz (+1.8 KB gz), sound 64.3 KB gz.
 
 Other pages load no JavaScript file. Devices that get the awake layer
 (Save-Data, no WebGL2, < 4 GB or < 4 cores; reduced motion does not route,

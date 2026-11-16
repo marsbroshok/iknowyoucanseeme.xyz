@@ -33,141 +33,89 @@ const SURVEY_VIEWPORTS: ReadonlyArray<{
 ];
 
 test.describe('Multi-persona sociological UX survey & navigation audit', () => {
-  test('measures live DOM geometry, HUD collisions, touch targets, wayfinding checks, and 7-persona baseline scores across EN & FR', async ({
+  test('verifies zero HUD collisions, <= 25% chrome coverage, 100% touch targets, 8/8 wayfinding checks across fine & coarse viewports, and >= 90/100 scores for all 7 personas', async ({
     browser,
   }, testInfo) => {
-    test.setTimeout(180_000);
+    test.setTimeout(240_000);
 
     const telemetryByKey = new Map<string, ViewportDriftTelemetry>();
     for (const locale of ['en', 'fr'] as const) {
       for (const { viewport, pointerKind } of SURVEY_VIEWPORTS) {
+        const key = `${locale}:${viewport.width}x${viewport.height}`;
         const telemetry = await collectViewportTelemetry(browser, locale, viewport, pointerKind);
-        telemetryByKey.set(`${locale}:${viewport.width}x${viewport.height}`, telemetry);
+        telemetryByKey.set(key, telemetry);
 
         // Pointer media query matches persona pointer profile.
-        expect(telemetry.matchesCoarseMedia).toBe(pointerKind === 'coarse');
+        expect(telemetry.matchesCoarseMedia, `${key} coarse media`).toBe(pointerKind === 'coarse');
 
         // Threshold screen never collides with top Wake-up / Mute controls.
         expect(telemetry.thresholdRects.length).toBe(3);
         expect(telemetry.thresholdOverlaps).toEqual([]);
+
+        // Post-overhaul HUD geometry: 0 collisions, single-row zone strip, <= 25% viewport coverage.
+        expect(detectRectOverlaps(telemetry.hudRects), `${key} HUD overlaps`).toEqual([]);
+        expect(telemetry.zoneStripRowCount, `${key} single-row zone strip`).toBe(1);
+        const cov = viewportCoverageRatio(telemetry.hudRects, telemetry.viewport);
+        expect(cov, `${key} HUD coverage > 0`).toBeGreaterThan(0.01);
+        expect(cov, `${key} HUD coverage <= 0.25`).toBeLessThanOrEqual(0.25);
+
+        // 100% touch-target pass ratio across Drift HUD, FocusOverlay, and Awake chrome.
+        const targetAudit = auditTouchTargets(telemetry.touchTargets, pointerKind);
+        expect(targetAudit.totalTargets, `${key} target count`).toBeGreaterThan(20);
+        expect(targetAudit.violations, `${key} touch-target violations`).toEqual([]);
+        expect(targetAudit.passRatio, `${key} passRatio`).toBe(1);
+
+        if (viewport.width >= 1440) {
+          expect(telemetry.headerPageInsetDeltaPx, `${key} header inset alignment`).toBeLessThanOrEqual(
+            2,
+          );
+        }
       }
     }
 
-    // Mobile portrait viewports (375x667 & 390x844) exhibit empirical .drift-top vs .drift-help collisions today,
-    // and wrap .drift-zones into multiple rows.
-    for (const locale of ['en', 'fr'] as const) {
-      for (const key of ['375x667', '390x844'] as const) {
-        const mobile = telemetryByKey.get(`${locale}:${key}`);
-        expect(mobile).toBeDefined();
-        if (!mobile) continue;
-        const overlaps = detectRectOverlaps(mobile.hudRects);
-        expect(overlaps.length, `${locale}:${key} mobile HUD overlap`).toBeGreaterThanOrEqual(1);
-        expect(overlaps[0]?.a).toBe('drift-top');
-        expect(overlaps[0]?.b).toBe('drift-help');
-        expect(overlaps[0]?.area).toBeGreaterThan(5_000);
-        expect(mobile.zoneStripRowCount, `${locale}:${key} wrapped zone rows`).toBeGreaterThanOrEqual(2);
-        const cov = viewportCoverageRatio(mobile.hudRects, mobile.viewport);
-        expect(cov).toBeGreaterThan(0.2);
-        expect(cov).toBeLessThan(0.6);
-
-        const targetAudit = auditTouchTargets(mobile.touchTargets, 'coarse');
-        expect(targetAudit.violations.length).toBeGreaterThan(0);
-        expect(targetAudit.passRatio).toBeGreaterThan(0);
-        expect(targetAudit.passRatio).toBeLessThan(1);
-      }
-    }
-
-    // Tablet (820x1180) has a single-row zone strip, yet still suffers a .drift-top vs .drift-help
-    // collision on touch hardware because [data-drift-tilt] adds a third top button.
-    for (const locale of ['en', 'fr'] as const) {
-      const tablet = telemetryByKey.get(`${locale}:820x1180`);
-      expect(tablet).toBeDefined();
-      if (!tablet) continue;
-      const tabletOverlaps = detectRectOverlaps(tablet.hudRects);
-      expect(tabletOverlaps.length, `${locale}:820x1180 tablet HUD overlap`).toBeGreaterThanOrEqual(1);
-      expect(tabletOverlaps[0]?.a).toBe('drift-top');
-      expect(tabletOverlaps[0]?.b).toBe('drift-help');
-      expect(tablet.zoneStripRowCount).toBe(locale === 'fr' ? 2 : 1);
-      const tabletTargetAudit = auditTouchTargets(tablet.touchTargets, 'coarse');
-      expect(tabletTargetAudit.violations.length).toBeGreaterThan(0);
-    }
-
-    // Desktop (1440x900, 1920x1080) viewports have zero HUD overlap today,
-    // while standalone Awake/Focus inline links fall below WCAG 2.5.8 24x24 target thresholds.
-    for (const locale of ['en', 'fr'] as const) {
-      for (const key of ['1440x900', '1920x1080'] as const) {
-        const wide = telemetryByKey.get(`${locale}:${key}`);
-        expect(wide).toBeDefined();
-        if (!wide) continue;
-        expect(detectRectOverlaps(wide.hudRects), `${locale}:${key} wide HUD overlap`).toEqual([]);
-        expect(wide.zoneStripRowCount).toBe(1);
-        expect(wide.headerPageInsetDeltaPx).toBeLessThanOrEqual(2);
-        const cov = viewportCoverageRatio(wide.hudRects, wide.viewport);
-        expect(cov).toBeGreaterThan(0.02);
-        expect(cov).toBeLessThan(0.25);
-
-        const targetAudit = auditTouchTargets(wide.touchTargets, wide.pointerKind);
-        expect(targetAudit.violations.length).toBeGreaterThan(0);
-      }
-    }
-
-    // Collect cross-site wayfinding snapshots in both English and French.
-    const wayfindingByLocale: Record<'en' | 'fr', WayfindingSnapshot> = {
-      en: await collectWayfindingSnapshot(
+    // Collect cross-site wayfinding snapshots across all 4 (locale × pointer class) combinations
+    // so responsive media queries cannot hide Awake or Drift controls on the opposite viewport class.
+    const wayfindingMatrix: Record<string, WayfindingSnapshot> = {
+      'en:fine': await collectWayfindingSnapshot(
         browser,
         'en',
         { width: 1440, height: 900, label: 'Desktop 1440×900' },
         'fine',
       ),
-      fr: await collectWayfindingSnapshot(
+      'fr:coarse': await collectWayfindingSnapshot(
         browser,
         'fr',
         { width: 390, height: 844, label: 'iPhone 390×844' },
         'coarse',
       ),
+      'en:coarse': await collectWayfindingSnapshot(
+        browser,
+        'en',
+        { width: 390, height: 844, label: 'iPhone 390×844' },
+        'coarse',
+      ),
+      'fr:fine': await collectWayfindingSnapshot(
+        browser,
+        'fr',
+        { width: 1440, height: 900, label: 'Desktop 1440×900' },
+        'fine',
+      ),
     };
 
-    const AWAKE_PASSED_CHECKS = [
-      'globalDriftEntry',
-      'reversibleWorksFilter',
-      'workBreadcrumbAndContext',
-      'territoryContinuity',
-      'awakeWakeContinuity',
-    ] as const;
-
-    // Verify zero touch-target violations across all Awake controls (header, footer, works filters, work CTAs)
-    // on every sampled viewport and pointer profile (fine 24x24 & coarse 44x44).
-    for (const [key, telemetry] of telemetryByKey.entries()) {
-      const awakeTargets = telemetry.touchTargets.filter(
-        (t) =>
-          t.id.startsWith('header-link-') ||
-          t.id.startsWith('footer-link-') ||
-          t.id.startsWith('works-filter-') ||
-          t.id.startsWith('work-cta-'),
-      );
-      expect(awakeTargets.length, `${key} awake target count`).toBeGreaterThan(10);
-      expect(
-        auditTouchTargets(awakeTargets, telemetry.pointerKind).violations,
-        `${key} awake touch-target violations`,
-      ).toEqual([]);
-    }
-
-    for (const locale of ['en', 'fr'] as const) {
-      const snap = wayfindingByLocale[locale];
-      expect(snap.totalCataloguedWorks).toBe(40);
-      expect(snap.worksCountRestoredAfterReset).toBe(40);
-      expect(snap.awakeModeDriftClicksFromNonHome).toBe(1);
+    for (const [matrixKey, snap] of Object.entries(wayfindingMatrix)) {
+      expect(snap.totalCataloguedWorks, `${matrixKey} totalCataloguedWorks`).toBe(40);
+      expect(snap.worksCountRestoredAfterReset, `${matrixKey} worksCountRestoredAfterReset`).toBe(40);
+      expect(snap.awakeModeDriftClicksFromNonHome, `${matrixKey} awakeModeDriftClicks`).toBe(1);
 
       const evaluated = evaluateWayfindingChecks(snap);
       expect(evaluated.totalCount).toBe(8);
-      expect(evaluated.passedCount).toBe(5);
+      expect(evaluated.passedCount, `${matrixKey} passedCount`).toBe(8);
       for (const checkId of WAYFINDING_CHECK_IDS) {
-        const expected = (AWAKE_PASSED_CHECKS as readonly string[]).includes(checkId);
-        expect(evaluated.checks[checkId], `${locale}:${checkId}`).toBe(expected);
+        expect(evaluated.checks[checkId], `${matrixKey}:${checkId}`).toBe(true);
       }
     }
 
-    // Score all 7 sociological personas against their primary empirical viewport and locale telemetry.
+    // Score all 7 sociological personas against their primary empirical viewport and locale/pointer telemetry.
     const summaryRows: Array<Record<string, unknown>> = [];
     for (const persona of VisitorPersonas.ALL) {
       const primaryLocale = persona.locales[0];
@@ -176,19 +124,24 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
       expect(telemetry, `telemetry for ${persona.id} (${key})`).toBeDefined();
       if (!telemetry) continue;
 
-      const report = reportFromTelemetry(telemetry, wayfindingByLocale[primaryLocale]);
+      const wayfindingSnap = wayfindingMatrix[`${primaryLocale}:${persona.pointerKind}`];
+      expect(wayfindingSnap, `wayfinding for ${persona.id}`).toBeDefined();
+      if (!wayfindingSnap) continue;
+
+      const report = reportFromTelemetry(telemetry, wayfindingSnap);
       const breakdown = explainPersonaScore(persona, report);
       const numericScore = scorePersona(persona, report);
 
       expect(numericScore).toBe(breakdown.total);
-      expect(numericScore).toBeGreaterThan(40);
-      expect(numericScore).toBeLessThan(95);
-      expect(breakdown.passedChecks).toEqual([...AWAKE_PASSED_CHECKS]);
+      expect(numericScore, `${persona.id} UX score >= 90`).toBeGreaterThanOrEqual(90);
+      expect(breakdown.passedChecks).toEqual([...WAYFINDING_CHECK_IDS]);
+      expect(breakdown.failedChecks).toEqual([]);
 
       summaryRows.push({
         id: persona.id,
         locale: primaryLocale,
         viewport: `${telemetry.viewport.width}x${telemetry.viewport.height}`,
+        pointer: telemetry.pointerKind,
         score: breakdown.total,
         collisionScore: breakdown.collisionScore,
         clearanceScore: breakdown.clearanceScore,
@@ -219,13 +172,13 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
             },
           ]),
         ),
-        wayfindingByLocale,
+        wayfindingMatrix,
         personas: summaryRows,
       },
       null,
       2,
     );
-    await testInfo.attach('ux-survey-baseline.json', {
+    await testInfo.attach('ux-survey-post-overhaul.json', {
       body: payload,
       contentType: 'application/json',
     });
