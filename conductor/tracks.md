@@ -74,7 +74,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 15: Awake layer wayfinding, persistent Drift bridge, zero-JS curatorial filters & work context navigation**
+- [x] **Track 15: Awake layer wayfinding, persistent Drift bridge, zero-JS curatorial filters & work context navigation**
   *Link: [./tracks/awake-navigation_20261114/index.md](./tracks/awake-navigation_20261114/index.md)*
 
 ---
