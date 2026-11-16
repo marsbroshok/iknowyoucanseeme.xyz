@@ -12,7 +12,7 @@ Track: `drift-navigation_20261114` · Spec: [spec.md](./spec.md) · Workflow: [.
     - [x] Green: implement `src/world/island/DriftHelp.ts`, `src/world/island/WorkStepper.ts`, and `src/world/island/LensToggle.ts` (100% coverage)
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) 820cb35
 
-## Phase 2: `DriftIsland.astro` & `DriftWorld.ts` Wiring, Mobile Ergonomics & 7-Persona Post-Upgrade Verification
+## Phase 2: `DriftIsland.astro` & `DriftWorld.ts` Wiring, Mobile Ergonomics & 7-Persona Post-Upgrade Verification [checkpoint: 56ce2c0]
 
 - [x] Task: Wire upgraded HUD dock, collision-free responsive CSS, single-row mobile zone strip & rich `FocusOverlay` into `DriftIsland.astro` and `DriftWorld.ts` 199fc52
     - [x] Red: Playwright E2E tests in `tests/e2e/driftNavigation.spec.ts` (zero HUD bounding-box overlap at `375×667` & `390×844` in EN/FR, `WorkStepper` glide + open, `[data-lens-cycle]` click cycling, `FocusOverlay` `Prev/Next` + `ArrowRight` camera sync, `Tab × 3` preservation, `?kiosk=1` zero-link preservation, and `0` axe violations with help panel & focus dialog open)
@@ -20,7 +20,7 @@ Track: `drift-navigation_20261114` · Spec: [spec.md](./spec.md) · Workflow: [.
 - [x] Task: Post-upgrade 7-persona sociological survey verification (`≥ 90 / 100`), before/after synthesis table, ADR & docs sync 56ce2c0
     - [x] Update `tests/e2e/uxSurvey.spec.ts` to assert `0` HUD collisions, all 8 wayfinding checks `true`, and every persona score `≥ 90 / 100`
     - [x] Update `docs/ux/senior-ux-synthesis.md` (before vs after empirical table), record sequential ADR in `docs/adr/`, update `README.md` & `docs/perf.md`, and set `metadata.json` `"status"` to `"completed"`
-- [~] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md) 56ce2c0
 
 ## Inherited Findings
 
