@@ -12,6 +12,24 @@ export interface PrevNext {
   next: Work | null;
 }
 
+/** 1-based ordinal sequence position of a work within a territory or catalogue list. */
+export interface WorkSequence {
+  /** 1-based position (`1..total`). */
+  readonly index: number;
+  /** Total works in the bounded list (`>= 1`). */
+  readonly total: number;
+}
+
+/** Aggregate counts of catalogued works partitioned by medium. */
+export interface MediumCounts {
+  /** Total works (`photo + ceramic`). */
+  readonly total: number;
+  /** Number of photographic works (`medium === 'photo'`). */
+  readonly photo: number;
+  /** Number of ceramic works (`medium === 'ceramic'`). */
+  readonly ceramic: number;
+}
+
 /**
  * Position of a zone in {@link ZONE_ORDER}; works without a zone get the
  * position after the last zone.
@@ -101,4 +119,40 @@ export function getPrevNextWork(works: readonly Work[], currentSlug: string, ter
     prev: idx > 0 ? contextWorks[idx - 1] : null,
     next: idx < contextWorks.length - 1 ? contextWorks[idx + 1] : null,
   };
+}
+
+/**
+ * Computes the 1-based sequence position (`index / total`) of `currentSlug`
+ * inside `territory` (when given) or across index order.
+ *
+ * @param works - All catalogued works.
+ * @param currentSlug - Target work slug.
+ * @param territory - Optional territory slug bounding the sequence.
+ * @returns `{ index, total }`, or `null` when `currentSlug` is absent.
+ */
+export function getWorkSequence(
+  works: readonly Work[],
+  currentSlug: string,
+  territory?: string,
+): WorkSequence | null {
+  const contextWorks = territory ? getWorksByTerritory(works, territory) : sortWorksForIndex(works);
+  const idx = contextWorks.findIndex((w) => w.slug === currentSlug);
+  if (idx === -1) return null;
+  return { index: idx + 1, total: contextWorks.length };
+}
+
+/**
+ * Counts photographs and ceramics across a collection of works or work views.
+ *
+ * @param works - Works or views carrying `medium: 'photo' | 'ceramic'`.
+ * @returns `{ total, photo, ceramic }`.
+ */
+export function countWorksByMedium(works: readonly Pick<Work, 'medium'>[]): MediumCounts {
+  let photo = 0;
+  let ceramic = 0;
+  for (const w of works) {
+    if (w.medium === 'ceramic') ceramic++;
+    else photo++;
+  }
+  return { total: photo + ceramic, photo, ceramic };
 }

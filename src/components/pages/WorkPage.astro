@@ -8,6 +8,7 @@
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { WorkView } from '../../domain/WorkView.js';
+import type { WorkBreadcrumb } from '../../domain/TerritoryView.js';
 import type { VisualArtworkJsonLd } from '../../domain/JsonLd.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
@@ -21,6 +22,7 @@ interface Props {
   prev: WorkView | null;
   next: WorkView | null;
   territory: { title: string; href: string };
+  breadcrumb?: WorkBreadcrumb;
   jsonLd: VisualArtworkJsonLd;
   ogImage?: string;
 }

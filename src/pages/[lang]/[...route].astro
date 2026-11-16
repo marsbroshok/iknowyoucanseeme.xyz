@@ -11,7 +11,7 @@ import { withCopy } from '../../content/helpers.js';
 import { buildSiteRoutes, type PageRef } from '../../i18n/SiteRoutes.js';
 import type { Locale } from '../../i18n/RouteMap.js';
 import { uiText } from '../../i18n/UiCatalog.js';
-import { buildIndexSections, buildTerritoryTeaser, buildTerritoryView, titleOf } from '../../domain/TerritoryView.js';
+import { buildIndexSections, buildTerritoryTeaser, buildTerritoryView, buildWorkBreadcrumb, titleOf } from '../../domain/TerritoryView.js';
 import HomePage from '../../components/pages/HomePage.astro';
 import TerritoryPage from '../../components/pages/TerritoryPage.astro';
 import WorkPage from '../../components/pages/WorkPage.astro';
@@ -101,6 +101,7 @@ function workPageProps(slug: string) {
     prev: prev && buildWorkView(prev, ui),
     next: next && buildWorkView(next, ui),
     territory: { title: titleOf(territory, ui), href: localizedPath('territories', lang, [territory.slug]) },
+    breadcrumb: buildWorkBreadcrumb(work, territory, zones, works, ui),
     jsonLd: buildVisualArtworkJsonLd(work, ARTIST_NAME, canonicalUrl('works', lang, site, params)),
     // Written by the og-images integration (tools/og) after the build.
     ogImage: `/og/${slug}.jpg`,
@@ -125,12 +126,12 @@ function territoryFor(slug: string) {
 {page.kind === 'territory' && (
   <TerritoryPage
     lang={lang}
-    territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui)}
+    territory={buildTerritoryView(territoryFor(page.slug), zones, works, ui, territories)}
     fragmentIds={territoryFragmentIds(territoryFor(page.slug), works, ui)}
   />
 )}
 {page.kind === 'work' && <WorkPage lang={lang} {...workPageProps(page.slug)} />}
-{page.kind === 'works' && <WorksIndexPage lang={lang} sections={buildIndexSections(territories, works, ui)} />}
+{page.kind === 'works' && <WorksIndexPage lang={lang} sections={buildIndexSections(territories, works, ui, zones)} />}
 {page.kind === 'exhibitions' && <ExhibitionsPage lang={lang} exhibitions={buildExhibitionViews(exhibitions, lang)} />}
 {page.kind === 'about' && (
   <AboutPage
