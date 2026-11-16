@@ -127,20 +127,43 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
       ),
     };
 
+    const AWAKE_PASSED_CHECKS = [
+      'globalDriftEntry',
+      'reversibleWorksFilter',
+      'workBreadcrumbAndContext',
+      'territoryContinuity',
+      'awakeWakeContinuity',
+    ] as const;
+
+    // Verify zero touch-target violations across all Awake controls (header, footer, works filters, work CTAs)
+    // on every sampled viewport and pointer profile (fine 24x24 & coarse 44x44).
+    for (const [key, telemetry] of telemetryByKey.entries()) {
+      const awakeTargets = telemetry.touchTargets.filter(
+        (t) =>
+          t.id.startsWith('header-link-') ||
+          t.id.startsWith('footer-link-') ||
+          t.id.startsWith('works-filter-') ||
+          t.id.startsWith('work-cta-'),
+      );
+      expect(awakeTargets.length, `${key} awake target count`).toBeGreaterThan(10);
+      expect(
+        auditTouchTargets(awakeTargets, telemetry.pointerKind).violations,
+        `${key} awake touch-target violations`,
+      ).toEqual([]);
+    }
+
     for (const locale of ['en', 'fr'] as const) {
       const snap = wayfindingByLocale[locale];
       expect(snap.totalCataloguedWorks).toBe(40);
-      expect(snap.worksCountRestoredAfterReset).toBe(28);
+      expect(snap.worksCountRestoredAfterReset).toBe(40);
       expect(snap.awakeModeDriftClicksFromNonHome).toBe(1);
 
       const evaluated = evaluateWayfindingChecks(snap);
       expect(evaluated.totalCount).toBe(8);
-      expect(evaluated.passedCount).toBe(2);
-      expect(evaluated.checks.globalDriftEntry, `${locale}:globalDriftEntry`).toBe(true);
-      expect(evaluated.checks.awakeWakeContinuity, `${locale}:awakeWakeContinuity`).toBe(true);
+      expect(evaluated.passedCount).toBe(5);
       for (const checkId of WAYFINDING_CHECK_IDS) {
-        if (checkId === 'globalDriftEntry' || checkId === 'awakeWakeContinuity') continue;
-        expect(evaluated.checks[checkId], `${locale}:${checkId}`).toBe(false);
+        const expected = (AWAKE_PASSED_CHECKS as readonly string[]).includes(checkId);
+        expect(evaluated.checks[checkId], `${locale}:${checkId}`).toBe(expected);
       }
     }
 
@@ -158,9 +181,9 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
       const numericScore = scorePersona(persona, report);
 
       expect(numericScore).toBe(breakdown.total);
-      expect(numericScore).toBeGreaterThan(20);
-      expect(numericScore).toBeLessThan(80);
-      expect(breakdown.passedChecks).toEqual(['globalDriftEntry', 'awakeWakeContinuity']);
+      expect(numericScore).toBeGreaterThan(40);
+      expect(numericScore).toBeLessThan(95);
+      expect(breakdown.passedChecks).toEqual([...AWAKE_PASSED_CHECKS]);
 
       summaryRows.push({
         id: persona.id,

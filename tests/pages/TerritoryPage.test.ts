@@ -14,8 +14,10 @@ const works = [
   fixtureWork({ slug: 'dissonance', title: { fr: 'Dissonance' }, zone: 'leak' }),
   fixtureWork(),
   fixtureWork({ slug: 'solitude', title: { fr: 'Solitude', en: 'Loneliness' }, zone: 'lens' }),
+  fixtureWork({ slug: 'cygne-icm-1', title: { fr: 'Cygne 1' }, territory: 'the-border-is-thin', zone: undefined, year: 2026 }),
 ];
 const dreamland = { slug: 'dreamland', title: { en: 'Dreamland', fr: 'Dreamland' }, statement: tb('The whole statement.', 'Tout le texte.') };
+const border = { slug: 'the-border-is-thin', title: { en: 'The border is thin', fr: "La frontière s'efface" }, statement: tb('Border text.', 'Texte frontière.') };
 
 describe('TerritoryPage', () => {
   let container: AstroContainer;
@@ -25,14 +27,24 @@ describe('TerritoryPage', () => {
 
   const render = (lang: 'en' | 'fr') =>
     container.renderToString(TerritoryPage, {
-      props: { lang, territory: buildTerritoryView(dreamland, zones, works, uiText(lang)), fragmentIds: ['work:arrivee', 'statement:dreamland:0'] },
+      props: {
+        lang,
+        territory: buildTerritoryView(dreamland, zones, works, uiText(lang), [dreamland, border]),
+        fragmentIds: ['work:arrivee', 'statement:dreamland:0'],
+      },
       request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
     });
 
-  it('renders the statement then zones Arrival → Lens → Leak with zone statements and works', async () => {
+  it('renders the statement, #zone-* jump bar, Drift portals, Arrival → Lens → Leak zones, and cross-territory continuation', async () => {
     const html = await render('en');
     expect(html).toMatch(/<h1[^>]*>Dreamland<\/h1>/);
     expect(html).toContain('The whole statement.');
+    expect(html).toMatch(/<a[^>]*href="\/en\/\?w=arrivee"[^>]*data-header-drift[^>]*>Drift<\/a>/);
+    for (const id of ['zone-arrival', 'zone-lens', 'zone-leak']) {
+      expect(html).toContain(`href="#${id}"`);
+      expect(html).toContain(`id="${id}"`);
+    }
+    expect(html).toContain('href="/en/territories/the-border-is-thin/"');
     const order = ['Arrival', 'Lens', 'Leak'].map((z) => html.search(new RegExp(`<h2[^>]*>${z}</h2>`)));
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);

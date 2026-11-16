@@ -546,3 +546,57 @@ blocks:
     fr: "La frontière s'efface"
     sources:
       - spec
+  works_filter_all:
+    status: draft
+    en: "All works ({count})"
+    fr: "Toutes les œuvres ({count})"
+    sources:
+      - spec
+  works_medium_legend:
+    status: draft
+    en: "Filter by medium"
+    fr: "Filtrer par médium"
+    sources:
+      - spec
+  works_medium_all:
+    status: draft
+    en: "All media ({count})"
+    fr: "Tous les médiums ({count})"
+    sources:
+      - spec
+  works_medium_photos:
+    status: draft
+    en: "Photographs ({count})"
+    fr: "Photographies ({count})"
+    sources:
+      - spec
+  works_medium_ceramics:
+    status: draft
+    en: "Ceramics ({count})"
+    fr: "Céramiques ({count})"
+    sources:
+      - spec
+  breadcrumb_label:
+    status: draft
+    en: "Breadcrumb trail"
+    fr: "Fil d'Ariane"
+    sources:
+      - spec
+  territory_zones_label:
+    status: draft
+    en: "Zones of this territory"
+    fr: "Zones de ce territoire"
+    sources:
+      - spec
+  territory_drift_link:
+    status: draft
+    en: "Enter the drift · {title}"
+    fr: "Entrer dans la dérive · {title}"
+    sources:
+      - spec
+  territory_other_heading:
+    status: draft
+    en: "Other territory"
+    fr: "Autre territoire"
+    sources:
+      - spec

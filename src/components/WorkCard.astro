@@ -1,8 +1,8 @@
 ---
 /**
  * A work as a list item: thumbnail, title (+ EN subtitle on the EN site),
- * optional territory name and year (or, for a Leak-zone specimen, its
- * museum tag), linking to the work page.
+ * optional territory name, year, and medium badge (or, for a Leak-zone
+ * specimen, its museum tag), linking to the work page.
  */
 import type { WorkView } from '../domain/WorkView.js';
 import WorkImage from './WorkImage.astro';
@@ -13,10 +13,13 @@ interface Props {
   territoryName?: string;
   /** Museum-tag label of a Leak-zone specimen (`specimen 03 · Venise · 2025`), shown in mono. */
   specimen?: string;
+  /** Whether to append the localized medium label (`photograph` / `ceramic`) to the card meta line. */
+  showMedium?: boolean;
 }
 
-const { work, territoryName, specimen } = Astro.props;
+const { work, territoryName, specimen, showMedium = false } = Astro.props;
 const first = work.images[0];
+const metaText = `${territoryName ? `${territoryName} · ` : ''}${work.year}${showMedium ? ` · ${work.mediumLabel}` : ''}`;
 ---
 <a class="work-card" href={work.href}>
   {first && (
@@ -31,7 +34,7 @@ const first = work.images[0];
   )}
   <span class="work-card-title">{work.title}</span>
   {work.subtitle && <span class="work-card-subtitle">{work.subtitle}</span>}
-  {specimen ? <span class="work-card-specimen">{specimen}</span> : <span class="work-card-meta">{territoryName ? `${territoryName} · ` : ''}{work.year}</span>}
+  {specimen ? <span class="work-card-specimen">{specimen}</span> : <span class="work-card-meta">{metaText}</span>}
 </a>
 
 <style>
@@ -44,6 +47,10 @@ const first = work.images[0];
   .work-card:hover .work-card-title,
   .work-card:focus-visible .work-card-title {
     text-decoration: underline;
+  }
+  .work-card:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 4px;
   }
   .work-card-title {
     font-size: var(--text-lg);

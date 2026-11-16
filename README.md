@@ -62,7 +62,16 @@ always with a trailing slash.
 | Exhibition labels (print, not indexed) | `/en/labels/` | `/fr/labels/` |
 
 All routes come from `src/i18n/SiteRoutes.ts` (one Astro route,
-`src/pages/[lang]/[...route].astro`). UI strings live in
+`src/pages/[lang]/[...route].astro`). Every non-Home Awake route carries a
+contextual **Drift / Dériver** portal (`[data-header-drift]`) in the 72 rem
+aligned header (`/{lang}/?w=<slug>` on work and territory pages, `/{lang}/?drift=1`
+elsewhere) plus a secondary colophon in `Footer.astro`. The works index
+(`WorksIndexPage.astro`) provides zero-JS reversible territory (`#all-works`)
+and medium (`<input type="radio" name="medium-filter">` + CSS `:has(:checked)`)
+filters (`0 B` JavaScript), work pages pair a top hierarchy breadcrumb and
+`i / N` sequence counter with a sticky desktop curatorial plinth and visual
+thumbnail `Previous / Next` cards, and territory pages offer `#zone-*` jump
+links alongside cross-territory continuation cards. UI strings live in
 `src/content/copy/pages/ui.yaml`; a missing key fails the build. No page
 shows a price: availability is "contact for availability / disponibilité
 sur demande" unless a work is marked sold or not for sale.
@@ -153,9 +162,12 @@ never removed; while the world is shown it is made `inert`.
 - Move: scroll or drag; arrow keys; tilt on phones (after a tap, with the
   iOS permission prompt). Tab goes to the nearest work, then along the
   path; Enter opens it in a dialog with its links.
-- Deep links: `/{lang}/?w=<slug>` opens the world in front of a work; every
-  work page has a "See it in the drift" link, which also overrides a stored
-  "Wake up" choice back into the world on WebGL2 devices without Save-Data.
+- Deep links & portals: `/{lang}/?w=<slug>` opens the world in front of a work,
+  and `/{lang}/?drift=1` enters the world in 1 click from non-Home Awake routes
+  (cleaning `?drift=1` via `replaceState`); both override a stored "Wake up"
+  choice on WebGL2 devices without Save-Data. When "Wake up" is pressed from a
+  settled or deep-linked `?w=<slug>` work, Awake Home reveals `[data-awake-resume]`
+  linking directly to that work's Awake page beside the focused "Drift" button.
   The address follows the work the visitor stops at.
 - Lens: pointing at a work (mouse, or a finger while it touches) shows it
   through one of the artist's camera techniques inside a soft circle:
