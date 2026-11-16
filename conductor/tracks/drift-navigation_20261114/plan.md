@@ -4,10 +4,10 @@ Track: `drift-navigation_20261114` · Spec: [spec.md](./spec.md) · Workflow: [.
 
 ## Phase 1: Manifest Curatorial Metadata, Rich In-Place `FocusOverlay` & Pure HUD Controllers
 
-- [ ] Task: Enrich `WorldManifest` (`ManifestWork`) with curatorial metadata & sequence fields + upgrade `FocusOverlay` (`‹ Prev / Next ›` buttons, `ArrowLeft`/`ArrowRight` keys, metadata & context header)
-    - [ ] Red: unit tests in `tests/world/core/WorldManifest.test.ts`, `tests/world/manifest/WorldManifestBuilder.test.ts`, and `tests/world/island/FocusOverlay.test.ts` (schema validation, localized `metaLine`/`availabilityLabel`/`contextLabel`/`positionIndex`, in-place `Prev/Next` callbacks, `ArrowLeft`/`ArrowRight` handling, `?kiosk=1` link hiding)
-    - [ ] Green: implement in `src/world/core/WorldManifest.ts`, `src/world/manifest/WorldManifestBuilder.ts`, `src/world/island/FocusOverlay.ts`, and `tests/world/fixtures.ts` (100% coverage)
-- [ ] Task: `DriftHelp`, `WorkStepper` & `LensToggle` island controllers
+- [x] Task: Enrich `WorldManifest` (`ManifestWork`) with curatorial metadata & sequence fields + upgrade `FocusOverlay` (`‹ Prev / Next ›` buttons, `ArrowLeft`/`ArrowRight` keys, metadata & context header) 81fd871
+    - [x] Red: unit tests in `tests/world/core/WorldManifest.test.ts`, `tests/world/manifest/WorldManifestBuilder.test.ts`, and `tests/world/island/FocusOverlay.test.ts` (schema validation, localized `metaLine`/`availabilityLabel`/`contextLabel`/`positionIndex`, in-place `Prev/Next` callbacks, `ArrowLeft`/`ArrowRight` handling, `?kiosk=1` link hiding)
+    - [x] Green: implement in `src/world/core/WorldManifest.ts`, `src/world/manifest/WorldManifestBuilder.ts`, `src/world/island/FocusOverlay.ts`, and `tests/world/fixtures.ts` (100% coverage)
+- [~] Task: `DriftHelp`, `WorkStepper` & `LensToggle` island controllers
     - [ ] Red: unit tests in `tests/world/island/DriftHelp.test.ts`, `tests/world/island/WorkStepper.test.ts`, and `tests/world/island/LensToggle.test.ts` (pointer-aware onboarding auto-dismiss by distance/time, `aria-expanded` + `Escape` help panel toggle, `Prev / Current (i / N) / Next` stepper updates & callbacks, tactile lens cycle button updates & click handling)
     - [ ] Green: implement `src/world/island/DriftHelp.ts`, `src/world/island/WorkStepper.ts`, and `src/world/island/LensToggle.ts` (100% coverage)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
@@ -34,4 +34,4 @@ From `ux-sociological-survey_20261114` empirical telemetry & review (address in 
 
 ## Assumptions & Domain Invariants Ledger
 
-*(Implementer appends assumptions made during execution here.)*
+- **A1 — Path-Order Sequence Numbering (`WorldManifestBuilder`):** `ManifestWork.positionIndex` (`1..positionTotal`) is computed from `FieldLayout.compute`'s deterministic stop order (`territoryOrder` + `progress`) rather than raw content-collection loading order so `[data-drift-current]` and `[data-focus-context]` step monotonically (`1 / 40 → 2 / 40 → …`) in lockstep with `DriftSession.stops`, and `contextLabel` falls back cleanly to the territory title when zone entries are omitted in isolated manifest unit fixtures.
