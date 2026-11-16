@@ -114,7 +114,7 @@ Options:
     console.log('catHashed:', catHashed.length, 'igHashed:', igHashed.length, 'proposals:', proposals.catalogue.length, proposals.territory2.length, proposals.leak.length);
     const newProposals = [
       ...proposals.catalogue.map(c => ({
-        src: c.matches[0]?.src || '',
+        src: c.matches[0]?.src || `catalogue/img-${String(c.pdf_index).padStart(3, '0')}.jpg`,
         keep: true,
         slug: c.slug,
         title_fr: c.title_fr,

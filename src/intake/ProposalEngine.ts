@@ -7,6 +7,8 @@ export interface Rules {
   territory2: string[]; // dates
   leak: string[]; // dates
   origin2019: { start: string; end: string };
+  catalogueExcludeDates?: string[];
+  catalogueMaxDistance?: number;
 }
 
 export interface HashedIgImage {
@@ -50,7 +52,9 @@ export function parseRules(yamlPath: string): Rules {
     origin2019: {
       start: parsed.origin2019?.date_range?.start || '',
       end: parsed.origin2019?.date_range?.end || ''
-    }
+    },
+    catalogueExcludeDates: parsed.catalogue?.exclude_dates || [],
+    catalogueMaxDistance: parsed.catalogue?.max_distance
   };
 }
 
@@ -62,19 +66,23 @@ export function generateProposals(
   igImages: HashedIgImage[],
   rules: Rules
 ): AllProposals {
+  const excludedDates = new Set([...rules.territory2, ...(rules.catalogueExcludeDates ?? [])]);
+  const validIgImages = igImages.filter(img => {
+    const ds = img.postDate.substring(0, 10);
+    if (rules.origin2019.start && rules.origin2019.end) {
+      if (ds >= rules.origin2019.start && ds <= rules.origin2019.end) return false;
+    }
+    return !excludedDates.has(ds);
+  });
+
   // Catalogue matches
   const catalogueProposals: CatalogueProposal[] = catalogue.map(work => {
-    const validIgImages = igImages.filter(img => {
-      const ds = img.postDate.substring(0, 10);
-      if (rules.origin2019.start && rules.origin2019.end) {
-        if (ds >= rules.origin2019.start && ds <= rules.origin2019.end) return false;
-      }
-      return true;
-    });
-    const scored = validIgImages.map(img => ({
-      ...img,
-      distance: hammingDistance(work.hash, img.hash)
-    }));
+    const scored = validIgImages
+      .map(img => ({
+        ...img,
+        distance: hammingDistance(work.hash, img.hash)
+      }))
+      .filter(img => rules.catalogueMaxDistance === undefined || img.distance <= rules.catalogueMaxDistance);
     
     // Sort by distance ASC, then by date DESC for deterministic tie-break
     scored.sort((a, b) => {

@@ -90,22 +90,24 @@ describe('CLI', () => {
       return true; // pretend all other files exist
     });
 
-    vi.mocked(ProposalEngine.parseRules).mockReturnValue({ territory2: [], leak: [], origin2019: { start: '', end: '' } });
+    vi.mocked(ProposalEngine.parseRules).mockReturnValue({ territory2: [], leak: [], origin2019: { start: '', end: '' }, catalogueExcludeDates: [] });
     vi.mocked(ProposalEngine.generateProposals).mockReturnValue({
       catalogue: [
         { slug: 'work-1', title_fr: 'w1', zone: 'arrival', pdf_index: 0, matches: [{ src: 'img1.jpg', distance: 0, postDate: '', postCaption: '', hash: 0n }] },
-        { slug: 'work-no-match', title_fr: 'no match', zone: 'arrival', pdf_index: 0, matches: [] }
+        { slug: 'work-no-match', title_fr: 'no match', zone: 'arrival', pdf_index: 12, matches: [] }
       ],
       territory2: [{ src: 't2.jpg', hash: 0n, postDate: '2026-11-10T12', postCaption: '' }, { src: 't3.jpg', hash: 0n, postDate: '2026-08-29T12', postCaption: '' }],
       leak: [{ src: 'l1.jpg', hash: 0n, postDate: '2025-05-02T12', postCaption: '' }, { src: 'l2.jpg', hash: 0n, postDate: '2026-10-19T12', postCaption: '' }],
       origin2019: []
     });
     vi.mocked(SelectionStore.readSelection).mockReturnValue([]);
-    vi.mocked(SelectionStore.mergeSelection).mockReturnValue([]);
+    vi.mocked(SelectionStore.mergeSelection).mockImplementation((_orig, proposed) => proposed);
 
     await runCli(['propose']);
     expect(ReviewSheetRenderer.renderReviewSheet).toHaveBeenCalled();
     expect(SelectionStore.writeSelection).toHaveBeenCalled();
+    const written = vi.mocked(SelectionStore.writeSelection).mock.calls[0][1];
+    expect(written.find(e => e.slug === 'work-no-match')?.src).toBe('catalogue/img-012.jpg');
   });
   
   it('runs propose and falls back to exportDir/../m for ig paths', async () => {

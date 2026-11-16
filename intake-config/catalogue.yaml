@@ -8,22 +8,22 @@ works:
     title_fr: "Rêver en rose"
     zone: arrival
     size: { w: 40, h: 60 }
-    pdf_index: 1
+    pdf_index: 3
   - slug: solitude
     title_fr: "Solitude"
     zone: arrival
     size: { w: 50, h: 70 }
-    pdf_index: 2
+    pdf_index: 1
   - slug: perdu-dans-les-etoiles
     title_fr: "Perdu dans les étoiles"
     zone: arrival
     size: { w: 40, h: 60 }
-    pdf_index: 3
+    pdf_index: 4
   - slug: immersion-ii
     title_fr: "Immersion II"
     zone: arrival
     size: { w: 30, h: 40 }
-    pdf_index: 4
+    pdf_index: 2
   - slug: la-decouverte
     title_fr: "La Découverte"
     zone: lens
@@ -38,12 +38,12 @@ works:
     title_fr: "Nouveau Soleil"
     zone: arrival
     size: { w: 30, h: 40 }
-    pdf_index: 7
+    pdf_index: 8
   - slug: dissonance
     title_fr: "Dissonance"
     zone: lens
     size: { w: 20, h: 30 }
-    pdf_index: 8
+    pdf_index: 7
   - slug: arrivee
     title_fr: "Arrivée"
     zone: arrival
@@ -58,19 +58,19 @@ works:
     title_fr: "Les Reflets II"
     zone: lens
     size: { w: 15, h: 40 }
-    pdf_index: 11
+    pdf_index: 13
   - slug: la-frontiere-s-estompe
     title_fr: "La Frontière s'estompe"
     zone: lens
     size: { w: 30, h: 40 }
-    pdf_index: 12
+    pdf_index: 11
   - slug: les-reflets-iii
     title_fr: "Les Reflets III"
     zone: lens
     size: { w: 15, h: 40 }
-    pdf_index: 13
+    pdf_index: 14
   - slug: un-etranger
     title_fr: "Un Étranger"
     zone: lens
     size: { w: 20, h: 30 }
-    pdf_index: 14
+    pdf_index: 12

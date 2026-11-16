@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: Four sculpted wings lie beside a small clay dragon on the workbench, waiting to join its body.
+  fr: Quatre ailes modelées reposent près d'un petit dragon d'argile sur l'établi, prêtes à rejoindre son corps.
+  sources:
+    - esquisse-argile-5
+    - caption_clay

@@ -99,7 +99,7 @@ describe('Zod Content Schemas', () => {
           availability: fc.constantFrom('available', 'sold', 'not-for-sale', 'unknown'),
           images: fc.array(fc.record({
             src: fc.string(),
-            source: fc.constantFrom('instagram', 'original'),
+            source: fc.constantFrom('instagram', 'original', 'catalogue'),
             width: fc.integer({ min: 1 }),
             height: fc.integer({ min: 1 }),
             palette: fc.array(fc.stringMatching(/^#[0-9a-f]{6}$/))

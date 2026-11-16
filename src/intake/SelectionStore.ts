@@ -10,6 +10,8 @@ export interface SelectionEntry {
   zone?: string;
   people?: { consent: 'confirmed' };
   titlePlaceholder?: boolean;
+  /** Physical print dimensions in cm when known from the exhibition catalogue. */
+  size?: { w: number; h: number };
   /** Techniques the artist declares for the work (e.g. `colour filter`); they override title/caption hints for the lens. */
   techniques?: string[];
 }

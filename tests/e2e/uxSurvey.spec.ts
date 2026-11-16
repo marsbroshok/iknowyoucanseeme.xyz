@@ -103,8 +103,8 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
     };
 
     for (const [matrixKey, snap] of Object.entries(wayfindingMatrix)) {
-      expect(snap.totalCataloguedWorks, `${matrixKey} totalCataloguedWorks`).toBe(40);
-      expect(snap.worksCountRestoredAfterReset, `${matrixKey} worksCountRestoredAfterReset`).toBe(40);
+      expect(snap.totalCataloguedWorks, `${matrixKey} totalCataloguedWorks`).toBe(43);
+      expect(snap.worksCountRestoredAfterReset, `${matrixKey} worksCountRestoredAfterReset`).toBe(43);
       expect(snap.awakeModeDriftClicksFromNonHome, `${matrixKey} awakeModeDriftClicks`).toBe(1);
 
       const evaluated = evaluateWayfindingChecks(snap);

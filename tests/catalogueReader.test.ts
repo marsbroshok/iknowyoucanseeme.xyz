@@ -36,6 +36,26 @@ describe('CatalogueReader', () => {
     expect(slugs).toContain('les-echos-du-passe');
     expect(slugs).toContain('la-frontiere-s-estompe');
     expect(slugs).toContain('un-etranger');
+
+    // Check pdf_index matches pdfimages extraction order (column-major across the 3 PDF pages)
+    const indexBySlug = Object.fromEntries(works.map(w => [w.slug, w.pdf_index]));
+    expect(indexBySlug).toEqual({
+      'immersion-i': 0,
+      'solitude': 1,
+      'immersion-ii': 2,
+      'rever-en-rose': 3,
+      'perdu-dans-les-etoiles': 4,
+      'la-decouverte': 5,
+      'les-echos-du-passe': 6,
+      'dissonance': 7,
+      'nouveau-soleil': 8,
+      'arrivee': 9,
+      'les-reflets-i': 10,
+      'la-frontiere-s-estompe': 11,
+      'un-etranger': 12,
+      'les-reflets-ii': 13,
+      'les-reflets-iii': 14
+    });
     
     // Check no prices
     works.forEach(w => {

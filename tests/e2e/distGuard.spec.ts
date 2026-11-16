@@ -31,7 +31,7 @@ test.describe('Built site guard (dist/)', () => {
   test('no page shows UI text in the other language (FR pages: no EN UI strings; EN pages: no FR ones)', () => {
     const guard = new LanguageGuard(loadUiBlocks());
     const localized = pages.filter((p) => /^(en|fr)\//.test(p));
-    expect(localized.length).toBe(2 * (7 + 40 + 2));
+    expect(localized.length).toBe(2 * (7 + 43 + 2));
     const violations = localized.flatMap((file) => guard.inspect(file, fs.readFileSync(path.join(DIST, file), 'utf8')));
     expect(violations).toEqual([]);
   });
@@ -48,7 +48,7 @@ test.describe('Built site guard (dist/)', () => {
       .filter((f) => f.endsWith('.yaml'))
       .map((f) => f.replace(/\.yaml$/, ''));
     const sitemap = fs.readFileSync(path.join(DIST, 'sitemap-0.xml'), 'utf8');
-    expect(slugs.length).toBe(40);
+    expect(slugs.length).toBe(43);
     for (const slug of slugs) {
       expect(pages, slug).toContain(`en/works/${slug}/index.html`);
       expect(pages, slug).toContain(`fr/oeuvres/${slug}/index.html`);
@@ -72,7 +72,7 @@ test.describe('Built site guard (dist/)', () => {
     const en = pages.filter((p) => p.startsWith('en/'));
     const fr = pages.filter((p) => p.startsWith('fr/'));
     expect(en.length).toBe(fr.length);
-    expect(en.length).toBe(7 + 40 + 2);
+    expect(en.length).toBe(7 + 43 + 2);
   });
 });
 

@@ -6,18 +6,22 @@ zone: arrival
 year: 2025
 medium: photo
 techniques: []
+size:
+  w: 50
+  h: 70
+  unit: cm
 availability: unknown
 images:
   - src: 0.jpg
     source: instagram
     width: 1440
-    height: 1800
+    height: 1079
     palette:
-      - "#79e3f0"
-      - "#04a8d3"
-      - "#02426f"
-      - "#011d3a"
-      - "#0272a3"
+      - "#026987"
+      - "#011f48"
+      - "#4cc7da"
+      - "#023c6e"
+      - "#08aec4"
 sourceNotes: >-
   2025-05-07T12:50:00.000
 

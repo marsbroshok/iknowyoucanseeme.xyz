@@ -6,31 +6,20 @@ zone: lens
 year: 2025
 medium: photo
 techniques: []
+size:
+  w: 40
+  h: 60
+  unit: cm
 availability: unknown
 images:
   - src: 0.jpg
-    source: instagram
-    width: 1440
-    height: 1800
+    source: catalogue
+    width: 750
+    height: 600
     palette:
-      - "#a6a6a6"
-      - "#9a9a9a"
-      - "#919191"
-      - "#ababab"
-      - "#a1a1a1"
-sourceNotes: >-
-  2025-01-30T14:08:00.000
-
-  Le noir et blanc me parle aujourd’hui, mais la vie a toujours une touche de
-  rouge... comme un bouvreuil vibrant dans la neige ❤️
-
-  Et si les arbres rêvaient en couleurs, pendant ce silence hivernal ?
-
-  :
-
-  :
-
-  :
-
-  #noirblanc #rouge #hiver #neige #bouvreuil #reve #nature #photographie
-  #artcontemporain ❤️ ❄️
+      - "#4d3f0a"
+      - "#062681"
+      - "#7b776a"
+      - "#48305e"
+      - "#69564d"
+sourceNotes: Dreamland catalogue (Atelier 51, 2025)

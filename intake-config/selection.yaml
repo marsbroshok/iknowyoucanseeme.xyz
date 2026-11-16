@@ -1,102 +1,115 @@
 selection:
-  - src: media/posts/18120727447746994.jpg
+  - src: catalogue/img-000.jpg
     keep: true
     slug: immersion-i
     title_fr: Immersion I
     territory: dreamland
     zone: arrival
-  - src: media/posts/18063584767861147.jpg
+    size: { w: 30, h: 40 }
+  - src: media/posts/18058048922177402.jpg
     keep: true
     slug: rever-en-rose
     title_fr: Rêver en rose
     territory: dreamland
     zone: arrival
-  - src: media/posts/18011233109551942.jpg
+    size: { w: 40, h: 60 }
+  - src: media/posts/18063584767861147.jpg
     keep: true
     slug: solitude
     title_fr: Solitude
     territory: dreamland
     zone: arrival
-  - src: media/posts/18058048922177402.jpg
+    size: { w: 50, h: 70 }
+  - src: media/posts/18508131397057682.jpg
     keep: true
     slug: perdu-dans-les-etoiles
     title_fr: Perdu dans les étoiles
     territory: dreamland
     zone: arrival
-  - src: media/posts/18508131397057682.jpg
+    size: { w: 40, h: 60 }
+  - src: catalogue/img-002.jpg
     keep: true
     slug: immersion-ii
     title_fr: Immersion II
     territory: dreamland
     zone: arrival
-  # doubtful match
-  - src: media/posts/17874504948258750.jpg
+    size: { w: 30, h: 40 }
+  - src: catalogue/img-005.jpg
     keep: true
     slug: la-decouverte
     title_fr: La Découverte
     territory: dreamland
     zone: lens
-    doubtful: true
-  - src: media/posts/18002117252433282.jpg
+    size: { w: 40, h: 60 }
+  - src: catalogue/img-006.jpg
     keep: true
     slug: les-echos-du-passe
     title_fr: Les échos du passé
     territory: dreamland
     zone: arrival
-  - src: media/posts/18121995212079827.jpg
+    size: { w: 30, h: 40 }
+  - src: media/posts/18059509969899977.jpg
     keep: true
     slug: nouveau-soleil
     title_fr: Nouveau Soleil
     territory: dreamland
     zone: arrival
-  - src: media/posts/18059509969899977.jpg
+    size: { w: 30, h: 40 }
+  - src: catalogue/img-007.jpg
     keep: true
     slug: dissonance
     title_fr: Dissonance
     territory: dreamland
     zone: lens
+    size: { w: 20, h: 30 }
   - src: media/posts/18501216103006307.jpg
     keep: true
     slug: arrivee
     title_fr: Arrivée
     territory: dreamland
     zone: arrival
-  - src: media/posts/17978721848782959.jpg
+    size: { w: 30, h: 40 }
+  - src: catalogue/img-010.jpg
     keep: true
     slug: les-reflets-i
     title_fr: Les Reflets I
     territory: dreamland
     zone: lens
+    size: { w: 15, h: 40 }
     techniques:
       - colour filter
-  - src: media/posts/18064849663947864.jpg
+  - src: media/posts/18060079817113369.jpg
     keep: true
     slug: les-reflets-ii
     title_fr: Les Reflets II
     territory: dreamland
     zone: lens
+    size: { w: 15, h: 40 }
     techniques:
       - colour filter
-  - src: media/posts/18373057408193453.jpg
+  - src: catalogue/img-011.jpg
     keep: true
     slug: la-frontiere-s-estompe
     title_fr: La Frontière s'estompe
     territory: dreamland
     zone: lens
-  - src: media/posts/18060079817113369.jpg
+    size: { w: 30, h: 40 }
+  - src: catalogue/img-014.jpg
     keep: true
     slug: les-reflets-iii
     title_fr: Les Reflets III
     territory: dreamland
     zone: lens
+    size: { w: 15, h: 40 }
     techniques:
       - colour filter
-  - src: media/posts/18122048333069684.jpg
+  - src: media/posts/18373057408193453.jpg
     keep: true
     slug: un-etranger
     title_fr: Un Étranger
     territory: dreamland
     zone: lens
+    size: { w: 20, h: 30 }
   - src: media/posts/18286919470292952.jpg
     keep: true
     slug: cygne-icm-1
@@ -143,6 +156,18 @@ selection:
     keep: true
     slug: cygne-icm-8
     title_fr: Cygne (ICM) 8
+    territory: the-border-is-thin
+    titlePlaceholder: true
+  - src: media/posts/18121995212079827.jpg
+    keep: true
+    slug: cygne-icm-9
+    title_fr: Cygne (ICM) 9
+    territory: the-border-is-thin
+    titlePlaceholder: true
+  - src: media/posts/18122048333069684.jpg
+    keep: true
+    slug: cygne-icm-10
+    title_fr: Cygne (ICM) 10
     territory: the-border-is-thin
     titlePlaceholder: true
   - src: media/posts/18030209147670079.jpg
@@ -194,6 +219,13 @@ selection:
     keep: true
     slug: esquisse-argile-4
     title_fr: Esquisse en argile 4
+    territory: dreamland
+    zone: leak
+    titlePlaceholder: true
+  - src: media/posts/18120727447746994.jpg
+    keep: true
+    slug: esquisse-argile-5
+    title_fr: Esquisse en argile 5
     territory: dreamland
     zone: leak
     titlePlaceholder: true

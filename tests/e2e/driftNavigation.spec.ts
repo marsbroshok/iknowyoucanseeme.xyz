@@ -177,10 +177,10 @@ test.describe('Drift spatial ergonomics, guided stepper, tactile lens & rich Foc
     }
     expect(seenModes.size).toBe(6);
 
-    // Guided Work Stepper: [data-drift-current] shows "<Title> · i / 40", Next/Prev glide, Current opens FocusOverlay.
+    // Guided Work Stepper: [data-drift-current] shows "<Title> · i / 43", Next/Prev glide, Current opens FocusOverlay.
     const currentBtn = page.locator('[data-drift-current]');
     await expect(currentBtn).toContainText('Arrivée');
-    await expect(currentBtn).toContainText('/ 40');
+    await expect(currentBtn).toContainText('/ 43');
     const initialText = await currentBtn.textContent();
 
     await page.locator('[data-drift-next]').click();
@@ -221,7 +221,7 @@ test.describe('Drift spatial ergonomics, guided stepper, tactile lens & rich Foc
       const dialog = page.locator('[data-drift-focus]');
       await expect(dialog).toBeVisible();
       await expect(dialog.locator('[data-focus-context]')).toContainText('Dreamland');
-      await expect(dialog.locator('[data-focus-context]')).toContainText('/ 40');
+      await expect(dialog.locator('[data-focus-context]')).toContainText('/ 43');
       await expect(dialog.locator('[data-focus-meta]')).toContainText('2025');
       await expect(dialog.locator('[data-focus-meta]')).not.toContainText('€');
 

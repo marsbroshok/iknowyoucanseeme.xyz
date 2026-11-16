@@ -55,7 +55,7 @@ export const WorkSchema = z.object({
   }).optional(),
   images: z.array(z.object({
     src: z.string(),
-    source: z.enum(['instagram', 'original']),
+    source: z.enum(['instagram', 'original', 'catalogue']),
     width: z.number(),
     height: z.number(),
     palette: z.array(z.string().regex(/^#[0-9a-fA-F]{6}$/))

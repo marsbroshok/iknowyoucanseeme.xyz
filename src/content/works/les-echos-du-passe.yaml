@@ -6,42 +6,20 @@ zone: arrival
 year: 2025
 medium: photo
 techniques: []
+size:
+  w: 30
+  h: 40
+  unit: cm
 availability: unknown
 images:
   - src: 0.jpg
-    source: instagram
-    width: 1080
-    height: 810
+    source: catalogue
+    width: 450
+    height: 600
     palette:
-      - "#977268"
-      - "#5b3728"
-      - "#2f1a14"
-      - "#734e42"
-      - "#c9b0a7"
-sourceNotes: >-
-  2024-03-15T09:00:00.000
-
-  Birdie on a throne in the Gorges Dades.
-
-  Look at this little ruler of the world, surveying the UFO landing in his
-  domain in the majestic Gorges Dades! This photo always makes me smile -
-  there's something so regal about this little bird, even though he's probably
-  just looking for his breakfast.
-
-
-  I captured this photo on my OM System OM-1 with a telephoto lens at f/5.6,
-  1/1000s, and ISO 400 to freeze the moment and blur the background a bit.
-
-
-  The Gorges Dades are a truly breathtaking place, and this little feathered
-  friend was the perfect way to add a touch of whimsy to the scene.
-
-
-  What are your favorite unexpected animal encounters you've had while
-  traveling? Let me know in the comments below!
-
-
-  #gorgesdades #morocco #birdlife #getoutside #naturelover #omsystem #om1
-  #travelphotography #instatravel #findyourwild #cantstopwontstop #wildthings
-  #natureismetal #birdsofinstagram #kingofthecastle #breakfastwithaview
-  #happybirday #adorable #travelgram #lighthearted
+      - "#a18c84"
+      - "#0b467a"
+      - "#d9e4e9"
+      - "#0b2c50"
+      - "#90c3e5"
+sourceNotes: Dreamland catalogue (Atelier 51, 2025)

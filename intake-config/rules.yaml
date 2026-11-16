@@ -10,3 +10,7 @@ origin2019:
   date_range:
     start: "2019-12-03"
     end: "2019-12-13"
+catalogue:
+  max_distance: 10
+  exclude_dates:
+    - "2026-10-19" # Calaca clay

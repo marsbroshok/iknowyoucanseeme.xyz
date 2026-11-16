@@ -21,9 +21,9 @@ const BOILERPLATE_DENYLIST = [
 ];
 
 describe('Works Fragments Integrity', () => {
-  it('validates all 40 fragments for uniqueness, non-boilerplate, and correct sources', () => {
+  it('validates all 43 fragments for uniqueness, non-boilerplate, and correct sources', () => {
     const files = fs.readdirSync(worksDir).filter(f => f.endsWith('.yaml'));
-    expect(files.length).toBe(40);
+    expect(files.length).toBe(43);
 
     const enSet = new Set<string>();
     const frSet = new Set<string>();
@@ -56,7 +56,7 @@ describe('Works Fragments Integrity', () => {
       frSet.add(fragment.fr);
     }
 
-    expect(enSet.size).toBe(40);
-    expect(frSet.size).toBe(40);
+    expect(enSet.size).toBe(43);
+    expect(frSet.size).toBe(43);
   });
 });

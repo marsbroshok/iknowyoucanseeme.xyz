@@ -74,5 +74,40 @@ describe('ProposalEngine', () => {
     vi.mocked(fs.readFileSync).mockReturnValue('');
     const rules = parseRules('empty.yaml');
     expect(rules.territory2).toEqual([]);
+    expect(rules.catalogueExcludeDates).toEqual([]);
+    expect(rules.catalogueMaxDistance).toBeUndefined();
+  });
+
+  it('parseRules reads catalogue max_distance and exclude_dates', () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFileSync).mockReturnValue('catalogue:\n  max_distance: 10\n  exclude_dates:\n    - "2026-10-19"');
+    const rules = parseRules('rules.yaml');
+    expect(rules.catalogueMaxDistance).toBe(10);
+    expect(rules.catalogueExcludeDates).toEqual(['2026-10-19']);
+  });
+
+  it('excludes territory2 and catalogueExcludeDates from catalogue matching and enforces catalogueMaxDistance', () => {
+    const catalogue: HashedCatalogueWork[] = [
+      { slug: 'work-1', title_fr: 'w1', zone: 'arrival', pdf_index: 0, size: { w: 1, h: 1 }, hash: 0n }
+    ];
+    const igImages: HashedIgImage[] = [
+      { src: 't2-swan.jpg', hash: 0n, postDate: '2026-11-10T01:29:00', postCaption: '' },
+      { src: 'clay.jpg', hash: 0n, postDate: '2026-10-19T07:10:00', postCaption: '' },
+      { src: 'far.jpg', hash: 15n, postDate: '2025-05-02T05:07:00', postCaption: '' }
+    ];
+    const rules: Rules = {
+      territory2: ['2026-11-10'],
+      leak: ['2026-10-19'],
+      origin2019: { start: '2019-12-03', end: '2019-12-13' },
+      catalogueExcludeDates: ['2026-10-19'],
+      catalogueMaxDistance: 10
+    };
+
+    vi.spyOn(PerceptualHasher, 'hammingDistance').mockImplementation((a, b) => Number(a > b ? a - b : b - a));
+
+    const proposals = generateProposals(catalogue, igImages, rules);
+    expect(proposals.catalogue[0].matches).toEqual([]);
+    expect(proposals.territory2.map(m => m.src)).toEqual(['t2-swan.jpg']);
+    expect(proposals.leak.map(m => m.src)).toEqual(['clay.jpg']);
   });
 });

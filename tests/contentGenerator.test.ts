@@ -16,12 +16,14 @@ describe('ContentGenerator', () => {
     fs.mkdirSync(path.join(srcDir, 'content/works'), { recursive: true });
     fs.mkdirSync(path.join(srcDir, 'assets/works/work-1'), { recursive: true });
     fs.mkdirSync(path.join(intakeDir, 'originals'), { recursive: true });
+    fs.mkdirSync(path.join(intakeDir, 'catalogue'), { recursive: true });
     fs.mkdirSync(path.join(intakeDir, 'review'), { recursive: true }); 
     
     const validJpeg = await sharp({ create: { width: 10, height: 10, channels: 3, background: { r: 255, g: 0, b: 0 } } }).jpeg().toBuffer();
     
     fs.writeFileSync(path.join(intakeDir, 'originals', 'work-1.jpg'), validJpeg);
     fs.writeFileSync(path.join(intakeDir, 'originals', 'work-7.png'), validJpeg);
+    fs.writeFileSync(path.join(intakeDir, 'catalogue', 'img-000.jpg'), validJpeg);
     
     // Create dummy instagram image
     const igPath = path.resolve(__dirname, 'temp_ig.jpg');
@@ -34,9 +36,10 @@ describe('ContentGenerator', () => {
     fs.writeFileSync(notInIgPath, validJpeg);
 
     const selection: SelectionEntry[] = [
-      { src: 'temp_ig.jpg', keep: true, slug: 'work-1', title_fr: 'w1', territory: 'dreamland', zone: 'arrival', people: { consent: 'confirmed' } },
+      { src: 'temp_ig.jpg', keep: true, slug: 'work-1', title_fr: 'w1', territory: 'dreamland', zone: 'arrival', people: { consent: 'confirmed' }, size: { w: 30, h: 40 } },
       { src: 'not_in_ig.jpg', keep: true, slug: 'work-1', title_fr: 'w1', territory: 'dreamland', zone: 'arrival' }, // 2nd image for work-1
       { src: 'temp_ig.jpg', keep: true, slug: 'work-3', title_fr: 'w3', territory: 'dreamland', zone: 'arrival', techniques: ['colour filter'] }, // no original; declared technique
+      { src: 'catalogue/img-000.jpg', keep: true, slug: 'work-cat', title_fr: 'wcat', territory: 'dreamland', zone: 'arrival', size: { w: 20, h: 30 } },
       { src: 'temp_ig_invalid.jpg', keep: true, slug: 'work-4', title_fr: 'w4', territory: 'dreamland', zone: 'arrival' }, // invalid image throws
       { src: 'not_in_ig.jpg', keep: true, slug: 'work-5', title_fr: 'w5', territory: 't2' }, // missing from igImages
       { src: 'temp_ig.jpg', keep: true, slug: 'work-7', title_fr: 'w7', territory: 't7' }, // has .png
@@ -68,6 +71,12 @@ describe('ContentGenerator', () => {
     // Declared techniques are written; works without them get []
     expect(yaml.parse(fs.readFileSync(path.join(srcDir, 'content/works/work-3.yaml'), 'utf-8')).techniques).toEqual(['colour filter']);
     expect(yaml.parse(content).techniques).toEqual([]);
+    expect(yaml.parse(content).size).toEqual({ w: 30, h: 40, unit: 'cm' });
+
+    const workCat = yaml.parse(fs.readFileSync(path.join(srcDir, 'content/works/work-cat.yaml'), 'utf-8'));
+    expect(workCat.images[0].source).toBe('catalogue');
+    expect(workCat.size).toEqual({ w: 20, h: 30, unit: 'cm' });
+    expect(workCat.sourceNotes).toBe('Dreamland catalogue (Atelier 51, 2025)');
 
     // Dropped work absent
     expect(fs.existsSync(path.join(srcDir, 'content/works/work-2.yaml'))).toBe(false);

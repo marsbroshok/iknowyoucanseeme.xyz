@@ -104,7 +104,7 @@ test.describe('Awake navigation, persistent Drift bridge & zero-JS curatorial fi
       const breadcrumb = page.locator('article.work .work-breadcrumb');
       await expect(breadcrumb).toBeVisible();
       await expect(breadcrumb.locator(`a[href="/${lang}/${territorySeg}/dreamland/${zoneAnchor}"]`)).toBeVisible();
-      await expect(breadcrumb).toContainText(/\b\d+\s*\/\s*28\b/);
+      await expect(breadcrumb).toContainText(/\b\d+\s*\/\s*29\b/);
 
       const plinthPosition = await page
         .locator('.work-plinth')
@@ -144,24 +144,24 @@ test.describe('Zero-JS reversible territory & medium filtering on WorksIndexPage
       ['fr', 'oeuvres'],
     ] as const) {
       await page.goto(`${KEYED}/${lang}/${worksSeg}/`);
-      expect(await visibleCards()).toBe(40);
+      expect(await visibleCards()).toBe(43);
 
-      // Isolate Dreamland (28 works) via :target, then reverse to all 40 in 1 click via #all-works.
+      // Isolate Dreamland (29 works) via :target, then reverse to all 43 in 1 click via #all-works.
       await page.locator('.works-index nav a[href="#dreamland"]').click();
-      expect(await visibleCards()).toBe(28);
+      expect(await visibleCards()).toBe(29);
 
       await page.locator('.works-index nav a[href="#all-works"]').click();
-      expect(await visibleCards()).toBe(40);
+      expect(await visibleCards()).toBe(43);
 
       // Toggle zero-JS CSS :has(:checked) medium filter pills.
       await page.locator('label[for="medium-filter-ceramic"]').click();
-      expect(await visibleCards()).toBe(4);
+      expect(await visibleCards()).toBe(5);
 
       await page.locator('label[for="medium-filter-photo"]').click();
-      expect(await visibleCards()).toBe(36);
+      expect(await visibleCards()).toBe(38);
 
       await page.locator('label[for="medium-filter-all"]').click();
-      expect(await visibleCards()).toBe(40);
+      expect(await visibleCards()).toBe(43);
     }
   });
 });

@@ -6,6 +6,10 @@ zone: arrival
 year: 2025
 medium: photo
 techniques: []
+size:
+  w: 30
+  h: 40
+  unit: cm
 availability: unknown
 images:
   - src: 0.jpg

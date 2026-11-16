@@ -1,0 +1,7 @@
+fragment:
+  status: draft
+  en: A lone white swan glides across dark water, leaving a curved wake of luminous motion behind.
+  fr: Un cygne blanc glisse sur l'eau sombre, traçant derrière lui un sillage courbe de lumière vive.
+  sources:
+    - cygne-icm-10
+    - caption_10

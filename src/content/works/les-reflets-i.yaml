@@ -7,20 +7,20 @@ year: 2025
 medium: photo
 techniques:
   - colour filter
+size:
+  w: 15
+  h: 40
+  unit: cm
 availability: unknown
 images:
   - src: 0.jpg
-    source: instagram
-    width: 1440
-    height: 1080
+    source: catalogue
+    width: 300
+    height: 600
     palette:
-      - "#857e7a"
-      - "#101615"
-      - "#635341"
-      - "#33342e"
-      - "#bf8245"
-sourceNotes: >-
-  2025-11-17T05:05:00.000
-
-  Je suis un rayon de lumière qui danse dans l’eau, un reflet des couleurs
-  d’automne.
+      - "#8e7f80"
+      - "#757867"
+      - "#5c6f55"
+      - "#3f6940"
+      - "#847d78"
+sourceNotes: Dreamland catalogue (Atelier 51, 2025)

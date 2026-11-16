@@ -110,7 +110,7 @@ const PERSONA_LIST: readonly VisitorPersona[] = [
     primaryViewport: { width: 1440, height: 900, label: 'Desktop 1440×900' },
     secondaryViewports: [{ width: 1920, height: 1080, label: 'Desktop 1920×1080' }],
     primaryGoals: [
-      'Scan the full body of 40 works and isolate photography vs ceramics without losing index context',
+      'Scan the full body of 43 works and isolate photography vs ceramics without losing index context',
       'Read exhibition statements, dimensions, mediums, and exhibition history within 90 seconds',
       'Step rapidly across a series and enter the 3D Drift from any dossier page in one click',
     ],

@@ -43,8 +43,12 @@ export async function generateContentFiles(
     if (s.zone) zones.add(s.zone);
 
     const ig = igImages.find(img => img.src === s.src);
-    const postDate = ig ? ig.postDate : '';
-    const postCaption = ig ? ig.postCaption : '';
+    const isCatalogueFallback = s.src.startsWith('catalogue/');
+    const sourceNotes = ig
+      ? `${ig.postDate}\n${ig.postCaption}`
+      : isCatalogueFallback
+        ? 'Dreamland catalogue (Atelier 51, 2025)'
+        : '\n';
 
     let work = worksBySlug.get(s.slug);
     if (!work) {
@@ -56,9 +60,10 @@ export async function generateContentFiles(
         year: s.slug.startsWith('venise-portrait') ? 2025 : 2026,
         medium: s.slug.startsWith('esquisse-argile') ? 'ceramic' : 'photo',
         techniques: [...(s.techniques ?? [])],
+        ...(s.size ? { size: { w: s.size.w, h: s.size.h, unit: 'cm' as const } } : {}),
         availability: 'unknown',
         images: [],
-        sourceNotes: `${postDate}\n${postCaption}`
+        sourceNotes
       };
       if (s.people?.consent) {
         work.people = { consent: 'confirmed' };
@@ -69,7 +74,7 @@ export async function generateContentFiles(
     // Process image
     const imgIndex = work.images.length;
     let inputBuf: Buffer;
-    let source: 'instagram' | 'original' = 'instagram';
+    let source: 'instagram' | 'original' | 'catalogue' = isCatalogueFallback ? 'catalogue' : 'instagram';
     
     // Check original swap
     const baseName = imgIndex === 0 ? s.slug : `${s.slug}-${imgIndex}`;
@@ -82,6 +87,8 @@ export async function generateContentFiles(
     if (originalPath) {
       inputBuf = fs.readFileSync(originalPath);
       source = 'original';
+    } else if (isCatalogueFallback) {
+      inputBuf = fs.readFileSync(path.resolve(intakeDir, s.src));
     } else {
       let srcPath = path.resolve(exportDir, s.src);
       if (!fs.existsSync(srcPath)) {

@@ -166,11 +166,11 @@ never removed; while the world is shown it is made `inert`.
   (`[data-drift-help-toggle]`) opens the full bilingual controls sheet (`Esc`
   dismissible). In the bottom wayfinding dock (placed after `[data-drift-works]`
   so `Tab × 3` still lands on the nearest work), the **Guided Work Stepper**
-  (`WorkStepper`: `‹ Prev · Title · i / 40 · Next ›`) glides along the
+  (`WorkStepper`: `‹ Prev · Title · i / 43 · Next ›`) glides along the
   exhibition path and opens `FocusOverlay` in 1 tap/click, and the tactile
   **Lens Cycle Pill** (`LensToggle`, `[data-lens-cycle]`) activates and cycles
   camera lenses without hidden shortcuts. Inside `FocusOverlay`, visitors see
-  `Territory · Zone · i / 40` context, curatorial dimensions/year/medium and
+  `Territory · Zone · i / 43` context, curatorial dimensions/year/medium and
   availability status, and step `‹ Previous / Next ›` (`[data-focus-prev]`,
   `[data-focus-next]`, or `ArrowLeft` / `ArrowRight`) in place while syncing
   the camera pose and `?w=` address. Design notes:
@@ -244,7 +244,10 @@ Prerequisites: `ffmpeg` (videos) and `poppler` (`pdfimages`), via Homebrew.
 2. `npm run intake catalogue`
 3. `npm run intake propose -- --export intake/instagram/your_instagram_activity`
    writes a review sheet (`intake/review/index.html`) and
-   `intake-config/selection.yaml`.
+   `intake-config/selection.yaml`. Catalogue matching excludes `territory2` and
+   configured `catalogue.exclude_dates`, respects `catalogue.max_distance`, and
+   falls back to `catalogue/img-0XX.jpg` when a catalogue work has no close
+   Instagram match.
 4. Edit `intake-config/selection.yaml` (`keep: false` drops a match), then
    `npm run intake generate -- --export intake/instagram/your_instagram_activity`.
 

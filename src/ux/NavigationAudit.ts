@@ -118,7 +118,7 @@ export interface WayfindingSnapshot {
   readonly worksFilterResetControlPresent: boolean;
   /** Visible work cards on Works index after activating a territory filter and clicking reset (or while targeted if absent). */
   readonly worksCountRestoredAfterReset: number;
-  /** Total catalogued works expected when unfiltered (`40`). */
+  /** Total catalogued works expected when unfiltered (`43`). */
   readonly totalCataloguedWorks: number;
   /** Count of zero-JS medium filter controls distinguishing photographs and ceramics. */
   readonly mediumFilterControlCount: number;
