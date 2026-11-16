@@ -18,7 +18,7 @@ export interface ManifestWork {
   fragment: string | null;
   /** Localized curatorial specifications (`size · year · medium · techniques`). */
   metaLine: string;
-  /** Localized non-commercial availability status (never a price). */
+  /** Localized non-commercial availability status (strictly non-commercial). */
   availabilityLabel: string;
   /** Localized exhibition context (`Territory · Zone` or `Territory`). */
   contextLabel: string;
