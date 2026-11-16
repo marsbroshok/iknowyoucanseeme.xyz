@@ -103,9 +103,10 @@ describe('Rendered layout chrome is in the page language', () => {
     const guard = new LanguageGuard(UI_BLOCKS);
     for (const lang of ['fr', 'en'] as const) {
       const page = await container.renderToString(BaseLayout, {
-        props: { lang, routeKey: 'works', title: 'iknowyoucanseeme' },
+        props: { lang, routeKey: 'works', title: 'iknowyoucanseeme', driftHref: `/${lang}/?w=arrivee` },
         request: new Request(`https://www.iknowyoucanseeme.xyz/${lang}/`),
       });
+      expect(page).toContain(`href="/${lang}/?w=arrivee"`);
       expect(guard.inspect(`${lang}/index.html`, page)).toEqual([]);
     }
   });

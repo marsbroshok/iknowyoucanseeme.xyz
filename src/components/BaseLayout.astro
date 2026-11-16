@@ -35,6 +35,8 @@ interface Props {
   analytics?: AnalyticsConfig;
   /** Room for the leak's stray apparition in the margins (off on full-width sheets). */
   apparition?: boolean;
+  /** Optional contextual Drift target passed through to the global Header portal. */
+  driftHref?: string;
 }
 
 const {
@@ -48,6 +50,7 @@ const {
   noindex = false,
   analytics = readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE),
   apparition = true,
+  driftHref,
 } = Astro.props;
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://www.iknowyoucanseeme.xyz';
 const canonical = canonicalUrl(routeKey, lang, siteUrl, routeParams);
@@ -100,7 +103,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
   </style>
 </head>
 <body>
-  <Header lang={lang} currentRouteKey={routeKey} routeParams={routeParams} />
+  <Header lang={lang} currentRouteKey={routeKey} routeParams={routeParams} driftHref={driftHref} />
   <main id="main-content">
     <slot />
     {apparition && (
@@ -109,7 +112,7 @@ const alternates = alternateLinks(routeKey, siteUrl, routeParams);
       </div>
     )}
   </main>
-  <Footer lang={lang} />
+  <Footer lang={lang} currentRouteKey={routeKey} routeParams={routeParams} />
   <slot name="world" />
   <AnalyticsScript config={analytics} />
 </body>

@@ -101,7 +101,7 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
         if (!wide) continue;
         expect(detectRectOverlaps(wide.hudRects), `${locale}:${key} wide HUD overlap`).toEqual([]);
         expect(wide.zoneStripRowCount).toBe(1);
-        expect(wide.headerPageInsetDeltaPx).toBeGreaterThan(100);
+        expect(wide.headerPageInsetDeltaPx).toBeLessThanOrEqual(2);
         const cov = viewportCoverageRatio(wide.hudRects, wide.viewport);
         expect(cov).toBeGreaterThan(0.02);
         expect(cov).toBeLessThan(0.25);
@@ -131,12 +131,15 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
       const snap = wayfindingByLocale[locale];
       expect(snap.totalCataloguedWorks).toBe(40);
       expect(snap.worksCountRestoredAfterReset).toBe(28);
-      expect(snap.awakeModeDriftClicksFromNonHome).toBe(2);
+      expect(snap.awakeModeDriftClicksFromNonHome).toBe(1);
 
       const evaluated = evaluateWayfindingChecks(snap);
       expect(evaluated.totalCount).toBe(8);
-      expect(evaluated.passedCount).toBe(0);
+      expect(evaluated.passedCount).toBe(2);
+      expect(evaluated.checks.globalDriftEntry, `${locale}:globalDriftEntry`).toBe(true);
+      expect(evaluated.checks.awakeWakeContinuity, `${locale}:awakeWakeContinuity`).toBe(true);
       for (const checkId of WAYFINDING_CHECK_IDS) {
+        if (checkId === 'globalDriftEntry' || checkId === 'awakeWakeContinuity') continue;
         expect(evaluated.checks[checkId], `${locale}:${checkId}`).toBe(false);
       }
     }
@@ -155,9 +158,9 @@ test.describe('Multi-persona sociological UX survey & navigation audit', () => {
       const numericScore = scorePersona(persona, report);
 
       expect(numericScore).toBe(breakdown.total);
-      expect(numericScore).toBeGreaterThan(0);
-      expect(numericScore).toBeLessThan(40);
-      expect(breakdown.failedChecks).toEqual([...WAYFINDING_CHECK_IDS]);
+      expect(numericScore).toBeGreaterThan(20);
+      expect(numericScore).toBeLessThan(80);
+      expect(breakdown.passedChecks).toEqual(['globalDriftEntry', 'awakeWakeContinuity']);
 
       summaryRows.push({
         id: persona.id,

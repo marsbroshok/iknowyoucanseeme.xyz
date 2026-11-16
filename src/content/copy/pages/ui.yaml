@@ -534,3 +534,15 @@ blocks:
     fr: "Ouvrir la page de l'œuvre · {title}"
     sources:
       - spec
+  nav_territory_dreamland:
+    status: draft
+    en: "Dreamland"
+    fr: "Dreamland"
+    sources:
+      - spec
+  nav_territory_border:
+    status: draft
+    en: "The border is thin"
+    fr: "La frontière s'efface"
+    sources:
+      - spec

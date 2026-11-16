@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import BaseLayout from '../src/components/BaseLayout.astro';
 import Header from '../src/components/Header.astro';
@@ -32,8 +34,14 @@ describe('Astro Components Container', () => {
       expect(result).toContain('hreflang="fr"');
       expect(result).toContain('hreflang="en"');
       
-      // Header assertions
+      // Header & Footer inner 72rem alignment assertions
       expect(result).toContain('iknowyoucanseeme'); // signature
+      expect(result).toContain('class="site-header-inner"');
+      expect(result).toContain('class="site-footer-inner"');
+      const headerCss = fs.readFileSync(path.resolve(__dirname, '../src/components/Header.astro'), 'utf8');
+      const footerCss = fs.readFileSync(path.resolve(__dirname, '../src/components/Footer.astro'), 'utf8');
+      expect(headerCss).toMatch(/\.site-header-inner\s*\{[\s\S]*?max-width:\s*72rem/);
+      expect(footerCss).toMatch(/\.site-footer-inner\s*\{[\s\S]*?max-width:\s*72rem/);
       expect(result).not.toContain('search');
       expect(result).not.toContain('theme toggle');
       
@@ -43,27 +51,80 @@ describe('Astro Components Container', () => {
   });
 
   describe('Header', () => {
-    it('renders localized links', async () => {
+    it('renders localized links, 72rem inner container, and ?drift=1 portal on non-Home routes', async () => {
       const result = await container.renderToString(Header, {
         props: {
           lang: 'en',
           currentRouteKey: 'works'
         }
       });
+      expect(result).toContain('class="site-header-inner"');
       expect(result).toContain('href="/fr/oeuvres/"');
       expect(result).toContain('iknowyoucanseeme');
+      expect(result).toMatch(/<a[^>]*href="\/en\/\?drift=1"[^>]*data-header-drift[^>]*>Drift<\/a>/);
+      expect(result).toMatch(/<a[^>]*href="\/en\/works\/"[^>]*aria-current="page"[^>]*>Works<\/a>/);
+      expect(result).not.toContain('data-section-active="true"');
+    });
+
+    it('omits [data-header-drift] on Home and marks signature aria-current="page"', async () => {
+      const result = await container.renderToString(Header, {
+        props: {
+          lang: 'fr',
+          currentRouteKey: 'home'
+        }
+      });
+      expect(result).not.toContain('data-header-drift');
+      expect(result).toMatch(/class="signature"[^>]*aria-current="page"/);
+    });
+
+    it('links [data-header-drift] to ?w=<slug> on Work pages and sets data-section-active on Works nav', async () => {
+      const workHeader = await container.renderToString(Header, {
+        props: {
+          lang: 'en',
+          currentRouteKey: 'works',
+          routeParams: { en: ['solitude'], fr: ['solitude'] }
+        }
+      });
+      expect(workHeader).toMatch(/<a[^>]*href="\/en\/\?w=solitude"[^>]*data-header-drift[^>]*>Drift<\/a>/);
+      expect(workHeader).toMatch(/<a[^>]*href="\/en\/works\/"[^>]*data-section-active="true"[^>]*>Works<\/a>/);
+      expect(workHeader).not.toContain('aria-current="page"');
+
+      const territoryHeader = await container.renderToString(Header, {
+        props: {
+          lang: 'fr',
+          currentRouteKey: 'territories',
+          routeParams: { en: ['dreamland'], fr: ['dreamland'] },
+          driftHref: '/fr/?w=arrivee'
+        }
+      });
+      expect(territoryHeader).toMatch(/<a[^>]*href="\/fr\/\?w=arrivee"[^>]*data-header-drift[^>]*>Dériver<\/a>/);
+      expect(territoryHeader).toMatch(/<a[^>]*href="\/fr\/oeuvres\/"[^>]*data-section-active="true"[^>]*>Œuvres<\/a>/);
     });
   });
 
   describe('Footer', () => {
-    it('renders localized footer text', async () => {
+    it('renders localized colophon without inline style, with secondary links, territories, and language switch', async () => {
       const result = await container.renderToString(Footer, {
         props: {
-          lang: 'fr'
+          lang: 'fr',
+          currentRouteKey: 'about'
         }
       });
+      expect(result).not.toMatch(/<footer[^>]*\bstyle=/);
+      expect(result).toContain('class="site-footer-inner"');
       expect(result).toContain('© ' + new Date().getFullYear() + ' Alexander Usoltsev, tous droits réservés.');
       expect(result).toMatch(/<a href="\/fr\/mentions-legales\/"[^>]*>Mentions légales<\/a>/);
+      expect(result).toContain('href="/fr/oeuvres/"');
+      expect(result).toContain('href="/fr/territoires/dreamland/"');
+      expect(result).toContain('href="/fr/territoires/the-border-is-thin/"');
+      expect(result).toContain("La frontière s&#39;efface");
+      expect(result).toContain('href="/fr/expositions/"');
+      expect(result).toContain('href="/fr/a-propos/"');
+      expect(result).toContain('href="/fr/contact/"');
+      expect(result).toContain('href="/en/about/"');
+      const visibleText = result.replace(/<[^>]+>/g, ' ');
+      expect(visibleText).not.toContain('iknowyoucanseeme');
+      expect(visibleText).not.toContain('search');
       expect(result).not.toContain('all rights reserved');
       expect(result).not.toContain('Légales');
     });
@@ -72,6 +133,8 @@ describe('Astro Components Container', () => {
       const result = await container.renderToString(Footer, { props: { lang: 'en' } });
       expect(result).toContain('Alexander Usoltsev, all rights reserved.');
       expect(result).toContain('>Legal notice</a>');
+      expect(result).toContain('The border is thin');
+      expect(result).toContain('href="/fr/"');
       expect(result).not.toContain('tous droits réservés');
     });
   });

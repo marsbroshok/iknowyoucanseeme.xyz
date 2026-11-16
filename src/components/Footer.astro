@@ -1,21 +1,96 @@
 ---
 /**
- * Site footer: copyright line and the legal notice link, both from ui.yaml
- * (`footer_rights`, `nav_legal`) so the footer is in the page language.
+ * Site footer colophon: aligned 72rem inner container with secondary Awake
+ * navigation (Works, both Territories, Exhibitions, About, Contact, Legal
+ * notice, and locale switch) plus the localized copyright notice from
+ * `ui.yaml` (`footer_rights`). Deliberately omits `iknowyoucanseeme` so the
+ * signature appears strictly once on Home, and omits `<nav>` so `<Header>`
+ * remains the sole navigation landmark on Home.
  */
-import type { Locale } from '../i18n/RouteMap.js';
+import type { Locale, RouteKey } from '../i18n/RouteMap.js';
+import type { LocalizedParams } from '../i18n/Alternates.js';
 import { localizedPath } from '../i18n/LocalizedPath.js';
 import { uiText } from '../i18n/UiCatalog.js';
 
 interface Props {
   lang: Locale;
+  currentRouteKey?: RouteKey;
+  routeParams?: LocalizedParams;
 }
 
-const { lang } = Astro.props;
+const { lang, currentRouteKey = 'home', routeParams } = Astro.props;
 const ui = uiText(lang);
+const otherLang: Locale = lang === 'en' ? 'fr' : 'en';
+const switchHref = localizedPath(currentRouteKey, otherLang, routeParams?.[otherLang]);
 const year = new Date().getFullYear();
 const legalHref = localizedPath('legal', lang);
 ---
-<footer style="padding: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm);">
-  <p>© {year} Alexander Usoltsev, {ui.t('footer_rights')}. <a href={legalHref}>{ui.t('nav_legal')}</a></p>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <ul class="footer-links" role="list">
+      <li><a href={localizedPath('works', lang)}>{ui.t('nav_works')}</a></li>
+      <li><a href={localizedPath('territories', lang, ['dreamland'])}>{ui.t('nav_territory_dreamland')}</a></li>
+      <li><a href={localizedPath('territories', lang, ['the-border-is-thin'])}>{ui.t('nav_territory_border')}</a></li>
+      <li><a href={localizedPath('exhibitions', lang)}>{ui.t('nav_exhibitions')}</a></li>
+      <li><a href={localizedPath('about', lang)}>{ui.t('nav_about')}</a></li>
+      <li><a href={localizedPath('contact', lang)}>{ui.t('nav_contact')}</a></li>
+      <li><a href={legalHref}>{ui.t('nav_legal')}</a></li>
+      <li>
+        <a
+          class="footer-lang"
+          href={switchHref}
+          hreflang={otherLang}
+          lang={otherLang}
+          aria-label={`${otherLang.toUpperCase()} · ${uiText(otherLang).t('lang_switch')}`}
+        >{otherLang.toUpperCase()}</a>
+      </li>
+    </ul>
+    <p class="footer-rights">© {year} Alexander Usoltsev, {ui.t('footer_rights')}.</p>
+  </div>
 </footer>
+
+<style>
+  .site-footer-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-3);
+    border-top: 1px solid color-mix(in srgb, var(--text-secondary) 35%, transparent);
+    display: grid;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding-block: var(--space-1);
+  }
+  .footer-lang {
+    padding-inline: var(--space-2);
+  }
+  .footer-links a:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  .footer-rights {
+    color: var(--text-secondary);
+  }
+  @media (pointer: coarse) {
+    .footer-links a {
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
+  }
+</style>

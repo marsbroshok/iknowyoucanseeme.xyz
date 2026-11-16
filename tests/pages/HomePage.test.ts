@@ -123,9 +123,11 @@ describe('HomePage', () => {
       expect(html).toContain('>Fermer la boîte de dialogue</button>');
     });
 
-    it('offers a hidden "Drift" button in the intro (shown by the boot script on the awake layer)', async () => {
+    it('offers a hidden "Drift" button and hidden [data-awake-resume] link in the intro (shown by the boot script on the awake layer), with no [data-header-drift] on Home', async () => {
       const html = await renderWorld('fr');
       expect(html).toMatch(/<button type="button" class="drift-start"[^>]*data-drift-start[^>]*hidden[^>]*>Dériver<\/button>/);
+      expect(html).toMatch(/<a[^>]*data-awake-resume[^>]*data-resume-template="[^"]*\{title\}"[^>]*hidden/);
+      expect(html).not.toContain('data-header-drift');
       expect(html).toContain('>Se réveiller</button>');
       expect(html).toContain('Bouger avec le téléphone');
     });
