@@ -79,7 +79,7 @@ Execution order is top to bottom. Each track depends on the one above it.
 
 ---
 
-- [ ] **Track 16: Drift world mobile/desktop ergonomics, guided work stepper, rich in-place Focus dialog & tactile Lens/help controls**
+- [x] **Track 16: Drift world mobile/desktop ergonomics, guided work stepper, rich in-place Focus dialog & tactile Lens/help controls**
   *Link: [./tracks/drift-navigation_20261114/index.md](./tracks/drift-navigation_20261114/index.md)*
 
 ---
