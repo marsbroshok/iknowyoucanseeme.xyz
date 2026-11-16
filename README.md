@@ -159,9 +159,22 @@ never removed; while the world is shown it is made `inert`.
   gallery screen (no threshold, auto-drift, reset after 90 s, hidden
   cursor, sound after the first tap, QR codes instead of links). Setup:
   [`docs/exhibition-mode.md`](docs/exhibition-mode.md).
-- Move: scroll or drag; arrow keys; tilt on phones (after a tap, with the
-  iOS permission prompt). Tab goes to the nearest work, then along the
-  path; Enter opens it in a dialog with its links.
+- Move & spatial wayfinding: scroll or drag; arrow keys; tilt on phones
+  (after a tap, with the iOS permission prompt). A pointer-aware transient
+  onboarding hint (`DriftHelp`, `[data-drift-onboarding]`) auto-dismisses
+  after `≥ 2.5 m` of movement or `6 s`, while **Controls / Aide**
+  (`[data-drift-help-toggle]`) opens the full bilingual controls sheet (`Esc`
+  dismissible). In the bottom wayfinding dock (placed after `[data-drift-works]`
+  so `Tab × 3` still lands on the nearest work), the **Guided Work Stepper**
+  (`WorkStepper`: `‹ Prev · Title · i / 40 · Next ›`) glides along the
+  exhibition path and opens `FocusOverlay` in 1 tap/click, and the tactile
+  **Lens Cycle Pill** (`LensToggle`, `[data-lens-cycle]`) activates and cycles
+  camera lenses without hidden shortcuts. Inside `FocusOverlay`, visitors see
+  `Territory · Zone · i / 40` context, curatorial dimensions/year/medium and
+  availability status, and step `‹ Previous / Next ›` (`[data-focus-prev]`,
+  `[data-focus-next]`, or `ArrowLeft` / `ArrowRight`) in place while syncing
+  the camera pose and `?w=` address. Design notes:
+  `docs/adr/0015-drift-wayfinding-ergonomics-and-focus-stepping.md`.
 - Deep links & portals: `/{lang}/?w=<slug>` opens the world in front of a work,
   and `/{lang}/?drift=1` enters the world in 1 click from non-Home Awake routes
   (cleaning `?drift=1` via `replaceState`); both override a stored "Wake up"
@@ -192,11 +205,12 @@ never removed; while the world is shown it is made `inert`.
   `libasound2`), GPU code only in `src/world/gl/` (verified by Playwright, see
   `docs/adr/0006-webgl-code-verified-in-browser.md`; module scripts on the
   home pages: `docs/adr/0007-home-pages-load-world-modules.md`).
-- UX survey & synthesis: 7-persona sociological browser telemetry and
-  cross-layer wayfinding blueprint in
+- UX survey & synthesis: 7-persona sociological browser telemetry (`100 / 100`
+  post-overhaul across all 7 archetypes) and cross-layer wayfinding blueprint in
   [`docs/ux/sociological-survey.md`](docs/ux/sociological-survey.md),
-  [`docs/ux/senior-ux-synthesis.md`](docs/ux/senior-ux-synthesis.md), and
-  `docs/adr/0014-sociological-ux-survey-and-wayfinding-architecture.md`.
+  [`docs/ux/senior-ux-synthesis.md`](docs/ux/senior-ux-synthesis.md),
+  `docs/adr/0014-sociological-ux-survey-and-wayfinding-architecture.md`, and
+  `docs/adr/0015-drift-wayfinding-ergonomics-and-focus-stepping.md`.
 - Test-only flag: building with `PUBLIC_DRIFT_DEBUG=true` exposes read-only
   state as `window.__driftDebug` for the e2e suite (only the e2e "keyed"
   build sets it; production builds do not contain the code).

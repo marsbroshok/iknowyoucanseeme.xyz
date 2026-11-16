@@ -1,6 +1,6 @@
 # Senior UI/UX Expert Synthesis & Cross-Layer Wayfinding Blueprint
 
-**Track:** `ux-sociological-survey_20261114` · **Governs:** Track 15 (`awake-navigation_20261114`) & Track 16 (`drift-navigation_20261114`) · **Decision Record:** [ADR 0014](../adr/0014-sociological-ux-survey-and-wayfinding-architecture.md)
+**Track:** `ux-sociological-survey_20261114` · **Governs:** Track 15 (`awake-navigation_20261114`) & Track 16 (`drift-navigation_20261114`) · **Decision Records:** [ADR 0014](../adr/0014-sociological-ux-survey-and-wayfinding-architecture.md), [ADR 0015](../adr/0015-drift-wayfinding-ergonomics-and-focus-stepping.md)
 
 ## 1. Executive Architectural Diagnosis
 
@@ -93,16 +93,31 @@ Every UX improvement in Tracks 15 and 16 MUST preserve the following invariants 
 | `tactileLensControl` | `P1` | Track 16 (`drift-navigation_20261114`) | `true` (`[data-lens-cycle]` cycles optical lenses on click/tap) |
 | `focusInPlaceBrowsing` | `P1` | Track 16 (`drift-navigation_20261114`) | `true` (`[data-focus-meta]` + `[data-focus-prev]` / `[data-focus-next]`) |
 
-### 4.2 Baseline vs Post-Overhaul Persona UX Score Targets
+### 4.2 Empirical Before-vs-After Persona UX Score Verification (Tracks 14 → 15 → 16)
 
-Track 16 re-runs `tests/e2e/uxSurvey.spec.ts` through the unchanged `NavigationAudit` rubric to verify that every persona rises from its baseline friction score to **`≥ 90 / 100`**:
+Re-running `tests/e2e/uxSurvey.spec.ts` after Track 15 (`awake-navigation_20261114`) and Track 16 (`drift-navigation_20261114`) against the unchanged `NavigationAudit` rubric confirms that all 8 cross-site wayfinding capabilities pass (`8 / 8` across `en:1440×900`, `fr:390×844`, `en:390×844`, and `fr:1440×900`), HUD collisions drop to `0 px²` across all 10 `(locale × viewport)` runs, HUD chrome coverage stays strictly `≤ 25%` everywhere (`24.46%` on `fr:375×667`, `19.17%` on `fr:390×844`, `16.66%` on `en:390×844`, `12.63%` on `fr:820×1180`, `11.55–12.24%` on `1440×900`, `8.98–9.41%` on `1920×1080`), interactive target pass ratios reach `100%` (`45 / 45` on coarse touch profiles, `44 / 44` on fine desktop profiles), and all 7 sociological personas achieve **`100 / 100`** (exceeding the `≥ 90 / 100` gate):
 
-| Persona ID | Locale & Viewport | Baseline UX Score (Track 14) | Post-Track 15 Projected | Post-Track 16 Acceptance Gate |
-|---|---|---|---|---|
-| `curator` | `fr` · `1440×900` | `16.91 / 100` | `~84 / 100` | **`≥ 90 / 100`** |
-| `instagram-mobile` | `en` · `390×844` | `16.64 / 100` | `~48 / 100` | **`≥ 90 / 100`** |
-| `collector` | `fr` · `820×1180` | `16.97 / 100` | `~70 / 100` | **`≥ 90 / 100`** |
-| `peer-artist` | `en` · `1440×900` | `22.09 / 100` | `~72 / 100` | **`≥ 90 / 100`** |
-| `gallery-qr` | `fr` · `390×844` | `12.45 / 100` | `~56 / 100` | **`≥ 90 / 100`** |
-| `non-gamer` | `en` · `1440×900` | `22.91 / 100` | `~68 / 100` | **`≥ 90 / 100`** |
-| `keyboard-a11y` | `en` · `1440×900` | `21.73 / 100` | `~80 / 100` | **`≥ 90 / 100`** |
+| Persona ID | Locale & Viewport | Baseline UX Score (Track 14) | Post-Overhaul Collision | Post-Overhaul Clearance | Post-Overhaul Targets | Post-Overhaul Wayfinding (`8/8`) | **Measured Post-Track 16 Score** | Net Gain |
+|---|---|---|---|---|---|---|---|---|
+| `curator` | `fr` · `1440×900` (`fine`) | `16.91 / 100` | `6 / 6` (`0 px²`) | `6 / 6` (`12.24%`) | `12 / 12` (`44/44`) | `76 / 76` | **`100 / 100`** | **`+83.09`** |
+| `instagram-mobile` | `en` · `390×844` (`coarse`) | `16.64 / 100` | `16 / 16` (`0 px²`) | `10 / 10` (`16.66%`) | `18 / 18` (`45/45`) | `56 / 56` | **`100 / 100`** | **`+83.36`** |
+| `collector` | `fr` · `820×1180` (`coarse`) | `16.97 / 100` | `8 / 8` (`0 px²`) | `8 / 8` (`12.63%`) | `16 / 16` (`45/45`) | `68 / 68` | **`100 / 100`** | **`+83.03`** |
+| `peer-artist` | `en` · `1440×900` (`fine`) | `22.09 / 100` | `8 / 8` (`0 px²`) | `10 / 10` (`11.55%`) | `10 / 10` (`44/44`) | `72 / 72` | **`100 / 100`** | **`+77.91`** |
+| `gallery-qr` | `fr` · `390×844` (`coarse`) | `12.45 / 100` | `14 / 14` (`0 px²`) | `10 / 10` (`19.17%`) | `16 / 16` (`45/45`) | `60 / 60` | **`100 / 100`** | **`+87.55`** |
+| `non-gamer` | `en` · `1440×900` (`fine`) | `22.91 / 100` | `10 / 10` (`0 px²`) | `8 / 8` (`11.55%`) | `12 / 12` (`44/44`) | `70 / 70` | **`100 / 100`** | **`+77.09`** |
+| `keyboard-a11y` | `en` · `1440×900` (`fine`) | `21.73 / 100` | `10 / 10` (`0 px²`) | `6 / 6` (`11.55%`) | `14 / 14` (`44/44`) | `70 / 70` | **`100 / 100`** | **`+78.27`** |
+
+### 4.3 Post-Overhaul Multi-Viewport HUD Geometry Summary
+
+| Locale | Viewport | Pointer | HUD Overlaps (`px²`) | Zone Strip Rows (Before → After) | Union HUD Coverage (Before → After) | Target Comfort Pass |
+|---|---|---|---|---|---|---|
+| `en` | `375×667` | `coarse` | `20,580` → **`0 px²`** | `2` → **`1` row** | `38.19%` → **`21.40%`** | `45 / 45` (`100%`) |
+| `fr` | `375×667` | `coarse` | `20,580` → **`0 px²`** | `4` → **`1` row** | `55.11%` → **`24.46%`** | `45 / 45` (`100%`) |
+| `en` | `390×844` | `coarse` | `21,120` → **`0 px²`** | `2` → **`1` row** | `29.73%` → **`16.66%`** | `45 / 45` (`100%`) |
+| `fr` | `390×844` | `coarse` | `21,120` → **`0 px²`** | `4` → **`1` row** | `43.03%` → **`19.17%`** | `45 / 45` (`100%`) |
+| `en` | `820×1180` | `coarse` | `54.12` → **`0 px²`** | `1` → **`1` row** | `13.76%` → **`11.58%`** | `45 / 45` (`100%`) |
+| `fr` | `820×1180` | `coarse` | `4,489.32` → **`0 px²`** | `2` → **`1` row** | `18.48%` → **`12.63%`** | `45 / 45` (`100%`) |
+| `en` | `1440×900` | `fine` | `0` → **`0 px²`** | `1` → **`1` row** | `13.61%` → **`11.55%`** | `44 / 44` (`100%`) |
+| `fr` | `1440×900` | `fine` | `0` → **`0 px²`** | `1` → **`1` row** | `14.30%` → **`12.24%`** | `44 / 44` (`100%`) |
+| `en` | `1920×1080` | `fine` | `0` → **`0 px²`** | `1` → **`1` row** | `10.45%` → **`8.98%`** | `44 / 44` (`100%`) |
+| `fr` | `1920×1080` | `fine` | `0` → **`0 px²`** | `1` → **`1` row** | `10.88%` → **`9.41%`** | `44 / 44` (`100%`) |

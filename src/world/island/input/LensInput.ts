@@ -151,6 +151,15 @@ export class LensInput {
   }
 
   /**
+   * Aims the lens at the work in front of the camera (used by the tactile
+   * `[data-lens-cycle]` pill), until the pointer next moves over or touches
+   * the canvas.
+   */
+  aimAtFacing(): void {
+    this.keyboard = true;
+  }
+
+  /**
    * Whether the last press was used by the lens (a long press or a
    * two-finger tap), so its click must not open the work.
    *

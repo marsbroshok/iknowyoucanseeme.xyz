@@ -12,6 +12,10 @@ describe('UX survey & synthesis documentation invariants', () => {
     ROOT,
     'docs/adr/0014-sociological-ux-survey-and-wayfinding-architecture.md',
   );
+  const adr0015Path = path.join(
+    ROOT,
+    'docs/adr/0015-drift-wayfinding-ergonomics-and-focus-stepping.md',
+  );
   const readmePath = path.join(ROOT, 'README.md');
 
   it('provides sociological-survey.md covering all 7 personas and 5 empirical viewports', () => {
@@ -36,14 +40,19 @@ describe('UX survey & synthesis documentation invariants', () => {
     }
   });
 
-  it('records ADR 0014 and indexes UX telemetry docs in README.md without local paths or commercial markers', () => {
+  it('records ADR 0014 & ADR 0015, documents empirical before/after persona scores, and indexes UX telemetry docs in README.md without local paths or commercial markers', () => {
     expect(fs.existsSync(adrPath)).toBe(true);
+    expect(fs.existsSync(adr0015Path)).toBe(true);
     const readme = fs.readFileSync(readmePath, 'utf8');
     expect(readme).toContain('docs/ux/sociological-survey.md');
     expect(readme).toContain('docs/ux/senior-ux-synthesis.md');
     expect(readme).toContain('0014-sociological-ux-survey-and-wayfinding-architecture.md');
+    expect(readme).toContain('0015-drift-wayfinding-ergonomics-and-focus-stepping.md');
 
-    for (const docPath of [surveyPath, synthesisPath, adrPath]) {
+    const synthesis = fs.readFileSync(synthesisPath, 'utf8');
+    expect(synthesis).toContain('100 / 100');
+
+    for (const docPath of [surveyPath, synthesisPath, adrPath, adr0015Path]) {
       const content = fs.readFileSync(docPath, 'utf8');
       expect(content).not.toMatch(/\/Users\/|\/home\/|\.gemini|\.agy|\.claude/);
       expect(content).not.toMatch(/€|\$|\bprix\b|\bprices?\b/i);

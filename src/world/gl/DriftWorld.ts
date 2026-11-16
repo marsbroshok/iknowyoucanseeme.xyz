@@ -13,6 +13,9 @@ import { HorizonCompass } from '../island/HorizonCompass.js';
 import { ZoneBanner } from '../island/ZoneBanner.js';
 import { WorkList } from '../island/WorkList.js';
 import { FocusOverlay } from '../island/FocusOverlay.js';
+import { DriftHelp } from '../island/DriftHelp.js';
+import { WorkStepper } from '../island/WorkStepper.js';
+import { LensToggle } from '../island/LensToggle.js';
 import { DriftAnalytics } from '../island/DriftAnalytics.js';
 import { Analytics, type AnalyticsHost } from '../../analytics/Analytics.js';
 import { readAnalyticsConfig } from '../../analytics/AnalyticsConfig.js';
@@ -78,11 +81,13 @@ function part<T extends Element>(root: HTMLElement, selector: string): T {
 
 /**
  * Mounts the Three.js world in the home page's world layer: stage, one
- * apparition per work, texture streaming, inputs, compass, the keyboard
- * work list and the lens (camera-technique shaders over the work under the
- * pointer; decisions by LensDirector, LensUniforms and LensCrossfade) and
- * the sound's view of the camera (`SoundScene`, handed to the boot's sound
- * director), all driven frame by frame by a {@link DriftSession}.
+ * apparition per work, texture streaming, inputs, transient onboarding &
+ * controls panel, guided work stepper, tactile lens cycle pill, compass, the
+ * keyboard work list, the rich focus overlay and the lens (camera-technique
+ * shaders over the work under the pointer; decisions by LensDirector,
+ * LensUniforms and LensCrossfade) and the sound's view of the camera
+ * (`SoundScene`, handed to the boot's sound director), all driven frame by
+ * frame by a {@link DriftSession}.
  *
  * Verified in the browser (ADR 0006).
  *
@@ -128,7 +133,9 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const wheel = new WheelInput(root, acc);
   const drag = new PointerDragInput(canvas, acc);
   const keys = new KeyboardInput(root);
-  const tilt = new TiltControl(part<HTMLButtonElement>(root, '[data-drift-tilt]'), win, win.matchMedia('(pointer: coarse)').matches);
+  const coarsePointer = win.matchMedia('(pointer: coarse)').matches;
+  const tilt = new TiltControl(part<HTMLButtonElement>(root, '[data-drift-tilt]'), win, coarsePointer);
+  const help = new DriftHelp(root, coarsePointer);
 
   const halfFov = () => Math.atan(Math.tan((CAMERA.fov * Math.PI) / 360) * stage.camera.aspect);
   const compass = new HorizonCompass(
@@ -144,7 +151,28 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
   const crossing = ZoneCrossing.fromManifest(session.layout.regions, manifest);
   const zoneBanner = new ZoneBanner(root);
 
-  const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'), undefined, { kiosk });
+  const stepToWork = (fromSlug: string | null, direction: -1 | 1, syncUrl: boolean) => {
+    const nextSlug = session.cycle(fromSlug, direction);
+    if (!nextSlug) return null;
+    session.focus(nextSlug);
+    if (syncUrl && !kiosk) {
+      win.history.replaceState(win.history.state, '', DeepLink.withWork(win.location.href, nextSlug));
+    }
+    return work(nextSlug);
+  };
+
+  const stepper = new WorkStepper(part<HTMLElement>(root, '[data-drift-dock]'), {
+    onStep: (currentSlug, direction) => stepToWork(currentSlug, direction, false),
+    onOpen: (slug) => overlay.open(work(slug)),
+  });
+  const overlay = new FocusOverlay(part<HTMLDialogElement>(root, '[data-drift-focus]'), undefined, {
+    kiosk,
+    onStep: (currentSlug, direction) => {
+      const stepped = stepToWork(currentSlug, direction, true);
+      if (stepped) stepper.update(stepped, true);
+      return stepped;
+    },
+  });
   const open = (slug: string) => overlay.open(work(slug));
   const list = new WorkList(part<HTMLUListElement>(root, '[data-drift-works]'), session.stops.map((s) => ({ slug: s.slug, title: work(s.slug).title })), {
     onFocus: (slug) => session.focus(slug),
@@ -153,16 +181,42 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     isLast: (slug, direction) => session.isLast(slug, direction),
   });
 
-  // The lens (FR1-FR4): decisions in src/world/core, input in src/world/island.
+  // The lens (FR1-FR4): decisions in src/world/core, input & tactile pill in src/world/island.
   const director = new LensDirector(
     manifest.works.map((w) => ({ slug: w.slug, territory: w.territory, zone: w.zone, techniques: w.techniques, palette: w.palette })),
     tier,
   );
   const lens = new LensSession(director);
   const announcer = new LensAnnouncer(part<HTMLElement>(root, '[data-drift-lens]'));
+  let currentActiveSlug: string | null = startSlug ?? session.stops[0]?.slug ?? null;
+  let currentDirectlyFacing = startSlug !== null;
+  let lastLensSlug: string | null = null;
   const lensInput = new LensInput(canvas, root, () => {
     const mode = lens.cycle();
-    if (mode) announcer.announce(mode);
+    if (mode) {
+      announcer.announce(mode);
+      lensToggle.setMode(mode);
+    }
+  });
+  const lensToggle = new LensToggle(part<HTMLButtonElement>(root, '[data-lens-cycle]'), {
+    onCycle: () => {
+      lensInput.aimAtFacing();
+      if (lens.slug) {
+        const mode = lens.cycle();
+        if (mode) {
+          lastLensSlug = lens.slug;
+          announcer.announce(mode);
+        }
+        return mode;
+      }
+      const targetSlug = currentActiveSlug;
+      if (!targetSlug) return null;
+      if (!currentDirectlyFacing) session.focus(targetSlug);
+      const mode = lastLensSlug === targetSlug ? director.cycle(targetSlug) : director.mode(targetSlug);
+      lastLensSlug = targetSlug;
+      announcer.announce(mode);
+      return mode;
+    },
   });
 
   const metrics = new DriftAnalytics(new Analytics(readAnalyticsConfig(import.meta.env.PUBLIC_GOATCOUNTER_CODE), win as unknown as AnalyticsHost), win);
@@ -234,6 +288,7 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     stage.setSkyColor(f.sky);
     for (const gm of gateMeshes) gm.update(f.state.x, EYE_HEIGHT, f.state.z, portalTime);
     zoneBanner.update(crossing.update(f.state, threshold.holding, dt));
+    help.frame({ x: f.state.x, z: f.state.z, active: !held }, dt);
     if (leak && !threshold.visible) {
       leak.dispose();
       leak = null;
@@ -255,14 +310,26 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     const aim = held ? null : LensUniforms.aimFrom(hovered, li.keyboard, f.facing);
     const lf = lens.frame({ aim, touch: li.touch, unaltered: li.unaltered }, dt, (slug) => meshes.get(slug)?.texture != null);
     if (lf.released) meshes.get(lf.released)?.setLens(null);
-    if (lf.announce === 'clear') announcer.clear();
-    else if (lf.announce) announcer.announce(lf.announce);
+    if (lf.slug) {
+      lastLensSlug = lf.slug;
+      lensToggle.setMode(lf.mode);
+    }
+    if (lf.announce === 'clear') {
+      announcer.clear();
+      lensToggle.setMode(null);
+    } else if (lf.announce) {
+      announcer.announce(lf.announce);
+      lensToggle.setMode(lf.announce);
+    }
     if (lf.slug && lf.settings) {
       const { modeA, modeB, partner, ...rest } = lf.settings;
       (meshes.get(lf.slug) as ApparitionMesh).setLens({ ...rest, modeA: modeIndex(modeA), modeB: modeIndex(modeB), partner: partner ? (meshes.get(partner)?.texture ?? null) : null });
     }
     sound?.frame(soundScene.read(f.state), dt);
     const activeSlug = f.facing ?? f.nearest;
+    currentDirectlyFacing = f.facing !== null;
+    currentActiveSlug = activeSlug;
+    stepper.update(activeSlug ? work(activeSlug) : null, f.state.target !== null);
     const activeDistance = activeSlug ? (f.works.find((w) => w.slug === activeSlug)?.distance ?? f.nearestDistance) : f.nearestDistance;
     metrics.frame(activeSlug, activeDistance, dt);
     leakRecorder.frame(dt, threshold.holding, activeSlug ? { color: work(activeSlug).color, distance: activeDistance } : null);
@@ -311,6 +378,8 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
     },
     restart() {
       overlay.close();
+      help.close();
+      stepper.clearTarget();
       kioskStop = null;
       crossing.reset();
       zoneBanner.clear();
@@ -320,6 +389,9 @@ export async function mountWorld(root: HTMLElement, options: MountOptions): Prom
       leak?.dispose();
       zoneBanner.clear();
       compass.detach();
+      help.detach();
+      stepper.detach();
+      lensToggle.detach();
       whisper.fragment(null, false);
       whisper.gaze(0, false);
       whisper.specimen(null);
