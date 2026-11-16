@@ -1,11 +1,10 @@
 ---
 /**
- * Territory page `/{lang}/territories|territoires/<slug>/`: the statement,
- * then the works grouped by zone (Dreamland: Arrival → Lens → Leak) with
- * each zone's statement; the Leak zone's inhabitants are a specimen grid
- * (framed cards with mono museum tags, FR4). With JavaScript, "Fragments found: n / N" shows
- * how many of the territory's fragments the visitor has read in the drift
- * (hidden without JavaScript; a small inline script, FragmentCount).
+ * Territory page `/{lang}/territories|territoires/<slug>/`: statement, top
+ * `#zone-*` jump bar + Drift portal links, works grouped by zone (Dreamland:
+ * Arrival → Lens → Leak, with Leak as a framed specimen grid), "Fragments
+ * found: n / N" (hidden without JavaScript; `FragmentCount`), and a bottom
+ * sibling-territory continuation card so visitors never hit a dead end.
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { TerritoryView } from '../../domain/TerritoryView.js';
@@ -31,16 +30,50 @@ const params = { en: [territory.slug], fr: [territory.slug] };
   routeParams={params}
   title={`${territory.title} · iknowyoucanseeme`}
   description={territory.statement ? excerpt(territory.statement, 155) : territory.title}
+  driftHref={territory.driftHref}
 >
-  <article class="page">
-    <h1>{territory.title}</h1>
+  <article class="page territory-page">
+    <header class="territory-header">
+      <h1>{territory.title}</h1>
+      {territory.driftHref && (
+        <p class="territory-portal">
+          <a href={territory.driftHref} data-drift-link class="drift-portal-pill">
+            {ui.t('territory_drift_link').replace('{title}', territory.title)}
+          </a>
+        </p>
+      )}
+    </header>
+
     {territory.statement && <div class="prose statement"><p>{territory.statement}</p></div>}
+
     {fragmentIds.length > 0 && (
       <p class="fragments-found" data-fragments-found data-ids={JSON.stringify(fragmentIds)} data-template={ui.t('fragments_found')} hidden></p>
     )}
+
+    {territory.zoneJumps.length > 0 && (
+      <nav class="zone-jumps" aria-label={ui.t('territory_zones_label')}>
+        <ul class="zone-jump-list" role="list">
+          {territory.zoneJumps.map((z) => (
+            <li>
+              <a class="zone-jump-pill" href={`#${z.anchorId}`}>{z.title} ({z.count})</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
     {territory.groups.map((group) => (
-      <section class="zone" data-zone={group.slug ?? 'none'}>
-        {group.title && <h2>{group.title}</h2>}
+      <section id={group.anchorId} class="zone" data-zone={group.slug ?? 'none'}>
+        {group.title && (
+          <div class="zone-header">
+            <h2>{group.title}</h2>
+            {group.driftHref && (
+              <a class="zone-drift-link" href={group.driftHref}>
+                {ui.t('territory_drift_link').replace('{title}', group.title)}
+              </a>
+            )}
+          </div>
+        )}
         {group.statement && <p class="prose zone-statement">{group.statement}</p>}
         {group.specimens ? (
           <ul class="work-grid specimen-grid" aria-label={ui.t('specimens_label')}>
@@ -53,14 +86,133 @@ const params = { en: [territory.slug], fr: [territory.slug] };
         )}
       </section>
     ))}
+
+    {territory.otherTerritories.length > 0 && (
+      <div class="other-territory" data-other-territory>
+        {territory.otherTerritories.map((other) => (
+          <div class="other-territory-card">
+            <p class="meta-line">{ui.t('territory_other_heading')}</p>
+            <h2 class="other-territory-title">
+              <a href={other.href}>{other.title} ({other.count})</a>
+            </h2>
+            {other.excerpt && <p class="prose other-territory-excerpt">{other.excerpt}</p>}
+            <p class="other-territory-links">
+              <a class="zone-drift-link" href={other.href}>{ui.t('territory_link')} · {other.title}</a>
+              <a class="zone-drift-link" href={other.driftHref}>{ui.t('territory_drift_link').replace('{title}', other.title)}</a>
+            </p>
+          </div>
+        ))}
+      </div>
+    )}
   </article>
 </BaseLayout>
 
 <style>
+  .territory-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .statement {
+    margin-top: var(--space-3);
+  }
+  .drift-portal-pill,
+  .zone-jump-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--text-secondary) 55%, transparent);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .drift-portal-pill:hover,
+  .zone-jump-pill:hover {
+    border-color: var(--text-primary);
+    text-decoration: underline;
+  }
+  .zone-jumps {
+    margin-top: var(--space-3);
+  }
+  .zone-jump-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .zone-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-4);
+  }
+  .zone-header h2 {
+    margin-top: 0;
+  }
+  .zone-drift-link {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding-block: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .zone-drift-link:hover {
+    color: var(--text-primary);
+  }
   /* Specimens: each card framed like a museum drawer, the tag in mono. */
   .specimen-grid > li {
     padding: var(--space-2);
     border: 1px solid var(--text-secondary);
+  }
+  .other-territory {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--text-secondary) 35%, transparent);
+  }
+  .other-territory-card {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .other-territory-title {
+    margin-top: 0;
+  }
+  .other-territory-title a {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+  }
+  .other-territory-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .territory-page a:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  @media (pointer: coarse) {
+    .drift-portal-pill,
+    .zone-jump-pill,
+    .zone-drift-link,
+    .other-territory-title a {
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
   }
 </style>
 

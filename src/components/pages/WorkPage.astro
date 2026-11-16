@@ -1,13 +1,15 @@
 ---
 /**
- * Work page `/{lang}/works|oeuvres/<slug>/`: large image(s), FR title (+ EN
- * subtitle on the EN site), fragment, metadata line, availability (never a
- * price), contact link pre-filled with the work, prev/next within the
- * territory, and the "See it in the drift" link (`/{lang}/?w=<slug>`: the
- * home page opens the world in front of this work; plain link, no script).
+ * Work page `/{lang}/works|oeuvres/<slug>/`: top hierarchy breadcrumb
+ * (`Works → Territory → #zone-<slug>`) + `i / N` sequence position, desktop
+ * two-column editorial split (`>= 60rem`) pairing large artwork image(s) with
+ * a `position: sticky` curatorial plinth (title, EN subtitle, poetic fragment,
+ * metadata, non-commercial availability status, primary "See it in the drift"
+ * CTA, and secondary inquiry link), plus visual thumbnail `Prev / Next` cards.
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { WorkView } from '../../domain/WorkView.js';
+import type { WorkBreadcrumb } from '../../domain/TerritoryView.js';
 import type { VisualArtworkJsonLd } from '../../domain/JsonLd.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import { localizedPath } from '../../i18n/LocalizedPath.js';
@@ -21,14 +23,22 @@ interface Props {
   prev: WorkView | null;
   next: WorkView | null;
   territory: { title: string; href: string };
+  breadcrumb?: WorkBreadcrumb;
   jsonLd: VisualArtworkJsonLd;
   ogImage?: string;
 }
 
-const { lang, work, prev, next, territory, jsonLd, ogImage } = Astro.props;
+const { lang, work, prev, next, territory, breadcrumb, jsonLd, ogImage } = Astro.props;
 const ui = uiText(lang);
 const params = { en: [work.slug], fr: [work.slug] };
 const description = work.fragment ? `${work.displayTitle}. ${work.fragment}` : `${work.displayTitle} · ${work.metaLine}`;
+const driftHref = DeepLink.href(localizedPath('home', lang), work.slug);
+const crumb: WorkBreadcrumb = breadcrumb ?? {
+  worksHref: localizedPath('works', lang),
+  worksLabel: ui.t('nav_works'),
+  territoryHref: territory.href,
+  territoryTitle: territory.title,
+};
 ---
 <BaseLayout
   lang={lang}
@@ -38,49 +48,176 @@ const description = work.fragment ? `${work.displayTitle}. ${work.fragment}` : `
   description={description}
   ogImage={ogImage}
   jsonLd={[jsonLd]}
+  driftHref={driftHref}
 >
   <article class="page work">
-    <div class="work-images">
-      {work.images.map((img, i) => (
-        <WorkImage
-          src={`works/${work.slug}/${img.src}`}
-          alt={work.alt}
-          palette={img.palette}
-          sizes="(max-width: 72rem) 100vw, 72rem"
-          priority={i === 0}
-        />
-      ))}
-    </div>
-    <header class="work-heading">
-      <h1>{work.title}</h1>
-      {work.subtitle && <p class="subtitle" lang="en">{work.subtitle}</p>}
-    </header>
-    {work.fragment && <p class="prose fragment">{work.fragment}</p>}
-    <p class="meta-line">{work.metaLine}</p>
-    <p class="availability">{work.availabilityLabel}</p>
-    {work.enquirable && <p><a href={work.contactHref}>{ui.t('work_contact_link')}</a></p>}
-    <p class="drift-link"><a href={DeepLink.href(localizedPath('home', lang), work.slug)} data-drift-link>{ui.t('drift_link')}</a></p>
-    <p class="territory-link"><a href={territory.href}>{territory.title}</a></p>
-    <nav class="prev-next" aria-label={territory.title}>
-      {prev && <a rel="prev" href={prev.href}><span class="meta-line">{ui.t('work_prev')}</span> {prev.title}</a>}
-      {next && <a rel="next" href={next.href}><span class="meta-line">{ui.t('work_next')}</span> {next.title}</a>}
+    <nav class="work-breadcrumb" aria-label={ui.t('breadcrumb_label')}>
+      <ol class="breadcrumb-list" role="list">
+        <li><a href={crumb.worksHref}>{crumb.worksLabel}</a></li>
+        <li><a href={crumb.territoryHref}>{crumb.territoryTitle}</a></li>
+        {crumb.zoneHref && crumb.zoneTitle && (
+          <li><a href={crumb.zoneHref}>{crumb.zoneTitle}</a></li>
+        )}
+        <li aria-current="page"><span class="breadcrumb-current">{work.title}</span></li>
+      </ol>
+      {crumb.sequence && (
+        <p class="meta-line work-sequence">{crumb.sequence.index} / {crumb.sequence.total}</p>
+      )}
     </nav>
+
+    <div class="work-split">
+      <div class="work-images">
+        {work.images.map((img, i) => (
+          <WorkImage
+            src={`works/${work.slug}/${img.src}`}
+            alt={work.alt}
+            palette={img.palette}
+            sizes="(max-width: 60rem) 100vw, 42rem"
+            priority={i === 0}
+          />
+        ))}
+      </div>
+
+      <div class="work-plinth">
+        <header class="work-heading">
+          <h1>{work.title}</h1>
+          {work.subtitle && <p class="subtitle" lang="en">{work.subtitle}</p>}
+        </header>
+        {work.fragment && <p class="prose fragment">{work.fragment}</p>}
+        <p class="meta-line">{work.metaLine}</p>
+        <p class="availability">{work.availabilityLabel}</p>
+        <div class="work-actions">
+          <p class="drift-link">
+            <a href={driftHref} data-drift-link class="drift-cta">{ui.t('drift_link')}</a>
+          </p>
+          {work.enquirable && (
+            <p class="contact-link">
+              <a href={work.contactHref} class="contact-cta">{ui.t('work_contact_link')}</a>
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {(prev || next) && (
+      <nav class="prev-next" aria-label={territory.title}>
+        {prev && (
+          <a class="prev-next-card" rel="prev" href={prev.href}>
+            {prev.images[0] && (
+              <span class="prev-next-thumb-frame">
+                <WorkImage
+                  src={`works/${prev.slug}/${prev.images[0].src}`}
+                  alt=""
+                  palette={prev.images[0].palette}
+                  sizes="4rem"
+                  widths={[160, 320]}
+                  className="prev-next-thumb"
+                />
+              </span>
+            )}
+            <span class="prev-next-text">
+              <span class="meta-line">{ui.t('work_prev')}</span>
+              <span class="prev-next-title">{prev.title}</span>
+            </span>
+          </a>
+        )}
+        {next && (
+          <a class="prev-next-card" rel="next" href={next.href}>
+            <span class="prev-next-text">
+              <span class="meta-line">{ui.t('work_next')}</span>
+              <span class="prev-next-title">{next.title}</span>
+            </span>
+            {next.images[0] && (
+              <span class="prev-next-thumb-frame">
+                <WorkImage
+                  src={`works/${next.slug}/${next.images[0].src}`}
+                  alt=""
+                  palette={next.images[0].palette}
+                  sizes="4rem"
+                  widths={[160, 320]}
+                  className="prev-next-thumb"
+                />
+              </span>
+            )}
+          </a>
+        )}
+      </nav>
+    )}
   </article>
 </BaseLayout>
 
 <style>
+  .work-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  .breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .breadcrumb-list li + li::before {
+    content: '→' / '';
+    margin-inline: var(--space-1);
+    color: var(--text-secondary);
+  }
+  .breadcrumb-list a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding: var(--space-1);
+    color: var(--text-secondary);
+  }
+  .breadcrumb-list a:hover {
+    color: var(--text-primary);
+  }
+  .breadcrumb-current {
+    color: var(--text-primary);
+    padding: var(--space-1);
+  }
+  .work-sequence {
+    margin: 0;
+  }
+  .work-split {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 60rem) {
+    .work-split {
+      grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 1fr);
+      align-items: start;
+      gap: var(--space-4);
+    }
+    .work-plinth {
+      position: sticky;
+      top: var(--space-4);
+    }
+  }
   .work-images {
     display: grid;
     gap: var(--space-3);
     max-width: 56rem;
   }
-  .work-heading {
-    margin-top: var(--space-4);
+  .work-heading h1 {
+    margin: 0;
   }
   .subtitle {
     font-size: var(--text-xl);
     font-style: italic;
     color: var(--text-secondary);
+    margin-top: var(--space-1);
   }
   .fragment {
     margin: var(--space-3) 0;
@@ -88,21 +225,109 @@ const description = work.fragment ? `${work.displayTitle}. ${work.fragment}` : `
   }
   .availability {
     margin-top: var(--space-2);
+    color: var(--text-secondary);
   }
-  .territory-link {
-    margin-top: var(--space-4);
+  .work-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-3);
+  }
+  .drift-cta,
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(44px, 2.75rem);
+    min-block-size: max(44px, 2.75rem);
+    padding: var(--space-2) var(--space-3);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  .drift-cta {
+    border: 1.5px solid var(--text-primary);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .drift-cta:hover {
+    text-decoration: underline;
+  }
+  .contact-cta {
+    border: 1px solid color-mix(in srgb, var(--text-secondary) 55%, transparent);
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .contact-cta:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
   }
   .prev-next {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-3);
-    margin-top: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--text-secondary) 35%, transparent);
+  }
+  .prev-next-card {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-inline-size: max(44px, 2.75rem);
+    min-block-size: 3.5rem;
+    padding: var(--space-2);
+    border: 1px solid color-mix(in srgb, var(--text-secondary) 45%, transparent);
+    border-radius: 2px;
+    color: var(--text-primary);
+    text-decoration: none;
+    max-width: 24rem;
+  }
+  .prev-next-card:hover {
+    border-color: var(--text-primary);
+  }
+  .prev-next-card:hover .prev-next-title {
+    text-decoration: underline;
   }
   .prev-next a[rel='next'] {
-    margin-left: auto;
+    margin-inline-start: auto;
     text-align: right;
+  }
+  .prev-next-thumb-frame {
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .prev-next-thumb-frame :global(.work-image-wrapper),
+  .prev-next-thumb-frame :global(picture),
+  .prev-next-thumb-frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .prev-next-text {
+    display: grid;
+    gap: var(--space-1);
   }
   .prev-next .meta-line {
     display: block;
+  }
+  .prev-next-title {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+  }
+  .work a:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  @media (pointer: coarse) {
+    .breadcrumb-list a {
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
   }
 </style>

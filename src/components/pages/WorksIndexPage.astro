@@ -1,12 +1,14 @@
 ---
 /**
- * Works index `/{lang}/works|oeuvres/`: every work (thumbnail, title,
- * territory, year), grouped by territory. Filtering works without JS: the
- * territory links are fragment anchors, and CSS `:target` hides the other
- * sections while one is targeted.
+ * Works index `/{lang}/works|oeuvres/`: every work grouped by territory and
+ * zone, with reversible zero-JS filtering (`#all-works` resets `:target`
+ * territory isolation, and native `<input type="radio" name="medium-filter">`
+ * pills filter `li[data-medium]` via pure CSS `:has()` without shipping any
+ * JavaScript).
  */
 import type { Locale } from '../../i18n/RouteMap.js';
 import type { IndexSectionView } from '../../domain/TerritoryView.js';
+import { countWorksByMedium } from '../../domain/WorkQueries.js';
 import { uiText } from '../../i18n/UiCatalog.js';
 import BaseLayout from '../BaseLayout.astro';
 import WorkCard from '../WorkCard.astro';
@@ -18,37 +20,235 @@ interface Props {
 
 const { lang, sections } = Astro.props;
 const ui = uiText(lang);
+const allWorks = sections.flatMap((s) => s.works);
+const counts = countWorksByMedium(allWorks);
 ---
 <BaseLayout lang={lang} routeKey="works" title={`${ui.t('nav_works')} · Alexander Usoltsev`} description={ui.t('desc_works')}>
-  <div class="page works-index">
+  <div class="page works-index" id="all-works">
     <h1>{ui.t('nav_works')}</h1>
-    <nav aria-label={ui.t('works_filter_label')}>
-      <p class="meta-line">{ui.t('works_filter_label')}</p>
-      <ul class="filters">
-        {sections.map((s) => <li><a href={`#${s.slug}`}>{s.title}</a></li>)}
-      </ul>
-    </nav>
-    {sections.map((s) => (
-      <section id={s.slug} aria-labelledby={`${s.slug}-heading`}>
-        <h2 id={`${s.slug}-heading`}>{s.title}</h2>
-        <ul class="work-grid">
-          {s.works.map((w) => <li><WorkCard work={w} territoryName={s.title} /></li>)}
+
+    <div class="works-controls">
+      <nav aria-label={ui.t('works_filter_label')}>
+        <p class="meta-line">{ui.t('works_filter_label')}</p>
+        <ul class="filters">
+          <li>
+            <a class="filter-pill filter-pill-all" href="#all-works">
+              {ui.t('works_filter_all').replace('{count}', String(counts.total))}
+            </a>
+          </li>
+          {sections.map((s) => (
+            <li>
+              <a class="filter-pill" href={`#${s.slug}`}>{s.title} ({s.count})</a>
+            </li>
+          ))}
         </ul>
+      </nav>
+
+      <fieldset class="medium-fieldset">
+        <legend class="meta-line">{ui.t('works_medium_legend')}</legend>
+        <div class="filters medium-pills">
+          <label class="filter-pill" for="medium-filter-all">
+            <input class="visually-hidden" type="radio" id="medium-filter-all" name="medium-filter" value="all" checked />
+            <span>{ui.t('works_medium_all').replace('{count}', String(counts.total))}</span>
+          </label>
+          <label class="filter-pill" for="medium-filter-photo">
+            <input class="visually-hidden" type="radio" id="medium-filter-photo" name="medium-filter" value="photo" />
+            <span>{ui.t('works_medium_photos').replace('{count}', String(counts.photo))}</span>
+          </label>
+          <label class="filter-pill" for="medium-filter-ceramic">
+            <input class="visually-hidden" type="radio" id="medium-filter-ceramic" name="medium-filter" value="ceramic" />
+            <span>{ui.t('works_medium_ceramics').replace('{count}', String(counts.ceramic))}</span>
+          </label>
+        </div>
+      </fieldset>
+    </div>
+
+    {sections.map((s) => (
+      <section
+        id={s.slug}
+        class="territory-section"
+        aria-labelledby={`${s.slug}-heading`}
+        data-filter-group
+        data-has-photo={s.hasPhoto ? 'true' : undefined}
+        data-has-ceramic={s.hasCeramic ? 'true' : undefined}
+      >
+        <header class="index-section-header">
+          <h2 id={`${s.slug}-heading`}>{s.title} <span class="section-count">({s.count})</span></h2>
+          <div class="section-portals">
+            <a class="section-link" href={s.href}>{ui.t('territory_link')} · {s.title}</a>
+            <a class="section-link" href={s.driftHref}>{ui.t('territory_drift_link').replace('{title}', s.title)}</a>
+          </div>
+        </header>
+
+        {s.subgroups.map((sg) => (
+          <div
+            class="index-zone-group"
+            data-zone-group={sg.slug ?? 'none'}
+            data-filter-group
+            data-has-photo={sg.hasPhoto ? 'true' : undefined}
+            data-has-ceramic={sg.hasCeramic ? 'true' : undefined}
+          >
+            {sg.title && (
+              <div class="index-zone-header">
+                <h3 class="index-zone-title">
+                  {sg.href ? <a class="zone-badge" href={sg.href}>{sg.title} ({sg.count})</a> : `${sg.title} (${sg.count})`}
+                </h3>
+                <a class="section-link" href={sg.driftHref}>{ui.t('territory_drift_link').replace('{title}', sg.title)}</a>
+              </div>
+            )}
+            <ul class="work-grid" role="list">
+              {sg.works.map((w) => (
+                <li data-medium={w.medium}>
+                  <WorkCard work={w} territoryName={s.title} showMedium />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </section>
     ))}
   </div>
 </BaseLayout>
 
 <style>
+  .works-controls {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+  .medium-fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-inline-size: 0;
+  }
   .filters {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
+    gap: var(--space-2);
     list-style: none;
     padding: 0;
     margin: var(--space-2) 0 0;
   }
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--text-secondary) 55%, transparent);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .filter-pill:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+  .works-index:not(:has(section:target)) .filter-pill-all,
+  .works-index:has(#dreamland:target) nav a[href='#dreamland'],
+  .works-index:has(#the-border-is-thin:target) nav a[href='#the-border-is-thin'],
+  label.filter-pill:has(:checked) {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  .filter-pill:focus-visible,
+  label.filter-pill:has(:focus-visible) {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  .visually-hidden {
+    position: absolute;
+    clip-path: inset(50%);
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    white-space: nowrap;
+  }
   .works-index:has(section:target) section:not(:target) {
     display: none;
+  }
+  .works-index:has(#medium-filter-photo:checked) li[data-medium='ceramic'],
+  .works-index:has(#medium-filter-ceramic:checked) li[data-medium='photo'],
+  .works-index:has(#medium-filter-photo:checked) [data-filter-group]:not([data-has-photo]),
+  .works-index:has(#medium-filter-ceramic:checked) [data-filter-group]:not([data-has-ceramic]) {
+    display: none;
+  }
+  .territory-section {
+    margin-top: var(--space-4);
+  }
+  .index-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+  .index-section-header h2 {
+    margin-top: 0;
+  }
+  .section-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+  .section-portals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .section-link,
+  .zone-badge {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding-block: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .section-link:hover,
+  .zone-badge:hover {
+    color: var(--text-primary);
+  }
+  .index-zone-group {
+    margin-top: var(--space-3);
+  }
+  .index-zone-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid color-mix(in srgb, var(--text-secondary) 30%, transparent);
+  }
+  .index-zone-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  @media (pointer: coarse) {
+    .filter-pill,
+    .section-link,
+    .zone-badge {
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
   }
 </style>

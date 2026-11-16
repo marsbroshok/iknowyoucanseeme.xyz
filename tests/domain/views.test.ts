@@ -31,6 +31,10 @@ describe('buildWorkView', () => {
     expect(v.displayTitle).toBe('Un étranger (A Stranger)');
     expect(v.metaLine).toBe('30 × 40 cm · 2025 · photograph · ICM, colour filter');
     expect(v.href).toBe('/en/works/arrivee/');
+    expect(v.driftHref).toBe('/en/?w=arrivee');
+    expect(v.medium).toBe('photo');
+    expect(v.mediumLabel).toBe('photograph');
+    expect(v.zone).toBe('arrival');
     expect(v.contactHref).toBe('/en/contact/?work=arrivee');
     expect(v.availabilityLabel).toBe('Contact for availability');
     expect(v.enquirable).toBe(true);

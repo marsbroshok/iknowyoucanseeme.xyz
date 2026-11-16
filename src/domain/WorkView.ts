@@ -1,13 +1,21 @@
 import type { Work } from '../content/schema/index.js';
 import type { UiText } from '../i18n/UiText.js';
 import { localizedPath } from '../i18n/LocalizedPath.js';
+import { DeepLink } from '../world/core/DeepLink.js';
 import { getAvailabilityLabel, isEnquirable } from './Availability.js';
+import type { ZoneSlug } from './ZoneOrder.js';
 
 /** Everything a page needs to display one work in one locale. */
 export interface WorkView {
   slug: string;
   territory: string;
+  /** Optional zone slug within a zoned territory (`arrival`, `lens`, `leak`). */
+  zone?: ZoneSlug;
   year: number;
+  /** Canonical medium key (`'photo'` or `'ceramic'`), used for zero-JS index filtering. */
+  medium: Work['medium'];
+  /** Localized medium label (`photograph` / `photographie`, `ceramic` / `céramique`). */
+  mediumLabel: string;
   /** Original (French) title; never translated. */
   title: string;
   /** English subtitle, only on the EN site and only when one exists. */
@@ -24,6 +32,8 @@ export interface WorkView {
   enquirable: boolean;
   /** Work page path in this locale. */
   href: string;
+  /** Deep-link URL into the 3D Drift world facing this work (`/{lang}/?w=<slug>`). */
+  driftHref: string;
   /** Contact page path pre-filled with this work (`?work=<slug>`). */
   contactHref: string;
   /** Poetic fragment in this locale, when written. */
@@ -55,18 +65,25 @@ export function buildWorkView(work: Work, ui: UiText): WorkView {
   const lang = ui.lang;
   const subtitle = lang === 'en' && work.title.en ? work.title.en : undefined;
   const displayTitle = subtitle ? `${work.title.fr} (${subtitle})` : work.title.fr;
+  const mediumLabel = ui.t(`medium_${work.medium}`);
 
   const metaParts: string[] = [];
   if (work.size) metaParts.push(`${work.size.w} × ${work.size.h} ${work.size.unit}`);
   metaParts.push(String(work.year));
-  metaParts.push(ui.t(`medium_${work.medium}`));
-  if (work.techniques && work.techniques.length > 0) metaParts.push(work.techniques.map((t) => ui.t(techniqueKey(t))).join(', '));
+  metaParts.push(mediumLabel);
+  if (work.techniques && work.techniques.length > 0) {
+    metaParts.push(work.techniques.map((t) => ui.t(techniqueKey(t))).join(', '));
+  }
 
   const href = localizedPath('works', lang, [work.slug]);
+  const homeHref = localizedPath('home', lang);
   return {
     slug: work.slug,
     territory: work.territory,
+    zone: work.zone,
     year: work.year,
+    medium: work.medium,
+    mediumLabel,
     title: work.title.fr,
     subtitle,
     displayTitle,
@@ -75,6 +92,7 @@ export function buildWorkView(work: Work, ui: UiText): WorkView {
     availabilityLabel: getAvailabilityLabel(work, lang),
     enquirable: isEnquirable(work),
     href,
+    driftHref: DeepLink.href(homeHref, work.slug),
     contactHref: `${localizedPath('contact', lang)}?work=${encodeURIComponent(work.slug)}`,
     fragment: work.fragment?.[lang],
     images: work.images,

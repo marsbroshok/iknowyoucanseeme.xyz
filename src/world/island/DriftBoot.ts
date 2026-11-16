@@ -62,12 +62,14 @@ export interface DriftBootHandle {
  * Boots the drift on the home page (small script, loaded with the page):
  * decides between world and awake layer (FR1), wires the "Wake up" and
  * "Drift" controls, overrides a stored `'awake'` choice when a valid known
- * `?w=<slug>` deep link arrives on a WebGL2 device without Save-Data, opens
- * the world on the threshold (full on a first
- * visit, short for a returning or deep-linked one; "Drift" skips it, being
- * itself the gesture) and emits `entered` on the world layer (bubbling,
- * detail {@link EnteredDetail}), and loads the Three.js world only after
- * first paint and only when it is shown.
+ * `?w=<slug>` deep link or an explicit `?drift=1` portal intent arrives on a
+ * WebGL2 device without Save-Data, cleans `?drift=1` via `replaceState`,
+ * surfaces `[data-awake-resume]` beside `[data-drift-start]` whenever the
+ * Awake home page is shown with a known `?w=<slug>`, opens the world on the
+ * threshold (full on a first visit, short for a returning, deep-linked, or
+ * `?drift=1` portal visit; "Drift" skips it, being itself the gesture) and
+ * emits `entered` on the world layer (bubbling, detail {@link EnteredDetail}),
+ * and loads the Three.js world only after first paint and only when it is shown.
  *
  * With `loadSound`, the sound is wired too (docs/adr/0011): a
  * {@link SoundDirector} hears `entered` (only a gesture may unlock audio),
@@ -76,11 +78,11 @@ export interface DriftBootHandle {
  * sound is on (not muted) the short threshold also waits for a click.
  *
  * With `?kiosk=1` (exhibition mode, FR5) the world opens at the start of
- * the path (`?w=` is ignored), without the threshold and without a gesture,
- * whatever was stored; a {@link KioskMode} takes the links out of the page,
- * hands the first tap to the sound as its gesture, drifts on by itself and
- * resets after 90 s without input (back into the world from the awake page
- * too); neither "Wake up" nor "Drift" is remembered.
+ * the path (`?w=` and `?drift=1` are ignored), without the threshold and
+ * without a gesture, whatever was stored; a {@link KioskMode} takes the links
+ * out of the page, hands the first tap to the sound as its gesture, drifts on
+ * by itself and resets after 90 s without input (back into the world from the
+ * awake page too); neither "Wake up" nor "Drift" is remembered.
  *
  * If the world fails to start, the error is reported in the console and the
  * visitor gets the awake page (which never left the DOM).
@@ -110,16 +112,33 @@ export function bootDrift(
   const visits = new VisitMemory(storage);
   const caps = probe(win as unknown as ProbeHost);
   const kiosk = isKiosk(win.location.search);
-  const resolved = !kiosk && DeviceProfile.canAutoEnterDeepLink(caps) ? resolveDeepLink(doc, win.location.search) : { manifest: null, slug: null };
+  const canAutoEnter = !kiosk && DeviceProfile.canAutoEnterDeepLink(caps);
+  let initialDriftIntent =
+    canAutoEnter &&
+    doc.getElementById('drift-manifest') !== null &&
+    DeepLink.hasDriftIntent(win.location.search);
+  const resolved = canAutoEnter ? resolveDeepLink(doc, win.location.search) : { manifest: null, slug: null };
+  let cachedManifest: WorldManifest | null = resolved.manifest;
   const deepLinkEnter = resolved.slug !== null;
-  if (deepLinkEnter) preference.write('world');
-  const decision = DeviceProfile.decide(caps, kiosk || deepLinkEnter ? 'world' : preference.read());
+  if (initialDriftIntent) {
+    win.history.replaceState(win.history.state, '', DeepLink.withoutDriftIntent(win.location.href));
+  }
+  if (deepLinkEnter || initialDriftIntent) preference.write('world');
+  const decision = DeviceProfile.decide(
+    caps,
+    kiosk || deepLinkEnter || initialDriftIntent ? 'world' : preference.read(),
+  );
   const starts = [...doc.querySelectorAll<HTMLButtonElement>('[data-drift-start]')];
+  const resumeLink = doc.querySelector<HTMLAnchorElement>('[data-awake-resume]');
   let state: 'awake' | 'loading' | 'world' = 'awake';
   let handle: WorldHandle | null = null;
   let failed = false;
   let threshold: ThresholdOverlay | null = null;
-  const sound = loadSound ? new SoundDirector(new SoundPreference(storage), () => loadSound().then((m) => m.createSoundEngine(win as unknown as SoundWindow))) : null;
+  const sound = loadSound
+    ? new SoundDirector(new SoundPreference(storage), () =>
+        loadSound().then((m) => m.createSoundEngine(win as unknown as SoundWindow)),
+      )
+    : null;
   if (sound) {
     const toggle = root.querySelector<HTMLButtonElement>('[data-sound-toggle]');
     if (!toggle) throw new Error('[drift] Missing [data-sound-toggle] in the world layer');
@@ -129,6 +148,32 @@ export function bootDrift(
 
   const showStarts = (visible: boolean) => starts.forEach((b) => (b.hidden = !visible));
 
+  const manifestOrNull = (): WorldManifest | null => {
+    if (cachedManifest) return cachedManifest;
+    if (!doc.getElementById('drift-manifest')) return null;
+    cachedManifest = readManifest(doc);
+    return cachedManifest;
+  };
+
+  const syncAwakeResume = (visible: boolean): void => {
+    if (!resumeLink) return;
+    if (kiosk || !visible) {
+      resumeLink.hidden = true;
+      return;
+    }
+    const rawSlug = new URLSearchParams(win.location.search).get(DeepLink.PARAM);
+    const manifest = rawSlug ? manifestOrNull() : null;
+    const matched = manifest?.works.find((w) => w.slug === rawSlug);
+    if (!matched) {
+      resumeLink.hidden = true;
+      return;
+    }
+    const template = resumeLink.dataset.resumeTemplate;
+    resumeLink.setAttribute('href', matched.href);
+    resumeLink.textContent = template ? template.replace('{title}', matched.title) : matched.title;
+    resumeLink.hidden = false;
+  };
+
   const leave = (): void => {
     state = 'awake';
     threshold?.dismiss();
@@ -137,10 +182,11 @@ export function bootDrift(
     handle = null;
     layer.hide();
     showStarts(caps.webgl2 && !failed);
+    syncAwakeResume(true);
     starts.find((b) => !b.hidden)?.focus();
   };
 
-  const enter = (manual = false, preloadedManifest: WorldManifest | null = null): void => {
+  const enter = (manual = false): void => {
     if (state !== 'awake') return;
     state = 'loading';
     const entered = (detail: EnteredDetail) => {
@@ -148,19 +194,34 @@ export function bootDrift(
       sound?.entered(detail);
       root.dispatchEvent(new CustomEvent<EnteredDetail>('entered', { bubbles: true, detail }));
     };
-    const deepLink = !kiosk && (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '';
-    const overlay = new ThresholdOverlay(root, new ThresholdState({ returning: visits.returning, deepLink, soundOn: sound !== null && !sound.muted }, entered), win);
+    const hadDriftIntent = initialDriftIntent;
+    initialDriftIntent = false;
+    const deepLink =
+      !kiosk &&
+      (hadDriftIntent || (new URLSearchParams(win.location.search).get(DeepLink.PARAM) ?? '') !== '');
+    const overlay = new ThresholdOverlay(
+      root,
+      new ThresholdState(
+        { returning: visits.returning, deepLink, soundOn: sound !== null && !sound.muted },
+        entered,
+      ),
+      win,
+    );
     threshold = overlay;
     layer.show();
     showStarts(false);
+    syncAwakeResume(false);
     if (kiosk) overlay.skip(false);
     else if (manual) overlay.skip();
     else overlay.show();
     const tier = DeviceProfile.decide(caps, 'world').tier;
     load()
       .then((module) => {
-        const manifest = preloadedManifest ?? readManifest(doc);
-        const startSlug = kiosk ? null : DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
+        const manifest = cachedManifest ?? readManifest(doc);
+        cachedManifest = manifest;
+        const startSlug = kiosk
+          ? null
+          : DeepLink.parse(win.location.search, new Set(manifest.works.map((w) => w.slug)));
         return module.mountWorld(root, { manifest, tier, startSlug, win, threshold: overlay, sound, kiosk });
       })
       .then(
@@ -184,7 +245,7 @@ export function bootDrift(
   starts.forEach((b) =>
     b.addEventListener('click', () => {
       if (!kiosk) preference.write('world');
-      enter(true, resolved.manifest);
+      enter(true);
     }),
   );
 
@@ -196,14 +257,16 @@ export function bootDrift(
     });
   }
 
-  showStarts(caps.webgl2 && decision.mode === 'awake');
-  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter(false, resolved.manifest));
+  const awakeInitially = decision.mode === 'awake';
+  showStarts(caps.webgl2 && awakeInitially);
+  syncAwakeResume(awakeInitially);
+  if (decision.mode === 'world') afterPaint(win as unknown as PaintHost, () => enter(false));
   return {
     decision,
     get threshold() {
       return threshold;
     },
-    enter: () => enter(false, resolved.manifest),
+    enter: () => enter(false),
     leave,
     sound,
   };

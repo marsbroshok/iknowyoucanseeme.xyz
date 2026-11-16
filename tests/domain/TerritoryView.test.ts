@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildTerritoryView, buildTerritoryTeaser, TEASER_EXCERPT_CHARS } from '../../src/domain/TerritoryView.js';
+import {
+  buildTerritoryView,
+  buildTerritoryTeaser,
+  buildWorkBreadcrumb,
+  buildIndexSections,
+  TEASER_EXCERPT_CHARS,
+} from '../../src/domain/TerritoryView.js';
 import { uiText } from '../../src/i18n/UiCatalog.js';
 import type { Work } from '../../src/content/schema/index.js';
 
@@ -35,7 +41,51 @@ describe('buildTerritoryView', () => {
     expect(v.groups[0].statement).toBe('Entrez.');
     expect(v.groups[1].statement).toBeUndefined();
     expect(v.groups[0].works.map((x) => x.slug)).toEqual(['a1', 'a2']);
+    expect(v.groups[0].anchorId).toBe('zone-arrival');
+    expect(v.groups[0].count).toBe(2);
+    expect(v.groups[0].driftHref).toBe('/fr/?w=a1');
     expect(v.groups[3].title).toBeUndefined();
+    expect(v.groups[3].anchorId).toBeUndefined();
+    expect(v.count).toBe(5);
+    expect(v.driftHref).toBe('/fr/?w=a1');
+    expect(v.zoneJumps).toEqual([
+      { slug: 'arrival', anchorId: 'zone-arrival', title: 'Arrivée', count: 2, driftHref: '/fr/?w=a1' },
+      { slug: 'lens', anchorId: 'zone-lens', title: 'La Loupe', count: 1, driftHref: '/fr/?w=le1' },
+      { slug: 'leak', anchorId: 'zone-leak', title: "L'Infiltration", count: 1, driftHref: '/fr/?w=l1' },
+    ]);
+    expect(v.otherTerritories).toEqual([]);
+  });
+
+  it('populates cross-territory continuation links (skipping self and empty territories) and handles empty own works', () => {
+    const allTerritories = [dreamland, border, { slug: 'empty', title: { en: 'Empty', fr: 'Vide' } }];
+    const dreamlandView = buildTerritoryView(dreamland, zones, works, uiText('en'), allTerritories);
+    expect(dreamlandView.otherTerritories).toEqual([
+      {
+        slug: 'border',
+        title: 'The border is thin',
+        excerpt: undefined,
+        href: '/en/territories/border/',
+        count: 1,
+        driftHref: '/en/?w=b1',
+      },
+    ]);
+
+    const borderView = buildTerritoryView(border, zones, works, uiText('fr'), allTerritories);
+    expect(borderView.zoneJumps).toEqual([]);
+    expect(borderView.otherTerritories).toEqual([
+      {
+        slug: 'dreamland',
+        title: 'Dreamland',
+        excerpt: 'Un rêve. Un autre.',
+        href: '/fr/territoires/dreamland/',
+        count: 5,
+        driftHref: '/fr/?w=a1',
+      },
+    ]);
+
+    const emptyView = buildTerritoryView({ slug: 'empty', title: { en: 'Empty', fr: 'Vide' } }, zones, works, uiText('en'));
+    expect(emptyView.count).toBe(0);
+    expect(emptyView.driftHref).toBeUndefined();
   });
 
   it('a territory without zones has a single untitled group and no statement when copy is missing', () => {
@@ -72,5 +122,86 @@ describe('buildTerritoryTeaser', () => {
     const t = buildTerritoryTeaser({ ...dreamland, statement: tb(long, long) }, works, uiText('en'));
     expect(t.excerpt!.length).toBeLessThanOrEqual(TEASER_EXCERPT_CHARS + 1);
     expect(buildTerritoryTeaser(border, works, uiText('fr')).excerpt).toBeUndefined();
+  });
+});
+
+describe('buildWorkBreadcrumb & buildIndexSections', () => {
+  it('builds zoned and unzoned breadcrumb models with sequence position, and fails on unknown zone', () => {
+    const zonedWork = works.find((x) => x.slug === 'le1')!;
+    expect(buildWorkBreadcrumb(zonedWork, dreamland, zones, works, uiText('en'))).toEqual({
+      worksHref: '/en/works/',
+      worksLabel: 'Works',
+      territoryHref: '/en/territories/dreamland/',
+      territoryTitle: 'Dreamland',
+      zoneHref: '/en/territories/dreamland/#zone-lens',
+      zoneTitle: 'Lens',
+      sequence: { index: 3, total: 5 },
+    });
+
+    const unzonedWork = works.find((x) => x.slug === 'b1')!;
+    expect(buildWorkBreadcrumb(unzonedWork, border, zones, works, uiText('fr'))).toEqual({
+      worksHref: '/fr/oeuvres/',
+      worksLabel: 'Œuvres',
+      territoryHref: '/fr/territoires/border/',
+      territoryTitle: "La frontière s'efface",
+      sequence: { index: 1, total: 1 },
+    });
+
+    expect(buildWorkBreadcrumb(unzonedWork, border, zones, [], uiText('en')).sequence).toBeUndefined();
+    expect(() => buildWorkBreadcrumb(zonedWork, dreamland, [], works, uiText('en'))).toThrow(/Unknown zone "lens"/);
+  });
+
+  it('builds index sections with zone subgroups, medium presence flags, counts, and drift hrefs', () => {
+    const mixedWorks = [
+      ...works,
+      { ...w('c1', 'dreamland', 'leak', 2026), medium: 'ceramic' as const },
+    ];
+    const sections = buildIndexSections([dreamland, border], mixedWorks, uiText('en'), zones);
+    expect(sections).toHaveLength(2);
+    expect(sections[0]).toMatchObject({
+      slug: 'border',
+      count: 1,
+      hasPhoto: true,
+      hasCeramic: false,
+      href: '/en/territories/border/',
+      driftHref: '/en/?w=b1',
+    });
+    expect(sections[0].subgroups).toHaveLength(1);
+    expect(sections[0].subgroups[0].title).toBeUndefined();
+
+    expect(sections[1]).toMatchObject({
+      slug: 'dreamland',
+      count: 6,
+      hasPhoto: true,
+      hasCeramic: true,
+      href: '/en/territories/dreamland/',
+      driftHref: '/en/?w=a1',
+    });
+    expect(sections[1].subgroups.map((sg) => sg.slug)).toEqual(['arrival', 'lens', 'leak', undefined]);
+    expect(sections[1].subgroups[0]).toMatchObject({
+      slug: 'arrival',
+      title: 'Arrival',
+      href: '/en/territories/dreamland/#zone-arrival',
+      driftHref: '/en/?w=a1',
+      count: 2,
+      hasPhoto: true,
+      hasCeramic: false,
+    });
+    expect(sections[1].subgroups[2]).toMatchObject({
+      slug: 'leak',
+      title: 'Leak',
+      href: '/en/territories/dreamland/#zone-leak',
+      count: 2,
+      hasPhoto: true,
+      hasCeramic: true,
+    });
+
+    // Zoned territory where one zone or the unzoned remainder is empty drops empty subgroups cleanly.
+    const partialZoned = buildIndexSections([dreamland], [w('a1', 'dreamland', 'arrival')], uiText('en'), zones);
+    expect(partialZoned[0].subgroups.map((sg) => sg.slug)).toEqual(['arrival']);
+
+    expect(() => buildIndexSections([dreamland], mixedWorks, uiText('en'), [{ slug: 'arrival', title: { en: 'Arrival', fr: 'Arrivée' } }])).toThrow(
+      /Unknown zone "lens"/,
+    );
   });
 });

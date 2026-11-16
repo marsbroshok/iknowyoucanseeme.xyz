@@ -64,7 +64,7 @@ beforeEach(() => {
   localStorage = new MemoryStorage();
   win = windowWith(() => localStorage);
   document.body.innerHTML = `
-    <main><p><button data-drift-start hidden>Drift</button></p></main>
+    <main><p><button data-drift-start hidden>Drift</button><a href="/fr/oeuvres/" data-awake-resume data-resume-template="Ouvrir la page de l'œuvre · {title}" hidden></a></p></main>
     <section data-drift hidden tabindex="-1">
       <div class="drift-top"><button data-drift-wake>Wake up</button></div>
       <canvas data-drift-canvas></canvas>
@@ -73,6 +73,7 @@ beforeEach(() => {
     <script type="application/json" id="drift-manifest">${JSON.stringify(sampleManifest)}</script>`;
 });
 afterEach(() => {
+  history.replaceState(null, '', '/');
   vi.restoreAllMocks();
 });
 
@@ -319,6 +320,91 @@ describe('bootDrift', () => {
       expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
       expect(world.load).not.toHaveBeenCalled();
     }
+    history.replaceState(null, '', '/');
+  });
+
+  it('overrides a stored "Wake up" choice on ?drift=1 when capable, cleans ?drift=1 via replaceState, and uses short threshold', async () => {
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    history.replaceState(null, '', '/en/?drift=1&utm=x#top');
+    const world = fakeWorld();
+    const boot = bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect(boot?.decision).toMatchObject({ mode: 'world', tier: 'high', reasons: [] });
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('world');
+    expect(win.location.pathname + win.location.search + win.location.hash).toBe('/en/?utm=x#top');
+    expect(world.mounts).toHaveLength(1);
+    expect(world.mounts[0].startSlug).toBeNull();
+    expect($('[data-threshold]').dataset.kind).toBe('short');
+    history.replaceState(null, '', '/');
+  });
+
+  it('keeps stored "Wake up" and URL untouched on ?drift=1 when Save-Data is on, WebGL2 is absent, or manifest is missing', async () => {
+    for (const caps of [
+      { ...capable, saveData: true },
+      { ...capable, webgl2: false },
+    ]) {
+      localStorage.setItem(ModePreference.KEY, 'awake');
+      history.replaceState(null, '', '/en/?drift=1');
+      const world = fakeWorld();
+      const boot = bootDrift(document, win, world.load, () => caps, now);
+      await flush();
+      expect(boot?.decision.mode).toBe('awake');
+      expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+      expect(win.location.search).toBe('?drift=1');
+      expect(world.load).not.toHaveBeenCalled();
+    }
+
+    localStorage.setItem(ModePreference.KEY, 'awake');
+    history.replaceState(null, '', '/en/?drift=1');
+    document.getElementById('drift-manifest')?.remove();
+    const noManifestWorld = fakeWorld();
+    const noManifestBoot = bootDrift(document, win, noManifestWorld.load, () => capable, now);
+    await flush();
+    expect(noManifestBoot?.decision.mode).toBe('awake');
+    expect(localStorage.getItem(ModePreference.KEY)).toBe('awake');
+    expect(win.location.search).toBe('?drift=1');
+    expect(noManifestWorld.load).not.toHaveBeenCalled();
+    history.replaceState(null, '', '/');
+  });
+
+  it('reveals [data-awake-resume] pointing to the ?w=<slug> work page upon "Wake up" while keeping [data-drift-start] focused, and hides it again on "Drift"', async () => {
+    history.replaceState(null, '', '/fr/?w=cygne-icm-1');
+    const world = fakeWorld();
+    bootDrift(document, win, world.load, () => capable, now);
+    await flush();
+    expect($('[data-awake-resume]').hidden).toBe(true);
+
+    $('[data-drift-wake]').click();
+    const resume = $<HTMLAnchorElement>('[data-awake-resume]');
+    expect(resume.hidden).toBe(false);
+    expect(resume.getAttribute('href')).toBe('/fr/oeuvres/cygne-icm-1/');
+    expect(resume.textContent).toBe("Ouvrir la page de l'œuvre · Cygne ICM 1");
+    expect(document.activeElement).toBe($('[data-drift-start]'));
+
+    $('[data-drift-start]').click();
+    await flush();
+    expect(resume.hidden).toBe(true);
+    history.replaceState(null, '', '/');
+  });
+
+  it('reveals [data-awake-resume] immediately on initial Awake boot with ?w=<slug> (e.g. Save-Data) and falls back to title without template', async () => {
+    history.replaceState(null, '', '/fr/?w=arrivee');
+    $('[data-awake-resume]').removeAttribute('data-resume-template');
+    bootDrift(document, win, fakeWorld().load, () => ({ ...capable, saveData: true }), now);
+    await flush();
+    const resume = $<HTMLAnchorElement>('[data-awake-resume]');
+    expect(resume.hidden).toBe(false);
+    expect(resume.getAttribute('href')).toBe('/fr/oeuvres/arrivee/');
+    expect(resume.textContent).toBe('Arrivée');
+
+    // Keeps [data-awake-resume] hidden when ?w= is unknown or absent, or when [data-awake-resume] is absent from DOM.
+    history.replaceState(null, '', '/fr/?w=unknown');
+    bootDrift(document, win, fakeWorld().load, () => ({ ...capable, saveData: true }), now);
+    expect(resume.hidden).toBe(true);
+
+    resume.remove();
+    history.replaceState(null, '', '/fr/?w=arrivee');
+    expect(() => bootDrift(document, win, fakeWorld().load, () => ({ ...capable, saveData: true }), now)).not.toThrow();
     history.replaceState(null, '', '/');
   });
 
@@ -625,6 +711,8 @@ describe('bootDrift — exhibition mode (?kiosk=1, FR5)', () => {
     history.replaceState(null, '', '/en/?kiosk=1&w=cygne-icm-1');
     $('[data-drift-wake]').dispatchEvent(new Event('pointerdown', { bubbles: true }));
     $('[data-drift-wake]').click();
+    expect($('[data-awake-resume]').hidden).toBe(true);
+    expect(document.querySelectorAll('a[href]')).toHaveLength(0);
     await vi.advanceTimersByTimeAsync(KIOSK.idleResetMs);
     expect(world.mounts).toHaveLength(2);
     expect(world.mounts[1].startSlug).toBeNull();

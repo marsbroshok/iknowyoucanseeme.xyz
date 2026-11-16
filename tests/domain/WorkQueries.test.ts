@@ -4,7 +4,9 @@ import {
   sortWorksByZone,
   sortWorksForIndex,
   getWorksByTerritory,
-  getPrevNextWork
+  getPrevNextWork,
+  getWorkSequence,
+  countWorksByMedium,
 } from '../../src/domain/WorkQueries.js';
 import type { Work } from '../../src/content/schema/index.js';
 
@@ -95,6 +97,29 @@ describe('WorkQueries', () => {
     sortWorksForIndex(works);
     expect(works.map((w) => w.slug)).toEqual(['b', 'a']);
   });
+
+  it('getWorkSequence returns 1-based position and total within territory or index, or null if absent', () => {
+    const works = [
+      mockWork('b', 't1', 'lens'),
+      mockWork('a', 't1', 'arrival'),
+      mockWork('c', 't2', 'arrival'),
+    ];
+    expect(getWorkSequence(works, 'a', 't1')).toEqual({ index: 1, total: 2 });
+    expect(getWorkSequence(works, 'b', 't1')).toEqual({ index: 2, total: 2 });
+    expect(getWorkSequence(works, 'c', 't1')).toBeNull();
+    expect(getWorkSequence(works, 'c')).toEqual({ index: 3, total: 3 });
+    expect(getWorkSequence(works, 'missing')).toBeNull();
+  });
+
+  it('countWorksByMedium tallies total, photo, and ceramic works', () => {
+    const items = [
+      mockWork('p1', 't1'),
+      { ...mockWork('c1', 't1', 'leak'), medium: 'ceramic' as const },
+      mockWork('p2', 't2'),
+    ];
+    expect(countWorksByMedium(items)).toEqual({ total: 3, photo: 2, ceramic: 1 });
+    expect(countWorksByMedium([])).toEqual({ total: 0, photo: 0, ceramic: 0 });
+  });
 });
 
 const zoneArb = fc.constantFrom<'arrival' | 'lens' | 'leak' | undefined>('arrival', 'lens', 'leak', undefined);
@@ -141,6 +166,25 @@ describe('WorkQueries properties', () => {
         }
         expect([...visited].sort()).toEqual(members.map((w) => w.slug).sort());
       }),
+    );
+  });
+
+  it('getWorkSequence indices form 1..N matching territory order, and countWorksByMedium is additive', () => {
+    fc.assert(
+      fc.property(
+        worksArb,
+        fc.array(fc.constantFrom<'photo' | 'ceramic'>('photo', 'ceramic'), { minLength: 1, maxLength: 20 }),
+        (works, mediums) => {
+          const tagged = works.map((w, i) => ({ ...w, medium: mediums[i % mediums.length] }));
+          const t1 = getWorksByTerritory(tagged, 't1');
+          t1.forEach((w, idx) => {
+            expect(getWorkSequence(tagged, w.slug, 't1')).toEqual({ index: idx + 1, total: t1.length });
+          });
+          const counts = countWorksByMedium(tagged);
+          expect(counts.photo + counts.ceramic).toBe(tagged.length);
+          expect(counts.total).toBe(tagged.length);
+        },
+      ),
     );
   });
 });

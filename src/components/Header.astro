@@ -1,25 +1,38 @@
 ---
 /**
- * Site header: skip link, signature (home link), main navigation and the
- * language switch, which keeps the visitor on the same page in the other
- * locale.
+ * Site header: skip link, aligned 72rem inner container with signature (home
+ * link), contextual `[data-header-drift]` portal on every non-Home Awake
+ * route (`?w=<slug>` on Work/Territory routes, `?drift=1` elsewhere), main
+ * navigation (`aria-current="page"` on exact routes and `data-section-active`
+ * on child routes), and the WCAG 2.5.8 / coarse-pointer sized language switch.
  */
 import type { Locale, RouteKey } from '../i18n/RouteMap.js';
 import type { LocalizedParams } from '../i18n/Alternates.js';
 import { localizedPath } from '../i18n/LocalizedPath.js';
 import { uiText } from '../i18n/UiCatalog.js';
+import { DeepLink } from '../world/core/DeepLink.js';
 import SkipLink from './SkipLink.astro';
 
 interface Props {
   lang: Locale;
   currentRouteKey: RouteKey;
   routeParams?: LocalizedParams;
+  /** Optional contextual Drift target (e.g. first work of a Territory page). */
+  driftHref?: string;
 }
 
-const { lang, currentRouteKey, routeParams } = Astro.props;
+const { lang, currentRouteKey, routeParams, driftHref } = Astro.props;
 const ui = uiText(lang);
 const otherLang: Locale = lang === 'en' ? 'fr' : 'en';
+const homeHref = localizedPath('home', lang);
 const switchHref = localizedPath(currentRouteKey, otherLang, routeParams?.[otherLang]);
+const childSlug = routeParams?.[lang]?.[0];
+const hasChildParam = Boolean(childSlug);
+const portalHref =
+  currentRouteKey === 'home'
+    ? undefined
+    : driftHref ?? (currentRouteKey === 'works' && childSlug ? DeepLink.href(homeHref, childSlug) : DeepLink.driftHref(homeHref));
+
 const navKeys = ['works', 'exhibitions', 'about', 'contact'] as const;
 const navLabels = {
   works: ui.t('nav_works'),
@@ -30,32 +43,63 @@ const navLabels = {
 ---
 <header class="site-header">
   <SkipLink targetId="main-content" label={ui.t('skip_content')} />
-  <a class="signature" href={localizedPath('home', lang)}>iknowyoucanseeme</a>
-  <nav aria-label={ui.t('nav_label')}>
-    <ul>
-      {navKeys.map((key) => (
+  <div class="site-header-inner">
+    <a class="signature" href={homeHref} aria-current={currentRouteKey === 'home' ? 'page' : undefined}>iknowyoucanseeme</a>
+    <nav aria-label={ui.t('nav_label')}>
+      <ul>
+        {portalHref && (
+          <li>
+            <a class="header-drift" href={portalHref} data-header-drift>{ui.t('drift')}</a>
+          </li>
+        )}
+        {navKeys.map((key) => {
+          const isExact = key === currentRouteKey && !hasChildParam;
+          const isSectionActive =
+            key === 'works' && ((currentRouteKey === 'works' && hasChildParam) || currentRouteKey === 'territories');
+          return (
+            <li>
+              <a
+                href={localizedPath(key, lang)}
+                aria-current={isExact ? 'page' : undefined}
+                data-section-active={isSectionActive ? 'true' : undefined}
+              >{navLabels[key]}</a>
+            </li>
+          );
+        })}
         <li>
-          <a href={localizedPath(key, lang)} aria-current={key === currentRouteKey ? 'page' : undefined}>{navLabels[key]}</a>
+          <a
+            class="lang-switch"
+            href={switchHref}
+            hreflang={otherLang}
+            lang={otherLang}
+            aria-label={`${otherLang.toUpperCase()} · ${uiText(otherLang).t('lang_switch')}`}
+          >{otherLang.toUpperCase()}</a>
         </li>
-      ))}
-      <li>
-        <a href={switchHref} hreflang={otherLang} lang={otherLang} aria-label={`${otherLang.toUpperCase()} · ${uiText(otherLang).t('lang_switch')}`}>{otherLang.toUpperCase()}</a>
-      </li>
-    </ul>
-  </nav>
+      </ul>
+    </nav>
+  </div>
 </header>
 
 <style>
   .site-header {
+    position: relative;
+  }
+  .site-header-inner {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    max-width: 72rem;
+    margin: 0 auto;
     padding: var(--space-3);
-    position: relative;
   }
   .signature {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding-block: var(--space-1);
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--text-primary);
@@ -64,15 +108,54 @@ const navLabels = {
   ul {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
     list-style: none;
     margin: 0;
     padding: 0;
     font-family: var(--font-mono);
     font-size: var(--text-sm);
   }
-  a[aria-current='page'] {
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: max(24px, 1.5rem);
+    min-block-size: max(24px, 1.5rem);
+    padding-block: var(--space-1);
+  }
+  .header-drift {
+    padding-inline: var(--space-3);
+    border: 1px solid var(--text-secondary);
+    border-radius: 999px;
     color: var(--text-primary);
+    text-decoration: none;
+  }
+  .header-drift:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+  }
+  .lang-switch {
+    padding-inline: var(--space-2);
+  }
+  a[aria-current='page'],
+  a[data-section-active='true'] {
+    color: var(--text-primary);
+    text-decoration: underline;
     text-decoration-thickness: 2px;
+  }
+  .signature[aria-current='page'] {
+    text-decoration: none;
+  }
+  .site-header a:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  @media (pointer: coarse) {
+    .signature,
+    nav a {
+      min-inline-size: max(44px, 2.75rem);
+      min-block-size: max(44px, 2.75rem);
+    }
   }
 </style>
