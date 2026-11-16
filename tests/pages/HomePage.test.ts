@@ -111,16 +111,30 @@ describe('HomePage', () => {
       expect(html).toContain('aria-label="Works around you"');
       expect(html).toContain('data-zone-banner');
       expect(html).toContain('data-zones-label="Zones and territories"');
+      expect(html).toContain('data-drift-onboarding');
+      expect(html).toContain('data-drift-dock');
+      expect(html).toContain('data-drift-prev');
+      expect(html).toContain('data-drift-current');
+      expect(html).toContain('data-drift-next');
+      expect(html).toContain('data-lens-cycle');
+      expect(html).toContain('data-drift-help-toggle');
+      expect(html).toContain('data-drift-help-panel');
+      expect(html.indexOf('data-drift-dock')).toBeGreaterThan(html.indexOf('data-drift-works'));
+      expect(html.indexOf('data-drift-help-panel')).toBeGreaterThan(html.indexOf('data-drift-works'));
       expect(html.indexOf('data-drift-compass')).toBeGreaterThan(html.indexOf('data-drift-works'));
       expect(html).toMatch(/<canvas[^>]*data-drift-canvas[^>]*aria-hidden="true"/);
     });
 
-    it('has the focus dialog, labelled by its title, with light dismiss and localized links', async () => {
+    it('has the focus dialog, labelled by its title, with context header, curatorial meta, in-place stepper, light dismiss, and localized links', async () => {
       const html = await renderWorld('fr');
       expect(html).toMatch(/<dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title"/);
+      expect(html).toContain('data-focus-context');
+      expect(html).toContain('data-focus-meta');
+      expect(html).toContain('data-focus-prev');
+      expect(html).toContain('data-focus-next');
       expect(html).toContain('>Voir la page de l&#39;œuvre</a>');
       expect(html).toContain('>Demander au sujet de cette œuvre</a>');
-      expect(html).toContain('>Fermer la boîte de dialogue</button>');
+      expect(html).toContain('data-focus-close');
     });
 
     it('offers a hidden "Drift" button and hidden [data-awake-resume] link in the intro (shown by the boot script on the awake layer), with no [data-header-drift] on Home', async () => {

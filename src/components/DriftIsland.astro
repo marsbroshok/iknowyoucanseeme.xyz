@@ -2,15 +2,14 @@
 /**
  * The drift world layer of the home page (progressive enhancement): the
  * canvas, the always-visible "Wake up" control and mute toggle (sound,
- * docs/adr/0011: Tone.js is imported only after the visitor's gesture), help text (and the lens
- * caption, a live region naming the lens in use), the horizon
- * compass, the keyboard work list, the focus dialog, the threshold (the
- * Dreamland border line, the breathing leak's canvas and Enter), the world's text (gaze
- * line and fragments, mirrored into a polite live region) and the
- * build-time world manifest. It is
- * rendered hidden; `bootDrift` shows it on capable devices after first
- * paint and lazy-loads the Three.js world. Without JavaScript, or on the
- * awake layer, the page below is untouched.
+ * docs/adr/0011: Tone.js is imported only after the visitor's gesture),
+ * pointer-aware transient onboarding hint + toggleable controls sheet
+ * (DriftHelp), the polite live lens caption (LensAnnouncer), the keyboard
+ * work list, the bottom wayfinding dock (WorkStepper + LensToggle + Controls
+ * toggle), the horizon compass, the rich FocusOverlay dialog, the threshold
+ * (the Dreamland border line, the breathing leak's canvas and Enter), the
+ * world's text (gaze line and fragments, mirrored into a polite live region)
+ * and the build-time world manifest.
  *
  * Rendered in BaseLayout's `world` slot, as a direct child of `<body>`, so
  * the awake page next to it can be made inert while the world is shown.
@@ -29,7 +28,7 @@ interface Props {
 
 const { lang, manifest, thresholdLine } = Astro.props;
 const ui = uiText(lang);
-/** Lens names in the page language, for the live caption (LensAnnouncer). */
+/** Lens names in the page language, for the live caption (LensAnnouncer) and LensToggle pill. */
 const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui.t(`lens_${m}`)])));
 ---
 <section class="drift" data-drift hidden tabindex="-1" aria-label={ui.t('drift_layer_label')}>
@@ -39,12 +38,40 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     <button type="button" class="drift-wake" data-drift-wake>{ui.t('wakeup')}</button>
     <button type="button" class="drift-tilt" data-drift-tilt hidden>{ui.t('drift_tilt')}</button>
   </div>
-  <div class="drift-help">
+  <p
+    class="drift-onboarding"
+    data-drift-onboarding
+    data-hint-fine={ui.t('drift_onboarding_fine')}
+    data-hint-coarse={ui.t('drift_onboarding_coarse')}
+  >{ui.t('drift_onboarding_fine')}</p>
+  <p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names={lensNames}></p>
+  <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
+  <div class="drift-dock" data-drift-dock>
+    <div class="drift-stepper" role="group" aria-label={ui.t('drift_stepper_label')}>
+      <button type="button" class="drift-step-btn" data-drift-prev aria-label={ui.t('work_prev')}><span aria-hidden="true">‹</span></button>
+      <button type="button" class="drift-step-current" data-drift-current></button>
+      <button type="button" class="drift-step-btn" data-drift-next aria-label={ui.t('work_next')}><span aria-hidden="true">›</span></button>
+    </div>
+    <button
+      type="button"
+      class="drift-lens-pill"
+      data-lens-cycle
+      data-lens-names={lensNames}
+      data-lens-prompt={ui.t('drift_lens_prompt')}
+      data-lens-template={ui.t('drift_lens_active')}
+    >{ui.t('drift_lens_prompt')}</button>
+    <button
+      type="button"
+      class="drift-help-toggle"
+      data-drift-help-toggle
+      aria-expanded="false"
+      aria-controls="drift-help-panel"
+    >{ui.t('drift_help_toggle')}</button>
+  </div>
+  <div id="drift-help-panel" class="drift-help-panel" data-drift-help-panel hidden>
     <p>{ui.t('drift_help')}</p>
     <p>{ui.t('drift_lens_help')}</p>
-    <p class="drift-lens" data-drift-lens aria-live="polite" data-lens-names={lensNames}></p>
   </div>
-  <ul class="drift-works" data-drift-works aria-label={ui.t('drift_works_label')}></ul>
   <div class="drift-compass" data-drift-compass data-zones-label={ui.t('drift_zones_label')}></div>
   <div class="drift-zone-banner" data-zone-banner hidden>
     <p class="drift-zone-banner-title" data-zone-banner-title></p>
@@ -55,17 +82,27 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   <p class="drift-specimen" data-drift-specimen aria-hidden="true"></p>
   <p class="drift-said" data-drift-said aria-live="polite"></p>
   <dialog class="drift-focus" data-drift-focus closedby="any" aria-labelledby="drift-focus-title">
+    <div class="drift-focus-header">
+      <p class="drift-focus-context" data-focus-context></p>
+      <button type="button" class="drift-focus-close" data-focus-close aria-label={ui.t('dialog_close')}><span aria-hidden="true">×</span></button>
+    </div>
     <img class="drift-focus-image" data-focus-image alt="" />
     <h2 id="drift-focus-title" data-focus-title></h2>
+    <p class="drift-focus-meta" data-focus-meta></p>
     <p class="drift-focus-fragment" data-focus-fragment></p>
     <p class="drift-focus-specimen" data-focus-specimen hidden></p>
-    <p data-focus-work-row><a data-focus-work>{ui.t('drift_open_work')}</a></p>
-    <p data-focus-contact-row><a data-focus-contact>{ui.t('work_contact_link')}</a></p>
+    <div class="drift-focus-stepper" role="group" aria-label={ui.t('drift_stepper_label')}>
+      <button type="button" class="drift-focus-step" data-focus-prev>‹ {ui.t('work_prev')}</button>
+      <button type="button" class="drift-focus-step" data-focus-next>{ui.t('work_next')} ›</button>
+    </div>
+    <div class="drift-focus-actions">
+      <p data-focus-work-row><a class="drift-focus-link" data-focus-work>{ui.t('drift_open_work')}</a></p>
+      <p data-focus-contact-row><a class="drift-focus-link" data-focus-contact>{ui.t('work_contact_link')}</a></p>
+    </div>
     <figure class="drift-focus-qr" data-focus-qr-row hidden>
       <img data-focus-qr alt={ui.t('kiosk_qr_alt')} width="160" height="160" />
       <figcaption>{ui.t('kiosk_qr')}</figcaption>
     </figure>
-    <button type="button" data-focus-close>{ui.t('dialog_close')}</button>
   </dialog>
   <div class="drift-threshold" data-threshold hidden>
     <canvas class="drift-threshold-leak" data-threshold-leak aria-hidden="true"></canvas>
@@ -121,49 +158,162 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-top {
     position: absolute;
-    top: var(--space-3);
+    top: var(--space-2);
     right: var(--space-3);
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: var(--space-2);
+    width: fit-content;
+    max-inline-size: calc(100% - var(--space-4));
     /* Above the threshold: "Wake up" is never covered (FR4). */
     z-index: 2;
   }
   .drift button {
     font: inherit;
     color: var(--text-primary);
-    background: rgb(11 16 48 / 0.72);
+    background: rgb(7 11 34 / 0.84);
     border: 1px solid var(--text-secondary);
-    border-radius: 2px;
-    padding: var(--space-2) var(--space-3);
-    min-height: 44px;
+    border-radius: 4px;
+    padding: var(--space-1) var(--space-3);
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
     cursor: pointer;
   }
   .drift button:focus-visible {
     outline: 2px solid var(--text-primary);
     outline-offset: 2px;
   }
-  .drift-help {
+  .drift button[hidden] {
+    display: none;
+  }
+  .drift-onboarding {
     position: absolute;
-    top: var(--space-3);
+    top: 4rem;
     left: var(--space-3);
-    max-width: 22rem;
+    width: fit-content;
+    max-inline-size: min(24rem, calc(100% - var(--space-4)));
     margin: 0;
-    padding: var(--space-2);
-    background: rgb(11 16 48 / 0.72);
-    color: var(--text-secondary);
+    padding: var(--space-1) var(--space-2);
+    background: rgb(7 11 34 / 0.84);
+    border: 1px solid rgb(160 165 181 / 0.45);
+    border-radius: 4px;
+    color: var(--text-primary);
     font-size: var(--text-xs);
+    line-height: 1.35;
+    pointer-events: none;
   }
-  .drift-help p {
-    margin: 0;
-  }
-  .drift-help p + p {
-    margin-top: var(--space-1);
+  .drift-onboarding[hidden] {
+    display: none;
   }
   .drift-lens {
+    position: absolute;
+    top: 6.75rem;
+    left: var(--space-3);
+    width: fit-content;
+    max-inline-size: calc(100% - var(--space-4));
+    margin: 0;
+    padding: var(--space-1) var(--space-2);
+    background: rgb(7 11 34 / 0.84);
+    border: 1px solid rgb(160 165 181 / 0.45);
+    border-radius: 4px;
     color: var(--text-primary);
+    font-size: var(--text-xs);
+    pointer-events: none;
   }
   .drift-lens:empty {
     display: none;
+  }
+  .drift-dock {
+    position: absolute;
+    left: 50%;
+    bottom: 5.75rem;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: fit-content;
+    max-inline-size: calc(100% - var(--space-3));
+  }
+  .drift-stepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+  .drift .drift-step-btn {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--space-2);
+    font-size: var(--text-base);
+    line-height: 1;
+  }
+  .drift .drift-step-current {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-inline-size: 20rem;
+    padding-inline: var(--space-3);
+    overflow: hidden;
+    font-size: var(--text-xs);
+    letter-spacing: 0.01em;
+  }
+  .drift-stepper-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-inline-size: 0;
+  }
+  .drift-stepper-pos {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .drift .drift-lens-pill,
+  .drift .drift-help-toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+  .drift .drift-lens-pill {
+    max-inline-size: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .drift .drift-lens-pill[data-lens-active='true'],
+  .drift .drift-help-toggle[aria-expanded='true'] {
+    border-color: var(--text-primary);
+    background: rgb(11 16 48 / 0.94);
+  }
+  .drift-help-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 9.25rem;
+    transform: translateX(-50%);
+    width: min(26rem, calc(100% - var(--space-3)));
+    padding: var(--space-3);
+    background: rgb(7 11 34 / 0.94);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    z-index: 3;
+  }
+  .drift-help-panel[hidden] {
+    display: none;
+  }
+  .drift-help-panel p {
+    margin: 0;
+  }
+  .drift-help-panel p + p {
+    margin-top: var(--space-2);
   }
   .drift-compass {
     position: absolute;
@@ -184,13 +334,13 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-horizon {
     position: relative;
-    height: 2.5rem;
+    height: 2rem;
     border-top: 1px solid rgb(240 240 245 / 0.2);
     pointer-events: none;
   }
   .drift-marker {
     position: absolute;
-    top: calc(var(--space-1) + var(--row, 0) * 1.2rem);
+    top: calc(var(--space-1) + var(--row, 0) * 1.1rem);
     left: calc(var(--x, 0.5) * 100%);
     transform: translateX(-50%);
     white-space: nowrap;
@@ -207,18 +357,30 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   }
   .drift-zones {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    touch-action: pan-x;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-secondary) transparent;
     gap: var(--space-1);
     padding: 0 var(--space-2);
     pointer-events: auto;
   }
+  .drift-zones > :first-child {
+    margin-inline-start: auto;
+  }
+  .drift-zones > :last-child {
+    margin-inline-end: auto;
+  }
   .drift .drift-zone-pill {
+    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
     padding: var(--space-1) var(--space-3);
-    min-height: 44px;
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+    white-space: nowrap;
     border-radius: 999px;
     border: 1px solid rgb(160 165 181 / 0.45);
     background: rgb(7 11 34 / 0.84);
@@ -247,6 +409,68 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   .drift .drift-zone-pill[data-active='true']::before {
     opacity: 1;
     transform: scale(1);
+  }
+  @media (max-width: 640px) {
+    .drift-top {
+      right: var(--space-2);
+      gap: var(--space-1);
+      max-inline-size: calc(100% - var(--space-3));
+    }
+    .drift-top button {
+      padding: var(--space-1) 0.45rem;
+      font-size: 0.6875rem;
+      line-height: 1.15;
+    }
+    .drift-top .drift-tilt {
+      max-inline-size: 7.5rem;
+      white-space: normal;
+      text-align: center;
+    }
+    .drift-onboarding {
+      left: var(--space-2);
+      max-inline-size: calc(100% - var(--space-3));
+      font-size: 0.6875rem;
+    }
+    .drift-lens {
+      left: var(--space-2);
+      max-inline-size: calc(100% - var(--space-3));
+    }
+    .drift-horizon {
+      display: none;
+    }
+    .drift-dock {
+      left: var(--space-2);
+      right: var(--space-2);
+      bottom: 3.75rem;
+      transform: none;
+      width: auto;
+      max-inline-size: none;
+      gap: var(--space-1);
+    }
+    .drift-stepper {
+      flex: 1 1 auto;
+      gap: 2px;
+    }
+    .drift .drift-step-btn {
+      padding-inline: 0;
+    }
+    .drift .drift-step-current {
+      max-inline-size: none;
+      padding-inline: var(--space-1);
+      font-size: 0.6875rem;
+    }
+    .drift .drift-lens-pill,
+    .drift .drift-help-toggle {
+      padding-inline: 0.45rem;
+      font-size: 0.6875rem;
+    }
+    .drift .drift-lens-pill {
+      flex: 0 1 auto;
+      max-inline-size: 6rem;
+    }
+    .drift-help-panel {
+      bottom: 6.75rem;
+    }
   }
   .drift-zone-banner {
     position: absolute;
@@ -286,37 +510,76 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     display: none;
   }
   .drift-focus {
+    width: min(40rem, 92vw);
     max-width: min(40rem, 92vw);
     max-height: 92vh;
+    max-height: 92dvh;
+    overflow-y: auto;
     padding: var(--space-3);
     background: var(--ink);
     color: var(--text-primary);
     border: 1px solid var(--text-secondary);
+    border-radius: 6px;
     font-family: var(--font-sans);
     font-size: var(--text-base);
   }
   .drift-focus::backdrop {
-    background: rgb(11 16 48 / 0.6);
+    background: rgb(7 11 34 / 0.72);
+  }
+  .drift-focus-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+  }
+  .drift-focus-context {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+  }
+  .drift .drift-focus-close {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    line-height: 1;
   }
   .drift-focus-image {
     display: block;
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 60vh;
+    max-height: 52vh;
+    max-height: 52dvh;
     margin: 0 auto var(--space-3);
+  }
+  @media (max-width: 640px) {
+    .drift-focus-image {
+      max-height: 40vh;
+      max-height: 40dvh;
+    }
   }
   .drift-focus h2 {
     font-size: var(--text-xl);
     font-weight: 400;
+    margin: 0 0 var(--space-1);
+  }
+  .drift-focus-meta {
     margin: 0 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    color: var(--text-secondary);
   }
   .drift-focus-fragment {
     font-style: italic;
     margin: 0 0 var(--space-3);
-  }
-  .drift-focus a {
-    color: var(--text-primary);
   }
   .drift-focus-specimen {
     font-family: var(--font-mono);
@@ -325,8 +588,55 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
     color: var(--text-secondary);
     margin: 0 0 var(--space-3);
   }
-  .drift-focus-qr {
+  .drift-focus-stepper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
     margin: 0 0 var(--space-3);
+  }
+  .drift .drift-focus-step {
+    flex: 1 1 9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .drift-focus-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .drift-focus-actions p {
+    margin: 0;
+  }
+  .drift-focus-actions p[hidden] {
+    display: none;
+  }
+  .drift-focus a.drift-focus-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    background: rgb(7 11 34 / 0.84);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-decoration: none;
+  }
+  .drift-focus a.drift-focus-link:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+  .drift-focus-qr {
+    margin: 0;
+  }
+  .drift-focus-qr[hidden] {
+    display: none;
   }
   .drift-focus-qr img {
     display: block;
@@ -464,7 +774,7 @@ const lensNames = JSON.stringify(Object.fromEntries(LENS_MODES.map((m) => [m, ui
   .drift-works button {
     position: absolute;
     left: 50%;
-    bottom: 9rem;
+    bottom: 9.75rem;
     transform: translateX(-50%);
     max-width: 90vw;
     opacity: 0;

@@ -600,3 +600,39 @@ blocks:
     fr: "Autre territoire"
     sources:
       - spec
+  drift_onboarding_fine:
+    status: draft
+    en: "Scroll, drag, or use the arrows below to drift."
+    fr: "Faites défiler, glissez ou utilisez les flèches en bas pour dériver."
+    sources:
+      - spec
+  drift_onboarding_coarse:
+    status: draft
+    en: "Swipe to drift · tap below to step or change lens."
+    fr: "Glissez pour dériver · touchez en bas pour avancer ou changer de loupe."
+    sources:
+      - spec
+  drift_help_toggle:
+    status: draft
+    en: "Controls"
+    fr: "Aide"
+    sources:
+      - spec
+  drift_stepper_label:
+    status: draft
+    en: "Step through works"
+    fr: "Parcourir les œuvres"
+    sources:
+      - spec
+  drift_lens_prompt:
+    status: draft
+    en: "Camera lens"
+    fr: "Loupe optique"
+    sources:
+      - spec
+  drift_lens_active:
+    status: draft
+    en: "Lens · {mode}"
+    fr: "Loupe · {mode}"
+    sources:
+      - spec
