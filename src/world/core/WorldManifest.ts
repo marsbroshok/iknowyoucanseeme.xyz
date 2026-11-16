@@ -16,6 +16,16 @@ export interface ManifestWork {
   title: string;
   /** Poetic fragment, when written. */
   fragment: string | null;
+  /** Localized curatorial specifications (`size · year · medium · techniques`). */
+  metaLine: string;
+  /** Localized non-commercial availability status (never a price). */
+  availabilityLabel: string;
+  /** Localized exhibition context (`Territory · Zone` or `Territory`). */
+  contextLabel: string;
+  /** 1-based ordinal stop position along the Drift exhibition path (`1..positionTotal`). */
+  positionIndex: number;
+  /** Total works along the Drift exhibition path (`>= 1`). */
+  positionTotal: number;
   /** Awake work page. */
   href: string;
   /** Contact page about this work, when it can be asked about. */
@@ -85,6 +95,11 @@ function work(input: unknown, path: string, territories: ReadonlySet<string>): M
   const territory = text(w.territory, `${path}.territory`);
   if (!territories.has(territory)) throw new Error(`[manifest] ${path}.territory "${territory}" is not in territories`);
   if (w.zone !== null && !ZONE_ORDER.includes(w.zone as ZoneSlug)) throw new Error(`[manifest] ${path}.zone must be one of ${ZONE_ORDER.join(', ')} or null`);
+  const positionTotal = positiveInt(w.positionTotal, `${path}.positionTotal`);
+  const positionIndex = positiveInt(w.positionIndex, `${path}.positionIndex`);
+  if (positionIndex > positionTotal) {
+    throw new Error(`[manifest] ${path}.positionIndex (${positionIndex}) must not exceed positionTotal (${positionTotal})`);
+  }
   const color = hex(w.color, `${path}.color`);
   const images = object(w.images, `${path}.images`);
   return {
@@ -93,6 +108,11 @@ function work(input: unknown, path: string, territories: ReadonlySet<string>): M
     zone: w.zone as ZoneSlug | null,
     title: text(w.title, `${path}.title`),
     fragment: w.fragment === null ? null : text(w.fragment, `${path}.fragment`),
+    metaLine: text(w.metaLine, `${path}.metaLine`),
+    availabilityLabel: text(w.availabilityLabel, `${path}.availabilityLabel`),
+    contextLabel: text(w.contextLabel, `${path}.contextLabel`),
+    positionIndex,
+    positionTotal,
     href: link(w.href, `${path}.href`),
     contactHref: w.contactHref === null ? null : link(w.contactHref, `${path}.contactHref`),
     color,
@@ -139,6 +159,13 @@ function link(input: unknown, path: string): string {
 
 function hex(input: unknown, path: string): string {
   if (typeof input !== 'string' || !/^#[0-9a-f]{6}$/i.test(input)) throw new Error(`[manifest] ${path} must be #rrggbb`);
+  return input;
+}
+
+function positiveInt(input: unknown, path: string): number {
+  if (typeof input !== 'number' || !Number.isInteger(input) || input < 1) {
+    throw new Error(`[manifest] ${path} must be a positive integer`);
+  }
   return input;
 }
 

@@ -45,6 +45,11 @@ describe('buildWorldManifest', () => {
       zone: 'arrival',
       title: 'Arrivée (Arrival)',
       fragment: 'The moment of return.',
+      metaLine: '2025 · photograph',
+      availabilityLabel: 'Contact for availability',
+      contextLabel: 'Dreamland · Arrival',
+      positionIndex: 1,
+      positionTotal: 2,
       href: '/en/works/arrivee/',
       contactHref: '/en/contact/?work=arrivee',
       color: '#8299fa',
@@ -60,10 +65,17 @@ describe('buildWorldManifest', () => {
     });
   });
 
-  it('keeps French titles on the French site, and leaves out what a work does not have', async () => {
+  it('keeps French titles on the French site, populates French curatorial metadata, and leaves out what a work does not have', async () => {
     const m = await buildWorldManifest({ works, territories, zones, ui: uiText('fr'), resolve });
     const cygne = m.works[1];
     expect(cygne.title).toBe('Cygne');
+    expect(cygne.metaLine).toBe('2025 · photographie');
+    expect(cygne.availabilityLabel).toBe('Vendu');
+    expect(cygne.contextLabel).toBe('La frontière est mince');
+    expect(cygne.positionIndex).toBe(2);
+    expect(cygne.positionTotal).toBe(2);
+    expect(m.works[0].contextLabel).toBe('Dreamland · Arrivée');
+    expect(m.works[0].availabilityLabel).toBe('Disponibilité sur demande');
     expect(m.territories[0].sentences).toEqual(['Un voyage est un cycle : le rêve est la maison.']);
     expect(cygne.zone).toBeNull();
     expect(cygne.fragment).toBeNull();
@@ -112,7 +124,10 @@ describe('buildWorldManifest', () => {
     expect(IMAGE_EDGES).toEqual({ low: 480, mid: 1200, high: 2400 });
   });
 
-  it('fails the build for a work without an image or a zone without a title', async () => {
+  it('falls back to the territory title in contextLabel when zones are omitted, and fails for a work without an image or a zone without a title', async () => {
+    const withoutZones = await buildWorldManifest({ works, territories, zones: [], ui: uiText('en'), resolve });
+    expect(withoutZones.works[0].contextLabel).toBe('Dreamland');
+
     await expect(buildWorldManifest({ works: [fixtureWork({ images: [] })], territories, zones, ui: uiText('en'), resolve })).rejects.toThrow(
       /Work "arrivee" has no image/,
     );
