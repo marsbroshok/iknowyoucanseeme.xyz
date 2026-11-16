@@ -115,6 +115,12 @@ describe('LensInput — changing the lens (FR2)', () => {
     key('keydown', 'l');
     pointer('pointerdown', { x: 300, y: 150 });
     expect(input.state().keyboard).toBe(false);
+
+    // Tactile LensToggle button can also request centre-aim on the faced work until pointer returns to canvas.
+    input.aimAtFacing();
+    expect(input.state().keyboard).toBe(true);
+    pointer('pointermove', { x: 300, y: 150 });
+    expect(input.state().keyboard).toBe(false);
   });
 
   it('ignores L typed in a field or inside the open dialog, and other keys', () => {
