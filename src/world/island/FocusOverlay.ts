@@ -30,13 +30,13 @@ export interface FocusOverlayOptions {
  * fallback where `closedBy` is unsupported (Safari).
  */
 export class FocusOverlay {
-  private readonly context: HTMLElement;
+  private readonly context: HTMLElement | null;
   private readonly title: HTMLElement;
-  private readonly meta: HTMLElement;
+  private readonly meta: HTMLElement | null;
   private readonly fragment: HTMLElement;
   private readonly image: HTMLImageElement;
-  private readonly prevButton: HTMLButtonElement;
-  private readonly nextButton: HTMLButtonElement;
+  private readonly prevButton: HTMLButtonElement | null;
+  private readonly nextButton: HTMLButtonElement | null;
   private readonly workLink: HTMLAnchorElement;
   private readonly workRow: HTMLElement;
   private readonly contactLink: HTMLAnchorElement;
@@ -86,13 +86,13 @@ export class FocusOverlay {
   ) {
     this.kiosk = options.kiosk ?? false;
     this.onStep = options.onStep;
-    this.context = this.part('[data-focus-context]');
+    this.context = dialog.querySelector<HTMLElement>('[data-focus-context]');
     this.title = this.part('[data-focus-title]');
-    this.meta = this.part('[data-focus-meta]');
+    this.meta = dialog.querySelector<HTMLElement>('[data-focus-meta]');
     this.fragment = this.part('[data-focus-fragment]');
     this.image = this.part('[data-focus-image]');
-    this.prevButton = this.part('[data-focus-prev]');
-    this.nextButton = this.part('[data-focus-next]');
+    this.prevButton = dialog.querySelector<HTMLButtonElement>('[data-focus-prev]');
+    this.nextButton = dialog.querySelector<HTMLButtonElement>('[data-focus-next]');
     this.workLink = this.part('[data-focus-work]');
     this.workRow = this.part('[data-focus-work-row]');
     this.contactLink = this.part('[data-focus-contact]');
@@ -102,8 +102,8 @@ export class FocusOverlay {
     this.qr = this.part('[data-focus-qr]');
     this.closeButton = this.part('[data-focus-close]');
     this.closeButton.addEventListener('click', this.onCloseClick);
-    this.prevButton.addEventListener('click', this.onPrevClick);
-    this.nextButton.addEventListener('click', this.onNextClick);
+    this.prevButton?.addEventListener('click', this.onPrevClick);
+    this.nextButton?.addEventListener('click', this.onNextClick);
     dialog.addEventListener('keydown', this.onKeyDown);
     dialog.addEventListener('close', this.onClosed);
     dialog.addEventListener('click', this.onBackdropClick);
@@ -132,8 +132,8 @@ export class FocusOverlay {
   /** Closes the overlay and stops listening. */
   detach(): void {
     this.closeButton.removeEventListener('click', this.onCloseClick);
-    this.prevButton.removeEventListener('click', this.onPrevClick);
-    this.nextButton.removeEventListener('click', this.onNextClick);
+    this.prevButton?.removeEventListener('click', this.onPrevClick);
+    this.nextButton?.removeEventListener('click', this.onNextClick);
     this.dialog.removeEventListener('keydown', this.onKeyDown);
     this.dialog.removeEventListener('close', this.onClosed);
     this.dialog.removeEventListener('click', this.onBackdropClick);
@@ -158,9 +158,13 @@ export class FocusOverlay {
    */
   private render(work: ManifestWork): void {
     this.currentSlug = work.slug;
-    this.context.textContent = `${work.contextLabel} · ${work.positionIndex} / ${work.positionTotal}`;
+    if (this.context) {
+      this.context.textContent = `${work.contextLabel} · ${work.positionIndex} / ${work.positionTotal}`;
+    }
     this.title.textContent = work.title;
-    this.meta.textContent = `${work.metaLine} · ${work.availabilityLabel}`;
+    if (this.meta) {
+      this.meta.textContent = `${work.metaLine} · ${work.availabilityLabel}`;
+    }
     this.fragment.textContent = work.fragment ?? '';
     this.fragment.hidden = work.fragment === null;
     this.image.src = work.images.mid.url;

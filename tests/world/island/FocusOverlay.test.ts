@@ -230,9 +230,17 @@ describe('FocusOverlay', () => {
     delete (HTMLDialogElement.prototype as unknown as Record<string, unknown>).closedBy;
   });
 
-  it('fails loudly when the page lacks any required part of the dialog', () => {
-    dialog.querySelector('[data-focus-meta]')?.remove();
-    expect(() => new FocusOverlay(dialog)).toThrow(/Missing \[data-focus-meta\]/);
+  it('fails loudly when the page lacks a core part of the dialog, while tolerating absent optional header/stepper slots', () => {
+    for (const sel of ['[data-focus-context]', '[data-focus-meta]', '[data-focus-prev]', '[data-focus-next]']) {
+      dialog.querySelector(sel)?.remove();
+    }
+    const minimal = new FocusOverlay(dialog);
+    minimal.open(sampleManifest.works[0]);
+    expect($('[data-focus-title]').textContent).toBe('Arrivée');
+    minimal.detach();
+
+    dialog.querySelector('[data-focus-title]')?.remove();
+    expect(() => new FocusOverlay(dialog)).toThrow(/Missing \[data-focus-title\]/);
   });
 
   it('stops listening on detach', () => {
